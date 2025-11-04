@@ -19,6 +19,9 @@ use MADealRoom\Repositories\PartyRepository;
 use MADealRoom\Repositories\AccountRepository;
 use MADealRoom\Repositories\ReminderRepository;
 use MADealRoom\Repositories\VendorRequestRepository;
+use MADealRoom\Repositories\VendorMessageRepository;
+use MADealRoom\Repositories\VendorAvailabilityRepository;
+use MADealRoom\Repositories\VendorRatingRepository;
 use MADealRoom\Repositories\DocumentRepository;
 use MADealRoom\Repositories\EventRepository;
 use MADealRoom\Repositories\NotificationRepository;
@@ -190,6 +193,18 @@ class Plugin {
 			return new VendorRequestRepository($container->get('cache_service'));
 		});
 
+		$this->container->register('vendor_message_repository', function($container) {
+			return new VendorMessageRepository($container->get('cache_service'));
+		});
+
+		$this->container->register('vendor_availability_repository', function($container) {
+			return new VendorAvailabilityRepository($container->get('cache_service'));
+		});
+
+		$this->container->register('vendor_rating_repository', function($container) {
+			return new VendorRatingRepository($container->get('cache_service'));
+		});
+
 		$this->container->register('event_repository', function($container) {
 			return new EventRepository($container->get('cache_service'));
 		});
@@ -262,7 +277,13 @@ class Plugin {
 
 		$this->container->register('vendor_service', function($container) {
 			return new VendorService(
-				$container->get('vendor_request_repository')
+				$container->get('vendor_request_repository'),
+				$container->get('vendor_message_repository'),
+				$container->get('vendor_availability_repository'),
+				$container->get('vendor_rating_repository'),
+				$container->get('transaction_repository'),
+				$container->get('email_service'),
+				$container->get('file_storage_service')
 			);
 		});
 
@@ -458,6 +479,7 @@ class Plugin {
 		$this->container->register('vendor_portal_controller', function($container) {
 			return new VendorPortalController(
 				$container->get('vendor_service'),
+				$container->get('vendor_message_repository'),
 				$container->get('event_repository')
 			);
 		});
