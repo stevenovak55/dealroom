@@ -13,6 +13,11 @@ use MADealRoom\Models\VendorMessage;
 class VendorMessageRepository extends BaseRepository {
 	protected $table = 'ma_deal_vendor_messages';
 	protected $model_class = VendorMessage::class;
+	protected $allowed_columns = [
+		'id', 'vendor_request_id', 'transaction_id', 'sender_type',
+		'sender_name', 'sender_email', 'message', 'is_read',
+		'read_at', 'created_at', 'updated_at'
+	];
 
 	/**
 	 * Get all messages for a vendor request
@@ -58,7 +63,7 @@ class VendorMessageRepository extends BaseRepository {
 		);
 
 		$results = $wpdb->get_results($sql, ARRAY_A);
-		return array_map([$this, 'mapToModel'], $results);
+		return $this->hydrate_models($results ?: []);
 	}
 
 	/**

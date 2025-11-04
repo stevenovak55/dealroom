@@ -13,6 +13,10 @@ use MADealRoom\Models\VendorAvailability;
 class VendorAvailabilityRepository extends BaseRepository {
 	protected $table = 'ma_deal_vendor_availability';
 	protected $model_class = VendorAvailability::class;
+	protected $allowed_columns = [
+		'id', 'vendor_request_id', 'available_date', 'start_time',
+		'end_time', 'timezone', 'notes', 'created_at', 'updated_at'
+	];
 
 	/**
 	 * Get availability windows for a vendor request
@@ -22,19 +26,8 @@ class VendorAvailabilityRepository extends BaseRepository {
 	 * @return array
 	 */
 	public function getByVendorRequest(int $vendor_request_id, bool $future_only = true): array {
-		global $wpdb;
-		$table = $wpdb->prefix . $this->table;
-
-		$sql = "SELECT * FROM {$table} WHERE vendor_request_id = %d";
-
-		if ($future_only) {
-			$sql .= " AND CONCAT(available_date, ' ', end_time) >= %s";
-			$results = $wpdb->get_results($wpdb->prepare($sql, $vendor_request_id, current_time('mysql')), ARRAY_A);
-		} else {
-			$results = $wpdb->get_results($wpdb->prepare($sql, $vendor_request_id), ARRAY_A);
-		}
-
-		return array_map([$this, 'mapToModel'], $results);
+		$conditions = ['vendor_request_id' => $vendor_request_id];
+		return $this->query($conditions, ['use_cache' => !$future_only]);
 	}
 
 	/**
@@ -77,7 +70,7 @@ class VendorAvailabilityRepository extends BaseRepository {
 		);
 
 		$results = $wpdb->get_results($sql, ARRAY_A);
-		return array_map([$this, 'mapToModel'], $results);
+		return $this->hydrate_models($results ?: []);
 	}
 
 	/**

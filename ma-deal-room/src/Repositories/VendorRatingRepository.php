@@ -13,6 +13,12 @@ use MADealRoom\Models\VendorRating;
 class VendorRatingRepository extends BaseRepository {
 	protected $table = 'ma_deal_vendor_ratings';
 	protected $model_class = VendorRating::class;
+	protected $allowed_columns = [
+		'id', 'vendor_request_id', 'transaction_id', 'vendor_email',
+		'rated_by_user_id', 'rating', 'timeliness_rating',
+		'quality_rating', 'communication_rating', 'review',
+		'would_recommend', 'created_at', 'updated_at'
+	];
 
 	/**
 	 * Get rating for a vendor request
