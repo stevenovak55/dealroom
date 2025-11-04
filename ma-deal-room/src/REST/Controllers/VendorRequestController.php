@@ -45,49 +45,49 @@ class VendorRequestController extends BaseController {
 		register_rest_route($this->namespace, '/' . $this->rest_base, [
 			'methods' => 'GET',
 			'callback' => [$this, 'list_vendor_requests'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 
 		// Create vendor request
 		register_rest_route($this->namespace, '/' . $this->rest_base, [
 			'methods' => 'POST',
 			'callback' => [$this, 'create_vendor_request'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 
 		// Get single vendor request
 		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>\d+)', [
 			'methods' => 'GET',
 			'callback' => [$this, 'get_vendor_request'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 
 		// Update vendor request
 		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>\d+)', [
 			'methods' => 'PUT',
 			'callback' => [$this, 'update_vendor_request'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 
 		// Delete vendor request
 		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>\d+)', [
 			'methods' => 'DELETE',
 			'callback' => [$this, 'delete_vendor_request'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 
 		// Resend invitation email
 		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>\d+)/resend', [
 			'methods' => 'POST',
 			'callback' => [$this, 'resend_invitation'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 
 		// Submit vendor rating
 		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>\d+)/rate', [
 			'methods' => 'POST',
 			'callback' => [$this, 'rate_vendor'],
-			'permission_callback' => [$this, 'check_permission'],
+			'permission_callback' => [$this, 'permission_callback'],
 		]);
 	}
 
