@@ -243,10 +243,10 @@ class VendorService {
 
 		// Auto-complete associated task if it exists
 		if ($result) {
-			$vendor_request = $this->vendor_request_repository->findById($request_id);
+			$vendor_request = $this->vendor_request_repository->find($request_id);
 			if ($vendor_request && $vendor_request->task_id) {
 				try {
-					$task = $this->task_repository->findById($vendor_request->task_id);
+					$task = $this->task_repository->find($vendor_request->task_id);
 					if ($task && $task->status !== 'completed') {
 						$this->task_repository->update($vendor_request->task_id, [
 							'status' => 'completed',
@@ -276,7 +276,7 @@ class VendorService {
 	 * @return int|false Message ID or false
 	 */
 	public function sendMessage(int $vendor_request_id, string $sender_type, string $sender_name, string $sender_email, string $message) {
-		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 
 		if (!$vendor_request) {
 			return false;
@@ -330,7 +330,7 @@ class VendorService {
 	 * @return string|false Document URL or false
 	 */
 	public function uploadDocument(int $vendor_request_id, array $file_data) {
-		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 
 		if (!$vendor_request) {
 			return false;
@@ -372,7 +372,7 @@ class VendorService {
 		}
 
 		// Get transaction details (limited info for vendor)
-		$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+		$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
 
 		// Get messages
 		$messages = $this->vendor_message_repository->getThreadWithMetadata($vendor_request->id);
@@ -410,13 +410,13 @@ class VendorService {
 	 */
 	private function sendScheduleConfirmationEmail(int $vendor_request_id): void {
 		try {
-			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 			if (!$vendor_request) {
 				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
 				return;
 			}
 
-			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
 			if (!$transaction) {
 				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
 				return;
@@ -436,13 +436,13 @@ class VendorService {
 	 */
 	private function sendCompletionNotificationEmail(int $vendor_request_id): void {
 		try {
-			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 			if (!$vendor_request) {
 				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
 				return;
 			}
 
-			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
 			if (!$transaction) {
 				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
 				return;
@@ -465,13 +465,13 @@ class VendorService {
 	 */
 	private function sendMessageNotificationEmail(int $vendor_request_id, string $sender_type, string $sender_name, string $message): void {
 		try {
-			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 			if (!$vendor_request) {
 				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
 				return;
 			}
 
-			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
 			if (!$transaction) {
 				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
 				return;
@@ -504,13 +504,13 @@ class VendorService {
 	 */
 	private function sendAvailabilityNotificationEmail(int $vendor_request_id): void {
 		try {
-			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 			if (!$vendor_request) {
 				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
 				return;
 			}
 
-			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
 			if (!$transaction) {
 				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
 				return;
