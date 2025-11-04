@@ -26,6 +26,7 @@ import {
   VerifyEmailPage,
   TwoFactorVerifyPage,
 } from '@/pages/Auth';
+import VendorPortal from '@/pages/VendorPortal';
 
 export const AppRoutes = () => {
   return (
@@ -37,6 +38,9 @@ export const AppRoutes = () => {
       <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
       <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
       <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
+
+      {/* Public Vendor Portal Route */}
+      <Route path="/vendor-portal" element={<VendorPortal />} />
 
       {/* Protected App Routes */}
       <Route
