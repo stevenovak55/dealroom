@@ -51,6 +51,7 @@ use MADealRoom\Services\Integration\MLS\MLSImportService;
 use MADealRoom\Services\Integration\MLS\MLSSubmissionService;
 use MADealRoom\Services\Integration\MLS\MLSSyncService;
 use MADealRoom\Frontend\AgentDashboard as FrontendAgentDashboard;
+use MADealRoom\Frontend\VendorPortalShortcode;
 use MADealRoom\REST\Controllers\TransactionController;
 use MADealRoom\REST\Controllers\TaskController;
 use MADealRoom\REST\Controllers\TemplateController;
@@ -602,6 +603,9 @@ class Plugin {
 
 		// Frontend dashboard template & assets
 		$this->container->get('frontend_agent_dashboard')->register();
+
+		// Vendor Portal shortcode
+		$this->hooks->add_action('init', [VendorPortalShortcode::class, 'register']);
 
 		// Admin initialization
 		if (is_admin()) {
