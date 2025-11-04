@@ -1,0 +1,73 @@
+Section,Task
+Deal Setup,Confirm Buyer's Legal Name(s) & Add to Deal Room
+Deal Setup,Add Milestone Dates & Relevant Notes to Deal Room
+Deal Setup,Verify Commission Amount & MLS Fee and Add to Deal Room
+Deal Setup,Upload Fully Executed Documents to Deal Room
+Deal Setup,"Send ""Ready to Go"" Email to TC once all Information has been Added to Deal Room"
+Deal Setup,Verify Milestone Dates
+Deal Setup,"Verify NET or GROSS, ensure refund box is correct & make note on invoice task"
+Deal Setup,Upload MLS Sheet
+Deal Setup,Create Linked Account for Co-Buyer (if needed)
+Deal Setup,"Audit Opening Documents and Deal Room, Send Audit Recap/Needs to Agent and cc TM and SM"
+Deal Setup,Publish Deal Room to Customer
+Mutual Acceptance,Send Welcome Letter to Buyer
+Mutual Acceptance,Make Introduction/Welcome Call to Buyer
+Mutual Acceptance,Send Welcome Letter to Listing Agent
+Mutual Acceptance,"Confirm or add property unit number, if applicable"
+Mutual Acceptance,Choose Inspector and Schedule Home Inspection
+Mutual Acceptance,Add Listing Agent's Staff to Deal Room
+Mutual Acceptance,Add Seller's Attorney & Staff to Deal Room
+Mutual Acceptance,Choose Lender
+Mutual Acceptance,Choose an Attorney
+Mutual Acceptance,Add Buyer's Attorney & Staff to Deal Room (mark as Buyer Attorney & Title)
+Mutual Acceptance,Send Intro Letter to Buyer's Attorney w/ offer/MLS Sheet
+Mutual Acceptance,Send Buyer's Attorney Info to Listing Agent (If Wasn't Sent in Welcome Letter)
+Mutual Acceptance,Send Intro Email connecting Attorneys & Agents (Buyer's & Seller's)
+Mutual Acceptance,Confirm Buyer's Final Lender Choice (Update Agent Tools if Needed)
+Mutual Acceptance,Add Lender & Staff to Deal Room
+Mutual Acceptance,Send Welcome Letter to Lender (Attach Fully Executed Contract & Earnest Money Check)
+Mutual Acceptance,Send Lender Info to Listing Agent (if wasn't sent in Welcome Letter)
+Earnest Money,Verify with Buyer that Deposit is in Transit
+Earnest Money,Schedule Agent/AA or send mailing label for Earnest Money Check pickup/delivery
+Earnest Money,Ensure copy of Earnest Money check in file (ask buyer or listing agent if not received)
+Earnest Money,Follow-up to ensure Earnest Money Received by listing agent
+Earnest Money,"Ensure lender has copy of EM check, if not sent with welcome email"
+Inspection,Add Inspector(s) & Staff Contact Info to Deal Room
+Inspection,Confirm Buyer has Scheduled Home Inspection(s) - Get Tentative Date/Time
+Inspection,Confirm Inspection Appointment with Buyer
+Inspection,Notify Listing Agent of Inspection Appointment - Confirm Property Access and Utilities On for Inspection
+Inspection,"Schedule Agent or AA for Inspection in Agent Tools (if AA, schedule Agent for Drop-in)"
+Inspection,Change Deal Stage to STI (Once Inspection is Scheduled)
+Inspection,Review Inspection Report Received from Inspector
+Inspection,Review Inspection Report with Buyer
+Inspection,Negotiate Repairs or Credit based upon Inspection Results (if applicable)
+Inspection,Negotiate Extension for Inspection Contingency (if needed)
+Inspection,"Follow up with Agent on Inspection Negotiation Status, Create Extension Addendum If Needed"
+Inspection,"Coordinate & Schedule Buyer's Follow-Up Inspections with Listing Agent, Add to Agent Tools"
+Inspection,Confirm if Inspector Left Radon Kit
+Inspection,Follow up with Buyer & Agent on any Specialized Inspections Needed/Desired
+Purchase & Sale Deposit,Confirm with attorney/listing agent who the P&S check should made out to and confirm delivery address
+Purchase & Sale Deposit,Send P&S milestone & check reminder to buyer
+Purchase & Sale Deposit,Verify with Buyer that Secondary Deposit is in transit
+Purchase & Sale Deposit,Schedule Agent/AA or send mailing label for Secondary deposit pickup/delivery OR send mailing label
+Purchase & Sale Deposit,Deliver Secondary deposit to listing agent or his/her office
+Purchase & Sale Deposit,Ensure copy of Earnest Money check in file (ask buyer or listing agent if not received)
+Purchase & Sale Deposit,Verify Secondary/Increased Deposit received
+Purchase & Sale Deposit,Email Secondary Earnest Money Receipt/Check Copy to Lender
+Purchase & Sale Agreement,Follow up with Buyer's Attorney on Purchase & Sale Draft Status
+Purchase & Sale Agreement,Review & Sign Purchase & Sale Agreement
+Purchase & Sale Agreement,Send Purchase & Sale Agreement to Buyer for Signature
+Purchase & Sale Agreement,Audit Deal & Milestone Dates Based on P&S - confirm with agent/attorney if there are discrepancies.
+Purchase & Sale Agreement,Send Redfin Refund Letter to Lender
+Purchase & Sale Agreement,Send Executed Purchase & Sale minus Repair Rider to Lender (cc Buyer)
+Purchase & Sale Agreement,Send Executed Purchase & Sale plus Repair Rider to Buyer's Attorney (cc Buyer)
+Purchase & Sale Agreement,Change Stage to Pending (When All Contingencies Removed)
+Purchase & Sale Agreement,Send what to expect after the P&S email to buyer
+Purchase & Sale Agreement,Ensure Buyers are Working on Homeowner's Insurance
+Purchase & Sale Agreement,Order Homeowner's Insurance
+Purchase & Sale Agreement,Order and Pay for Appraisal (with Lender)
+Purchase & Sale Agreement,Confirm with buyer appraisal has been ordered
+HOA Documents,"Follow-up with listing agent for HOA docs, if not received yet"
+HOA Documents,Email HOA docs to buyer and buyer attorney for review
+HOA Documents,Review HOA Docs
+Financing,"Confirm Closing Attorney (Buyer's Attorney or Newly Designated), Add to Deal Room if Newly Designated"

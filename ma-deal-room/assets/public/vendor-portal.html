@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA Deal Room - Vendor Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 16px;
+            color: #1f2937;
+            padding: 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .button-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .button-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vendor Portal</h1>
+            <p>MA Deal Room Transaction Management</p>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading request details...</p>
+        </div>
+
+        <div class="content" id="content" style="display: none;">
+            <div class="alert alert-success" id="successAlert">
+                <strong>Success!</strong> Your response has been submitted.
+            </div>
+
+            <div class="alert alert-error" id="errorAlert">
+                <strong>Error:</strong> <span id="errorMessage"></span>
+            </div>
+
+            <div id="requestDetails">
+                <div class="info-section">
+                    <div class="label">Vendor Type</div>
+                    <div class="value" id="vendorType">—</div>
+
+                    <div class="label">Property Address</div>
+                    <div class="value" id="propertyAddress">—</div>
+
+                    <div class="label">Preferred Dates</div>
+                    <div class="value" id="preferredDates">—</div>
+
+                    <div class="label">Notes</div>
+                    <div class="value" id="notes">—</div>
+                </div>
+
+                <form id="responseForm">
+                    <div class="form-group">
+                        <label for="response">Response *</label>
+                        <select id="response" name="response" required>
+                            <option value="">Select response...</option>
+                            <option value="accepted">Accept Request</option>
+                            <option value="declined">Decline Request</option>
+                            <option value="need_info">Need More Information</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="dateGroup" style="display: none;">
+                        <label for="selectedDate">Selected Date *</label>
+                        <input type="date" id="selectedDate" name="selectedDate">
+                    </div>
+
+                    <div class="form-group" id="timeGroup" style="display: none;">
+                        <label for="selectedTime">Selected Time *</label>
+                        <input type="time" id="selectedTime" name="selectedTime">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendorNotes">Your Notes</label>
+                        <textarea id="vendorNotes" name="notes" placeholder="Add any additional notes or questions..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendorName">Your Name *</label>
+                        <input type="text" id="vendorName" name="vendorName" required placeholder="Full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendorPhone">Your Phone *</label>
+                        <input type="tel" id="vendorPhone" name="vendorPhone" required placeholder="(555) 123-4567">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="button button-secondary" onclick="window.close()">Cancel</button>
+                        <button type="submit" class="button button-primary">Submit Response</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="expiredMessage" style="display: none; text-align: center; padding: 40px;">
+                <h2 style="color: #991b1b; margin-bottom: 12px;">Link Expired</h2>
+                <p style="color: #6b7280;">This vendor portal link has expired or is invalid. Please contact the agent for a new link.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by MA Deal Room &copy; 2025</p>
+        </div>
+    </div>
+
+    <script>
+        // Extract token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const apiUrl = window.maDealRoom?.apiUrl || '/wp-json/ma-deal/v1';
+
+        // Show/hide date/time fields based on response
+        document.getElementById('response').addEventListener('change', function() {
+            const dateGroup = document.getElementById('dateGroup');
+            const timeGroup = document.getElementById('timeGroup');
+            
+            if (this.value === 'accepted') {
+                dateGroup.style.display = 'block';
+                timeGroup.style.display = 'block';
+                document.getElementById('selectedDate').required = true;
+                document.getElementById('selectedTime').required = true;
+            } else {
+                dateGroup.style.display = 'none';
+                timeGroup.style.display = 'none';
+                document.getElementById('selectedDate').required = false;
+                document.getElementById('selectedTime').required = false;
+            }
+        });
+
+        // Load vendor request details
+        async function loadRequest() {
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const response = await fetch(`${apiUrl}/vendor/${token}`);
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                if (!data.success) {
+                    document.getElementById('requestDetails').style.display = 'none';
+                    document.getElementById('expiredMessage').style.display = 'block';
+                    return;
+                }
+
+                // Populate request details
+                const request = data.data;
+                document.getElementById('vendorType').textContent = request.vendor_type || '—';
+                document.getElementById('propertyAddress').textContent = request.property_address || '—';
+                document.getElementById('preferredDates').textContent = 
+                    request.preferred_dates?.join(', ') || '—';
+                document.getElementById('notes').textContent = request.notes || 'No additional notes';
+
+            } catch (error) {
+                console.error('Error loading request:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                document.getElementById('requestDetails').style.display = 'none';
+                document.getElementById('expiredMessage').style.display = 'block';
+            }
+        }
+
+        // Submit vendor response
+        document.getElementById('responseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(`${apiUrl}/vendor/${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('successAlert').style.display = 'block';
+                    document.getElementById('responseForm').style.display = 'none';
+                    document.getElementById('requestDetails').querySelector('.info-section').style.display = 'none';
+                } else {
+                    document.getElementById('errorAlert').style.display = 'block';
+                    document.getElementById('errorMessage').textContent = result.error?.message || 'Unknown error';
+                }
+            } catch (error) {
+                console.error('Error submitting response:', error);
+                document.getElementById('errorAlert').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Failed to submit response. Please try again.';
+            }
+        });
+
+        // Load request on page load
+        if (token) {
+            loadRequest();
+        } else {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('requestDetails').style.display = 'none';
+            document.getElementById('expiredMessage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

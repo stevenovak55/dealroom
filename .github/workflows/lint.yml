@@ -1,0 +1,59 @@
+name: Frontend Lint & Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  frontend-lint-build:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'ma-deal-room/assets/admin/package-lock.json'
+
+      - name: Install npm dependencies
+        run: |
+          cd ma-deal-room/assets/admin
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd ma-deal-room/assets/admin
+          npm run lint
+
+      - name: Run TypeScript compiler check
+        run: |
+          cd ma-deal-room/assets/admin
+          npx tsc --noEmit
+
+      - name: Build frontend
+        run: |
+          cd ma-deal-room/assets/admin
+          npm run build
+
+      - name: Check build artifacts
+        run: |
+          cd ma-deal-room/assets/admin
+          ls -la dist/
+          # Verify critical files exist
+          test -f dist/index.html || (echo "index.html not found" && exit 1)
+          test -d dist/assets || (echo "assets directory not found" && exit 1)
+          echo "Build artifacts verified successfully"
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: ma-deal-room/assets/admin/dist
+          retention-days: 7

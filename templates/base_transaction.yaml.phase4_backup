@@ -1,0 +1,1743 @@
+---
+template_id: "base_transaction"
+version: "1.0.0"
+title: "Base Transaction Template"
+name: Base Transaction Template
+type: universal
+description: Comprehensive base template with 100+ tasks for all transaction types
+created_date: "2025-10-30"
+author: "MA Deal Room Team"
+property_types:
+  - SFH
+  - Condo
+  - Multifamily
+  - Commercial
+  - Land
+
+workflows:
+  - name: Deal Setup
+    description: Initial transaction setup and document collection
+    tasks:
+      - id: "property_info_mls"
+        title: Property Information Entered into MLS
+        category: deal_setup
+        owner_role: agent
+        description: Add property details including description, pictures, and amenities
+        due: "Listing"
+        due_offset: "0d"
+        milestone: true
+        mandatory: true
+        depends_on: []
+        documents:
+          - Property details sheet
+          - MLS listing draft
+
+      - id: "collect_property_docs"
+        title: Collect property documents from seller
+        category: deal_setup
+        owner_role: agent
+        description: Gather all property-related documents from seller
+        due: "Listing"
+        due_offset: "+1d"
+        depends_on: []
+        documents:
+          - Deed
+          - Prior title insurance
+          - Property survey
+          - Floor plans
+
+      - id: "schedule_photography"
+        title: Schedule professional photography
+        category: deal_setup
+        owner_role: agent
+        description: Book photographer for listing photos and virtual tour
+        due: "Listing"
+        due_offset: "+2d"
+        depends_on: []
+        reminders:
+          - offset: "-1d"
+            channels: ["email"]
+            message: "Photographer coming tomorrow"
+
+      - id: "create_virtual_tour"
+        title: Create virtual tour/walkthrough
+        category: deal_setup
+        owner_role: agent
+        description: Coordinate virtual tour creation for online listing
+        due: "Listing"
+        due_offset: "+3d"
+        depends_on: ["schedule_photography"]
+        documents:
+          - Virtual tour link
+
+      - id: "order_prelim_title_search"
+        title: Order preliminary title search
+        category: title_work
+        owner_role: agent
+        description: Request preliminary title search to identify any issues early
+        due: "Listing"
+        due_offset: "+2d"
+        milestone: true
+        depends_on: []
+
+      - id: "sign_listing_agreement"
+        title: Review and sign listing agreement
+        category: deal_setup
+        owner_role: seller
+        description: Review terms and sign formal listing agreement
+        due: "Listing"
+        due_offset: "0d"
+        mandatory: true
+        depends_on: []
+        documents:
+          - Signed listing agreement
+
+      - id: "gather_seller_financials"
+        title: Gather seller financial documents
+        category: deal_setup
+        owner_role: agent
+        description: Collect tax bills, utility statements, HOA documents
+        due: "Listing"
+        due_offset: "+2d"
+        depends_on: []
+        documents:
+          - Property tax statements
+          - Utility bills
+          - HOA statements
+
+      # ========================================
+      # UNIVERSAL TASKS - Added from property templates
+      # ========================================
+
+      - id: "agency_disclosure"
+        title: "Provide Agency Disclosure Form"
+        category: compliance
+        description: "Present Massachusetts Mandatory Licensee-Consumer Relationship Disclosure before entering into contract with seller"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "FirstMeeting"
+        due_offset: "0d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "-7d"
+            channels: ["email"]
+          - offset: "-1d"
+            channels: ["email"]
+        citations:
+          - url: "https://www.mass.gov/doc/real-estate-board-agency-disclosure-form-english/download"
+            title: "MA Mandatory Licensee-Consumer Relationship Disclosure"
+        notes: "Must be presented electronically or in person before entering into contract with consumer (2023 updated requirement). Not required at open houses."
+
+
+
+      - id: "lead_paint_disclosure"
+        title: "Property Transfer Lead Paint Notification"
+        category: compliance
+        description: "Provide EPA lead paint disclosure and Massachusetts Property Transfer Lead Paint Notification for homes built before 1978"
+        mandatory: true
+        applies_if: "property.year_built < 1978"
+        due: "Offer"
+        due_offset: "-2d"
+        owner_role: seller
+        depends_on: []
+        reminders:
+          - offset: "-14d"
+            channels: ["email"]
+          - offset: "-7d"
+            channels: ["email"]
+          - offset: "-2d"
+            channels: ["email", "sms"]
+            priority: "high"
+        actions:
+          - type: "send_form"
+            form_type: "lead_paint_disclosure"
+        citations:
+          - url: "https://www.mass.gov/info-details/property-transfer-lead-paint-notification"
+            title: "Property Transfer Lead Paint Notification | Mass.gov"
+          - url: "https://www.mass.gov/doc/105-cmr-460-lead-poisoning-prevention-and-control/download"
+            title: "105 CMR 460.720 - Property Transfer Lead Notification"
+        notes: "Federal EPA penalties up to $11,000 per error. Buyer has right to 10-day inspection period (can be waived). Provide EPA pamphlet 'Protect Your Family from Lead in Your Home'."
+
+
+
+
+  - name: Party Onboarding
+    description: Adding and onboarding all transaction parties
+    tasks:
+      - id: "add_buyer_info"
+        title: Add buyer information to system
+        category: party_onboarding
+        owner_role: agent
+        description: Enter buyer contact details and preferences
+        due: "Offer"
+        due_offset: "+1d"
+        applies_if: "transaction.type IN ['buy_side', 'rental_tenant']"
+        depends_on: []
+
+      - id: "add_seller_info"
+        title: Add seller information to system
+        category: party_onboarding
+        owner_role: agent
+        description: Enter seller contact details
+        due: "Listing"
+        due_offset: "+1d"
+        applies_if: "transaction.type IN ['sell_side', 'rental_landlord']"
+        depends_on: []
+
+      - id: "add_coop_agent"
+        title: Add co-operating agent information
+        category: party_onboarding
+        owner_role: agent
+        description: Enter co-op agent and brokerage details
+        due: "Offer"
+        due_offset: "+2d"
+        applies_if: "transaction.has_coop_agent"
+        depends_on: []
+
+      - id: "send_buyer_welcome"
+        title: Send welcome packet to buyer
+        category: communication
+        owner_role: agent
+        description: Email buyer welcome packet with process overview
+        due: "Offer"
+        due_offset: "+1d"
+        applies_if: "transaction.type IN ['buy_side', 'rental_tenant']"
+        depends_on: ["add_buyer_info"]
+        documents:
+          - Buyer welcome packet
+          - Transaction timeline
+
+      - id: "send_seller_welcome"
+        title: Send welcome packet to seller
+        category: communication
+        owner_role: agent
+        description: Email seller welcome packet with process overview
+        due: "Listing"
+        due_offset: "+1d"
+        applies_if: "transaction.type IN ['sell_side', 'rental_landlord']"
+        depends_on: ["add_seller_info"]
+        documents:
+          - Seller welcome packet
+          - Net sheet estimate
+
+      - id: "collect_preapproval"
+        title: Collect buyer pre-approval letter
+        category: financing
+        owner_role: buyer
+        description: Provide mortgage pre-approval documentation
+        due: "Offer"
+        due_offset: "+2d"
+        mandatory: true
+        applies_if: "transaction.needs_financing"
+        depends_on: []
+        documents:
+          - Pre-approval letter
+          - Proof of funds
+
+      - id: "buyer_initial_consultation"
+        title: Schedule initial consultation with buyer
+        category: party_onboarding
+        owner_role: agent
+        description: Meet to review timeline and next steps
+        due: "Offer"
+        due_offset: "+3d"
+        applies_if: "transaction.type IN ['buy_side', 'rental_tenant']"
+        depends_on: []
+
+      - id: "seller_initial_consultation"
+        title: Schedule initial consultation with seller
+        category: party_onboarding
+        owner_role: agent
+        description: Meet to review pricing and preparation
+        due: "Listing"
+        due_offset: "+3d"
+        applies_if: "transaction.type IN ['sell_side', 'rental_landlord']"
+        depends_on: []
+
+  - name: Earnest Money Management
+    description: Handle earnest money deposit and escrow
+    tasks:
+      - id: "collect_emd"
+        title: Collect earnest money deposit
+        category: earnest_money
+        owner_role: agent
+        description: Receive EMD check or wire from buyer
+        due: "Offer"
+        due_offset: "+2d"
+        milestone: true
+        mandatory: true
+        depends_on: []
+        documents:
+          - EMD receipt
+          - Deposit slip
+
+      - id: "deposit_emd"
+        title: Deposit EMD into escrow account
+        category: earnest_money
+        owner_role: agent
+        description: Deposit earnest money into designated escrow account
+        due: "Offer"
+        due_offset: "+3d"
+        mandatory: true
+        depends_on: ["collect_emd"]
+
+      - id: "send_emd_receipt"
+        title: Send EMD receipt to all parties
+        category: earnest_money
+        owner_role: agent
+        description: Provide confirmation of EMD deposit to buyer and seller
+        due: "Offer"
+        due_offset: "+3d"
+        depends_on: ["deposit_emd"]
+        documents:
+          - Escrow receipt
+
+      - id: "emd_ledger_entry"
+        title: Create escrow account ledger entry
+        category: earnest_money
+        owner_role: agent
+        description: Record EMD in transaction accounting system
+        due: "Offer"
+        due_offset: "+3d"
+        depends_on: ["deposit_emd"]
+
+  - name: Inspection Period
+    description: Property inspection and negotiation phase
+    tasks:
+      - id: "schedule_home_inspection"
+        title: Schedule home inspection
+        category: inspection
+        owner_role: buyer
+        description: Book professional home inspector
+        due: "PS"
+        due_offset: "+5d"
+        milestone: true
+        depends_on: []
+        reminders:
+          - offset: "-2d"
+            channels: ["email"]
+            message: "Inspection coming up"
+
+      - id: "attend_inspection"
+        title: Attend home inspection
+        category: inspection
+        owner_role: agent
+        description: Be present during inspection to address questions
+        due: "PS"
+        due_offset: "+7d"
+        depends_on: ["schedule_home_inspection"]
+
+      - id: "review_inspection_report"
+        title: Review inspection report
+        category: inspection
+        owner_role: buyer
+        description: Review findings and determine repair requests
+        due: "PS"
+        due_offset: "+9d"
+        depends_on: ["attend_inspection"]
+        documents:
+          - Inspection report
+
+      - id: "submit_repair_request"
+        title: Submit repair request or waiver
+        category: inspection
+        owner_role: agent
+        description: Present repair requests to seller or waive contingency
+        due: "PS"
+        due_offset: "+11d"
+        milestone: true
+        depends_on: ["review_inspection_report"]
+        documents:
+          - Repair request form
+          - Inspection contingency waiver
+
+      - id: "negotiate_inspection_items"
+        title: Negotiate inspection items
+        category: inspection
+        owner_role: agent
+        description: Negotiate repairs, credits, or price adjustments
+        due: "PS"
+        due_offset: "+14d"
+        depends_on: ["submit_repair_request"]
+
+      - id: "finalize_inspection_agreement"
+        title: Finalize inspection agreement
+        category: inspection
+        owner_role: agent
+        description: Document agreed-upon inspection resolutions
+        due: "PS"
+        due_offset: "+15d"
+        depends_on: ["negotiate_inspection_items"]
+        documents:
+          - Signed inspection agreement
+
+      - id: "schedule_specialized_inspections"
+        title: Schedule specialized inspections
+        category: inspection
+        owner_role: buyer
+        description: Book additional inspections (pest, radon, etc.) if needed
+        due: "PS"
+        due_offset: "+5d"
+        applies_if: "property.needs_special_inspection"
+        depends_on: []
+
+      - id: "coordinate_repair_work"
+        title: Coordinate repair work
+        category: inspection
+        owner_role: seller
+        description: Schedule and complete agreed-upon repairs
+        due: "PS"
+        due_offset: "+25d"
+        applies_if: "inspection.repairs_needed"
+        depends_on: ["finalize_inspection_agreement"]
+
+      - id: "schedule_reinspection"
+        title: Schedule re-inspection
+        category: inspection
+        owner_role: buyer
+        description: Verify completion of agreed repairs
+        due: "PS"
+        due_offset: "+28d"
+        applies_if: "inspection.reinspection_needed"
+        depends_on: ["coordinate_repair_work"]
+
+      # ========================================
+      # UNIVERSAL TASKS - Added from property templates
+      # ========================================
+
+      - id: "home_inspection_schedule"
+        title: "Coordinate Home Inspection Access"
+        category: inspection
+        description: "Work with buyer's agent to schedule home inspection and provide property access"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "PS"
+        due_offset: "+7d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "+2d"
+            channels: ["email"]
+          - offset: "+5d"
+            channels: ["email"]
+          - offset: "+7d"
+            channels: ["email"]
+        notes: "Inspection contingency typically 7-15 days from P&S. Ensure utilities are on and property is accessible. Inspector will review Title 5 report."
+
+
+
+      - id: "home_inspection_response"
+        title: "Respond to Inspection Report Requests"
+        category: inspection
+        description: "Review buyer's inspection report and negotiate response (repairs, credits, or price adjustment)"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "PS"
+        due_offset: "+12d"
+        owner_role: seller
+        depends_on:
+          - "home_inspection_schedule"
+        reminders:
+          - offset: "+10d"
+            channels: ["email"]
+          - offset: "+12d"
+            channels: ["email", "sms"]
+        notes: "Response typically due within a few days of receiving report. Options: make repairs, offer credit, reduce price, or decline (buyer may have right to terminate). Septic issues may be raised even if Title 5 passed."
+
+
+
+
+  - name: Purchase and Sale Agreement
+    description: Negotiate and execute P&S agreement
+    tasks:
+      - id: "draft_ps_agreement"
+        title: Draft purchase and sale agreement
+        category: ps_agreement
+        owner_role: agent
+        description: Prepare comprehensive P&S with all terms
+        due: "Offer"
+        due_offset: "+2d"
+        milestone: true
+        depends_on: []
+        documents:
+          - P&S draft
+
+      - id: "attorney_review_ps"
+        title: Attorney review of P&S
+        category: ps_agreement
+        owner_role: buyer_attorney
+        description: Legal review of purchase agreement terms
+        due: "Offer"
+        due_offset: "+5d"
+        depends_on: ["draft_ps_agreement"]
+
+      - id: "negotiate_ps_terms"
+        title: Negotiate P&S terms
+        category: ps_agreement
+        owner_role: agent
+        description: Work through any requested changes
+        due: "Offer"
+        due_offset: "+7d"
+        depends_on: ["attorney_review_ps"]
+
+      - id: "execute_ps_agreement"
+        title: Execute purchase and sale agreement
+        category: ps_agreement
+        owner_role: buyer
+        description: Sign finalized P&S agreement
+        due: "Offer"
+        due_offset: "+8d"
+        milestone: true
+        mandatory: true
+        depends_on: ["negotiate_ps_terms"]
+        documents:
+          - Signed P&S agreement
+
+      - id: "seller_signs_ps"
+        title: Seller signs P&S agreement
+        category: ps_agreement
+        owner_role: seller
+        description: Seller executes P&S agreement
+        due: "Offer"
+        due_offset: "+9d"
+        mandatory: true
+        depends_on: ["execute_ps_agreement"]
+
+      - id: "distribute_executed_ps"
+        title: Distribute fully executed P&S
+        category: ps_agreement
+        owner_role: agent
+        description: Send signed P&S to all parties
+        due: "PS"
+        due_offset: "0d"
+        depends_on: ["seller_signs_ps"]
+
+      - id: "update_transaction_timeline"
+        title: Update transaction timeline
+        category: ps_agreement
+        owner_role: agent
+        description: Adjust schedule based on P&S dates
+        due: "PS"
+        due_offset: "+1d"
+        depends_on: ["distribute_executed_ps"]
+
+  - name: Financing
+    description: Mortgage application and approval process
+    tasks:
+      - id: "submit_mortgage_app"
+        title: Submit formal mortgage application
+        category: financing
+        owner_role: buyer
+        description: Complete full mortgage application with lender
+        due: "PS"
+        due_offset: "+3d"
+        milestone: true
+        applies_if: "transaction.needs_financing"
+        depends_on: []
+        documents:
+          - Loan application
+          - Financial statements
+
+      - id: "order_appraisal"
+        title: Order property appraisal
+        category: financing
+        owner_role: buyer
+        description: Lender orders property appraisal
+        due: "PS"
+        due_offset: "+8d"
+        milestone: true
+        applies_if: "transaction.needs_financing"
+        depends_on: ["submit_mortgage_app"]
+
+      - id: "schedule_appraisal"
+        title: Schedule appraisal inspection
+        category: financing
+        owner_role: agent
+        description: Coordinate appraiser access to property
+        due: "PS"
+        due_offset: "+13d"
+        applies_if: "transaction.needs_financing"
+        depends_on: ["order_appraisal"]
+
+      - id: "review_appraisal"
+        title: Review appraisal report
+        category: financing
+        owner_role: agent
+        description: Review appraisal value and comparables
+        due: "PS"
+        due_offset: "+15d"
+        applies_if: "transaction.needs_financing"
+        depends_on: ["schedule_appraisal"]
+        documents:
+          - Appraisal report
+
+      - id: "address_appraisal_issues"
+        title: Address appraisal issues
+        category: financing
+        owner_role: agent
+        description: Handle any appraisal value shortfall
+        due: "PS"
+        due_offset: "+18d"
+        applies_if: "appraisal.value_issue"
+        depends_on: ["review_appraisal"]
+
+      - id: "provide_additional_docs"
+        title: Provide additional documentation to lender
+        category: financing
+        owner_role: buyer
+        description: Submit any additional requested documents
+        due: "PS"
+        due_offset: "+10d"
+        applies_if: "loan.needs_more_docs"
+        depends_on: ["submit_mortgage_app"]
+
+      - id: "obtain_mortgage_commitment"
+        title: Obtain mortgage commitment
+        category: financing
+        owner_role: buyer
+        description: Receive formal loan commitment from lender
+        due: "PS"
+        due_offset: "+30d"
+        milestone: true
+        mandatory: true
+        applies_if: "transaction.needs_financing"
+        depends_on: ["submit_mortgage_app"]
+        documents:
+          - Commitment letter
+
+      - id: "review_loan_terms"
+        title: Review loan terms and conditions
+        category: financing
+        owner_role: buyer
+        description: Review final loan terms with lender
+        due: "PS"
+        due_offset: "+32d"
+        applies_if: "transaction.needs_financing"
+        depends_on: ["obtain_mortgage_commitment"]
+
+      - id: "clear_loan_conditions"
+        title: Clear loan conditions
+        category: financing
+        owner_role: buyer
+        description: Satisfy any remaining loan conditions
+        due: "Closing"
+        due_offset: "-10d"
+        applies_if: "loan.has_conditions"
+        depends_on: ["obtain_mortgage_commitment"]
+
+      - id: "schedule_loan_closing"
+        title: Schedule loan closing with lender
+        category: financing
+        owner_role: buyer
+        description: Coordinate closing date with lender
+        due: "Closing"
+        due_offset: "-5d"
+        applies_if: "transaction.needs_financing"
+        depends_on: ["clear_loan_conditions"]
+
+      # ========================================
+      # UNIVERSAL TASKS - Added from property templates
+      # ========================================
+
+      - id: "loan_commitment_track"
+        title: "Monitor Buyer Loan Commitment Status"
+        category: financing
+        description: "Check with buyer's agent regarding loan application progress and commitment timeline"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "PS"
+        due_offset: "+21d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "+14d"
+            channels: ["email"]
+          - offset: "+21d"
+            channels: ["email"]
+          - offset: "+28d"
+            channels: ["email", "sms"]
+            priority: "high"
+        notes: "Typical loan commitment arrives 3-4 weeks after P&S. Mortgage contingency usually 30-45 days from P&S. If delayed, buyer may request extension (must be in writing)."
+
+
+
+      - id: "loan_commitment_deadline"
+        title: "Confirm Loan Commitment Received or Extension Granted"
+        category: financing
+        description: "Verify buyer's lender has issued commitment letter or buyer has requested written extension"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "PS"
+        due_offset: "+35d"
+        owner_role: agent
+        depends_on:
+          - "loan_commitment_track"
+        reminders:
+          - offset: "-7d"
+            channels: ["email"]
+          - offset: "-3d"
+            channels: ["email", "sms"]
+          - offset: "-1d"
+            channels: ["email", "sms"]
+            priority: "high"
+        notes: "Mortgage contingency typically expires 30-45 days after P&S. Extension requests must be in writing. If commitment not received and no extension, seller may have option to terminate P&S."
+
+
+
+      - id: "appraisal_track"
+        title: "Monitor Property Appraisal Progress"
+        category: financing
+        description: "Confirm appraisal has been ordered and track completion status"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "PS"
+        due_offset: "+7d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "+7d"
+            channels: ["email"]
+          - offset: "+14d"
+            channels: ["email"]
+          - offset: "+21d"
+            channels: ["email"]
+        notes: "Appraisal usually ordered 1-2 weeks after P&S, completed 2-3 weeks after P&S. Ensure property shows well for appraiser. Appraiser will note septic system status."
+
+
+
+      - id: "appraisal_value_check"
+        title: "Verify Appraisal Supports Sales Price"
+        category: financing
+        description: "Confirm appraisal came in at or above sales price; address low appraisal if necessary"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "PS"
+        due_offset: "+21d"
+        owner_role: agent
+        depends_on:
+          - "appraisal_track"
+        reminders:
+          - offset: "+21d"
+            channels: ["email"]
+          - offset: "+25d"
+            channels: ["email"]
+        notes: "Low appraisal may require: buyer bringing additional cash, seller reducing price, or renegotiation. Failed septic can affect appraisal value."
+
+
+
+
+  - name: Pre-Closing Preparation
+    description: Final preparations before closing
+    tasks:
+      - id: "order_title_insurance"
+        title: Order title insurance
+        category: title_work
+        owner_role: agent
+        description: Order owner's and lender's title insurance policies
+        due: "Closing"
+        due_offset: "-21d"
+        milestone: true
+        depends_on: []
+        documents:
+          - Title commitment
+
+      - id: "review_title_commitment"
+        title: Review title commitment
+        category: title_work
+        owner_role: buyer_attorney
+        description: Review title report for issues
+        due: "Closing"
+        due_offset: "-18d"
+        depends_on: ["order_title_insurance"]
+
+      - id: "clear_title_issues"
+        title: Clear title issues
+        category: title_work
+        owner_role: seller_attorney
+        description: Resolve any title defects or liens
+        due: "Closing"
+        due_offset: "-14d"
+        applies_if: "title.has_issues"
+        depends_on: ["review_title_commitment"]
+
+      - id: "order_municipal_lien"
+        title: Order municipal lien certificate
+        category: title_work
+        owner_role: agent
+        description: Request certificate from municipality
+        due: "Closing"
+        due_offset: "-21d"
+        depends_on: []
+        documents:
+          - Lien certificate
+
+      - id: "schedule_closing_date"
+        title: Schedule closing date and time
+        category: pre_closing
+        owner_role: agent
+        description: Coordinate closing with all parties
+        due: "Closing"
+        due_offset: "-14d"
+        milestone: true
+        depends_on: []
+
+      - id: "select_closing_attorney"
+        title: Select closing attorney/location
+        category: pre_closing
+        owner_role: buyer
+        description: Choose closing attorney or title company
+        due: "Closing"
+        due_offset: "-14d"
+        depends_on: []
+
+      - id: "order_homeowners_insurance"
+        title: Order homeowner's insurance
+        category: pre_closing
+        owner_role: buyer
+        description: Obtain insurance policy for closing
+        due: "Closing"
+        due_offset: "-10d"
+        mandatory: true
+        depends_on: []
+        documents:
+          - Insurance binder
+          - Paid receipt
+
+      - id: "coordinate_utility_transfers"
+        title: Coordinate utility transfers
+        category: pre_closing
+        owner_role: agent
+        description: Arrange for utility account transfers
+        due: "Closing"
+        due_offset: "-7d"
+        depends_on: []
+        reminders:
+          - offset: "-2d"
+            channels: ["email"]
+            message: "Contact utilities for transfer"
+
+      - id: "schedule_final_walkthrough"
+        title: Schedule final walkthrough
+        category: pre_closing
+        owner_role: agent
+        description: Arrange pre-closing property inspection
+        due: "Closing"
+        due_offset: "-2d"
+        milestone: true
+        depends_on: []
+
+      - id: "prepare_closing_docs"
+        title: Prepare closing documents package
+        category: pre_closing
+        owner_role: agent
+        description: Gather all required closing documents
+        due: "Closing"
+        due_offset: "-3d"
+        depends_on: []
+        documents:
+          - Closing checklist
+          - Document package
+
+      # ========================================
+      # UNIVERSAL TASKS - Added from property templates
+      # ========================================
+
+      - id: "municipal_lien"
+        title: "Request Municipal Lien Certificate"
+        category: title_work
+        description: "Attorney to order municipal lien certificate from city/town tax collector"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-21d"
+        owner_role: buyer_attorney
+        depends_on: []
+        reminders:
+          - offset: "-28d"
+            channels: ["email"]
+          - offset: "-21d"
+            channels: ["email"]
+        citations:
+          - url: "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter60/Section23"
+            title: "M.G.L. Chapter 60, Section 23 - Municipal Lien Certificates"
+        notes: "Tax collector has 10 days to issue (excluding weekends/holidays). Certificate valid for 150 days when recorded. Fee typically $25-$50. Shows all unpaid taxes, assessments, charges."
+
+
+
+      - id: "smoke_co_inspection"
+        title: "Schedule Smoke & CO Detector Inspection"
+        category: compliance
+        description: "Contact local fire department to schedule certificate of compliance inspection for smoke and carbon monoxide detectors"
+        mandatory: true
+        applies_if: "property.type == 'SFH'"
+        due: "Closing"
+        due_offset: "-21d"
+        owner_role: seller
+        vendor_type: "fire_dept_smoke_cert"
+        estimated_duration: "Schedule 2-3 weeks ahead; inspection takes 30-45 minutes"
+        depends_on: []
+        reminders:
+          - offset: "-30d"
+            channels: ["email"]
+          - offset: "-21d"
+            channels: ["email"]
+          - offset: "-14d"
+            channels: ["email", "sms"]
+        actions:
+          - type: "request_vendor"
+            vendor_type: "fire_dept_smoke_cert"
+        citations:
+          - url: "https://www.mass.gov/doc/consumer-guide-to-smoke-detectors-when-selling-home/download"
+            title: "Consumer Guide to Smoke Detectors When Selling Your Home"
+          - url: "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter148/Section26F"
+            title: "M.G.L. c.148 §26F - Smoke Detector Requirements"
+          - url: "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter148/Section26F1/2"
+            title: "M.G.L. c.148 §26F½ - Carbon Monoxide Alarm Requirements"
+        notes: "Smoke detectors: Required for pre-1975 homes. CO alarms: ALL residences. Certificate valid 60 days. Fee typically $50-$100 per municipality. Some towns have online scheduling."
+
+
+
+      - id: "smoke_co_compliance"
+        title: "Obtain Smoke & CO Certificate of Compliance"
+        category: compliance
+        description: "Receive certificate from fire department after successful inspection"
+        mandatory: true
+        applies_if: "property.type == 'SFH'"
+        due: "Closing"
+        due_offset: "-14d"
+        owner_role: seller
+        depends_on:
+          - "smoke_co_inspection"
+        reminders:
+          - offset: "-10d"
+            channels: ["email"]
+          - offset: "-7d"
+            channels: ["email"]
+          - offset: "-3d"
+            channels: ["email", "sms"]
+            priority: "high"
+        notes: "Must have certificate at closing. If inspection fails, purchase and install required detectors and schedule re-inspection. Certificate valid for 60 days from inspection date."
+
+
+
+      - id: "insurance_track"
+        title: "Confirm Buyer Obtained Homeowners Insurance"
+        category: pre_closing
+        description: "Verify buyer has secured homeowners insurance policy or binder required by lender"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-21d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "-21d"
+            channels: ["email"]
+          - offset: "-14d"
+            channels: ["email"]
+          - offset: "-7d"
+            channels: ["email"]
+        notes: "Lender requires proof of insurance before releasing funds. Policy must show lender as mortgagee. Septic systems may affect insurance availability or rates."
+
+
+
+      - id: "clear_to_close_confirm"
+        title: "Confirm Lender Clear to Close"
+        category: pre_closing
+        description: "Verify buyer's lender has issued 'clear to close' and final Closing Disclosure delivered"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-5d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "-5d"
+            channels: ["email"]
+          - offset: "-3d"
+            channels: ["email", "sms"]
+          - offset: "-2d"
+            channels: ["email", "sms"]
+            priority: "high"
+        notes: "Final underwriting must be complete. Closing Disclosure delivered to buyer 3 business days before closing. Funding confirmed. If not received 3 days before closing, investigate potential delays immediately."
+
+
+
+      - id: "utilities_transfer"
+        title: "Coordinate Utility Account Transfers"
+        category: pre_closing
+        description: "Schedule final readings and account closures for electric, gas, water, internet, etc. as of closing date"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-7d"
+        owner_role: seller
+        depends_on: []
+        reminders:
+          - offset: "-14d"
+            channels: ["email"]
+          - offset: "-7d"
+            channels: ["email"]
+        notes: "Contact utility companies to schedule final readings as of closing date. Provide closing date and new owner information. Keep utilities on through closing day for final walkthrough."
+
+
+
+      - id: "attorney_docs_review"
+        title: "Review Closing Documents with Attorney"
+        category: pre_closing
+        description: "Meet with attorney to review HUD-1, deed, payoff statements, and all closing documents"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-7d"
+        owner_role: seller
+        depends_on: []
+        reminders:
+          - offset: "-14d"
+            channels: ["email"]
+          - offset: "-7d"
+            channels: ["email"]
+          - offset: "-3d"
+            channels: ["email"]
+        notes: "Review estimated closing costs, net proceeds, any liens to be discharged, mortgage payoff amounts. Clarify any questions before closing day. Ensure Title 5 Certificate included in closing documents."
+
+
+
+      - id: "final_walkthrough_schedule"
+        title: "Schedule Final Walkthrough"
+        category: pre_closing
+        description: "Coordinate with buyer's agent for final walkthrough 24-48 hours before closing"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-3d"
+        owner_role: agent
+        depends_on: []
+        reminders:
+          - offset: "-5d"
+            channels: ["email"]
+          - offset: "-3d"
+            channels: ["email"]
+        notes: "Typically scheduled 24-48 hours before closing. Buyer verifies property condition unchanged, agreed repairs completed, property vacant and broom clean."
+
+
+
+      - id: "property_vacant_clean"
+        title: "Ensure Property Vacant and Broom Clean"
+        category: pre_closing
+        description: "Remove all belongings, clean property, complete any agreed-upon repairs, and prepare for final walkthrough"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-1d"
+        owner_role: seller
+        depends_on: []
+        reminders:
+          - offset: "-7d"
+            channels: ["email"]
+          - offset: "-3d"
+            channels: ["email"]
+          - offset: "-1d"
+            channels: ["email", "sms"]
+        notes: "Property must be broom clean with all seller belongings removed. Complete any repairs agreed to during inspection. Remove all trash/debris. Turn utilities on for final walkthrough."
+
+      - id: "keys_docs_ready"
+        title: "Prepare Keys, Manuals, and Access Information"
+        category: pre_closing
+        description: "Gather all keys, garage remotes, alarm codes, appliance manuals, septic records, and other materials for buyer"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-1d"
+        owner_role: seller
+        depends_on: []
+        reminders:
+          - offset: "-3d"
+            channels: ["email"]
+          - offset: "-1d"
+            channels: ["email"]
+        notes: "Include: house keys, garage door remotes, alarm codes/instructions, appliance manuals, warranty information, Title 5 inspection report and Certificate, septic tank location map, pumping records, maintenance contractor contact, paint colors, contractor contacts for recent work."
+
+
+
+      - id: "water_final_reading"
+        category: property_specific
+        title: "Order Final Water Reading (if applicable)"
+        description: "Contact municipal water department to schedule final meter reading for closing"
+        mandatory: false
+        applies_if: "property.city IN ['Boston', 'Lynn', 'Lawrence', 'Haverhill']"
+        due: "Closing"
+        due_offset: "-28d"
+        owner_role: seller
+        depends_on: []
+        reminders:
+          - offset: "-35d"
+            channels: ["email"]
+          - offset: "-28d"
+            channels: ["email"]
+          - offset: "-21d"
+            channels: ["email", "sms"]
+        citations:
+          - url: "https://www.bwsc.org/residential-customers/services/buying-or-selling-property"
+            title: "Buying or Selling Property | Boston Water and Sewer Commission"
+        notes: "Required in Boston, Lynn, Lawrence, Haverhill. Boston requires ~2 weeks processing time. Day-of-closing water bill is NOT sufficient due to billing backlogs. Multi-unit properties may have higher water bills. Some properties have sub-metering to tenants; coordinate accordingly. Unpaid water becomes municipal lien."
+
+
+
+
+  - name: Closing Week Activities
+    description: Final week before closing
+    tasks:
+      - id: "confirm_wire_instructions"
+        title: Confirm wire instructions
+        category: pre_closing
+        owner_role: buyer
+        description: Verify wire transfer details with closing attorney
+        due: "Closing"
+        due_offset: "-3d"
+        mandatory: true
+        depends_on: []
+        reminders:
+          - offset: "-1d"
+            channels: ["email", "sms"]
+            priority: "high"
+            message: "Verify wire instructions - CALL to confirm"
+
+      - id: "obtain_closing_funds"
+        title: Obtain cashier's check or wire funds
+        category: pre_closing
+        owner_role: buyer
+        description: Prepare closing funds
+        due: "Closing"
+        due_offset: "-1d"
+        mandatory: true
+        depends_on: ["confirm_wire_instructions"]
+
+      - id: "conduct_final_walkthrough"
+        title: Conduct final walkthrough
+        category: pre_closing
+        owner_role: buyer
+        description: Final inspection of property condition
+        due: "Closing"
+        due_offset: "-1d"
+        milestone: true
+        depends_on: ["schedule_final_walkthrough"]
+        documents:
+          - Walkthrough checklist
+
+      - id: "address_walkthrough_issues"
+        title: Address walkthrough issues
+        category: pre_closing
+        owner_role: agent
+        description: Resolve any issues found during walkthrough
+        due: "Closing"
+        due_offset: "0d"
+        applies_if: "walkthrough.has_issues"
+        depends_on: ["conduct_final_walkthrough"]
+
+      - id: "confirm_closing_attendance"
+        title: Confirm closing attendance
+        category: pre_closing
+        owner_role: agent
+        description: Verify all parties will attend or have POA
+        due: "Closing"
+        due_offset: "-2d"
+        depends_on: []
+
+      - id: "review_closing_disclosure"
+        title: Review HUD-1/Closing Disclosure
+        category: pre_closing
+        owner_role: buyer
+        description: Review final settlement statement
+        due: "Closing"
+        due_offset: "-3d"
+        mandatory: true
+        depends_on: []
+        documents:
+          - Closing Disclosure
+          - HUD-1
+
+      - id: "review_seller_statement"
+        title: Review seller's closing statement
+        category: pre_closing
+        owner_role: seller
+        description: Review seller's proceeds and costs
+        due: "Closing"
+        due_offset: "-3d"
+        depends_on: []
+        documents:
+          - Seller's statement
+
+      - id: "prepare_poa"
+        title: Prepare power of attorney
+        category: pre_closing
+        owner_role: buyer
+        description: Execute POA if unable to attend closing
+        due: "Closing"
+        due_offset: "-3d"
+        applies_if: "buyer.needs_poa"
+        depends_on: []
+        documents:
+          - Power of Attorney
+
+      # ========================================
+      # UNIVERSAL TASKS - Added from property templates
+      # ========================================
+
+      - id: "final_walkthrough_complete"
+        title: "Complete Final Walkthrough Successfully"
+        category: pre_closing
+        description: "Buyer completes final walkthrough and confirms property is ready for closing"
+        mandatory: true
+        applies_if: "property.state == 'MA'"
+        due: "Closing"
+        due_offset: "-1d"
+        owner_role: seller
+        depends_on:
+          - "final_walkthrough_schedule"
+          - "property_vacant_clean"
+        reminders:
+          - offset: "-1d"
+            channels: ["email", "sms"]
+        notes: "Address any issues discovered during walkthrough immediately. Seller should be available to resolve problems. Serious issues could delay closing."
+
+
+
+
+  - name: Closing Day
+    description: Closing day activities
+    tasks:
+      - id: "final_loan_doc_review"
+        title: Final loan document review
+        category: closing
+        owner_role: buyer
+        description: Review and sign all loan documents
+        due: "Closing"
+        due_offset: "0d"
+        milestone: true
+        mandatory: true
+        applies_if: "transaction.needs_financing"
+        depends_on: []
+
+      - id: "sign_closing_docs"
+        title: Sign closing documents
+        category: closing
+        owner_role: buyer
+        description: Execute all purchase documents
+        due: "Closing"
+        due_offset: "0d"
+        mandatory: true
+        depends_on: []
+        documents:
+          - Deed
+          - Bill of sale
+          - Affidavits
+
+      - id: "seller_signs_transfer"
+        title: Seller signs transfer documents
+        category: closing
+        owner_role: seller
+        description: Execute deed and transfer documents
+        due: "Closing"
+        due_offset: "0d"
+        mandatory: true
+        depends_on: []
+
+      - id: "transfer_keys_access"
+        title: Transfer keys and access
+        category: closing
+        owner_role: seller
+        description: Provide all keys, codes, and garage openers
+        due: "Closing"
+        due_offset: "0d"
+        mandatory: true
+        depends_on: []
+        documents:
+          - Key inventory
+          - Access codes
+
+      - id: "record_deed_mortgage"
+        title: Record deed and mortgage
+        category: closing
+        owner_role: agent
+        description: Ensure documents are recorded at registry
+        due: "Closing"
+        due_offset: "0d"
+        milestone: true
+        mandatory: true
+        depends_on: ["sign_closing_docs", "seller_signs_transfer"]
+
+      - id: "disburse_funds"
+        title: Disburse funds
+        category: closing
+        owner_role: agent
+        description: Confirm all funds properly distributed
+        due: "Closing"
+        due_offset: "0d"
+        mandatory: true
+        depends_on: []
+
+      - id: "provide_buyer_closing_package"
+        title: Provide closing package to buyer
+        category: closing
+        owner_role: agent
+        description: Give buyer copies of all closing documents
+        due: "Closing"
+        due_offset: "0d"
+        depends_on: ["sign_closing_docs"]
+        documents:
+          - Complete closing package
+
+      - id: "provide_seller_closing_package"
+        title: Provide closing package to seller
+        category: closing
+        owner_role: agent
+        description: Give seller copies of relevant documents
+        due: "Closing"
+        due_offset: "0d"
+        depends_on: ["seller_signs_transfer"]
+        documents:
+          - Seller closing package
+
+      - id: "update_mls_closed"
+        title: Update MLS status to closed
+        category: closing
+        owner_role: agent
+        description: Change listing status in MLS
+        due: "Closing"
+        due_offset: "0d"
+        mandatory: true
+        depends_on: ["record_deed_mortgage"]
+
+  - name: Post-Closing
+    description: Post-closing follow-up tasks
+    tasks:
+      - id: "confirm_deed_recording"
+        title: Confirm deed recording
+        category: post_closing
+        owner_role: agent
+        description: Verify deed properly recorded at registry
+        due: "Closing"
+        due_offset: "+3d"
+        depends_on: ["record_deed_mortgage"]
+        documents:
+          - Recorded deed
+
+      - id: "distribute_recorded_docs"
+        title: Distribute recorded documents
+        category: post_closing
+        owner_role: agent
+        description: Send recorded deed to buyer
+        due: "Closing"
+        due_offset: "+4d"
+        depends_on: ["confirm_deed_recording"]
+
+      - id: "file_transaction_docs"
+        title: File transaction documents
+        category: post_closing
+        owner_role: agent
+        description: Archive all transaction paperwork
+        due: "Closing"
+        due_offset: "+5d"
+        mandatory: true
+        depends_on: []
+
+      - id: "process_commissions"
+        title: Process commission disbursements
+        category: post_closing
+        owner_role: agent
+        description: Ensure all commissions properly paid
+        due: "Closing"
+        due_offset: "+2d"
+        depends_on: []
+
+      - id: "send_buyer_gift"
+        title: Send closing gift to buyer
+        category: post_closing
+        owner_role: agent
+        description: Send congratulations gift to new homeowner
+        due: "Closing"
+        due_offset: "+7d"
+        depends_on: []
+
+      - id: "send_seller_gift"
+        title: Send closing gift to seller
+        category: post_closing
+        owner_role: agent
+        description: Send thank you gift to seller
+        due: "Closing"
+        due_offset: "+7d"
+        depends_on: []
+
+      - id: "request_testimonials"
+        title: Request client testimonials
+        category: post_closing
+        owner_role: agent
+        description: Ask for reviews and testimonials
+        due: "Closing"
+        due_offset: "+14d"
+        depends_on: []
+
+      - id: "add_to_crm"
+        title: Add clients to CRM for follow-up
+        category: post_closing
+        owner_role: agent
+        description: Enter in CRM for ongoing relationship
+        due: "Closing"
+        due_offset: "+3d"
+        depends_on: []
+
+      - id: "schedule_30day_followup"
+        title: Schedule 30-day follow-up call
+        category: post_closing
+        owner_role: agent
+        description: Check in with buyer about their new home
+        due: "Closing"
+        due_offset: "+30d"
+        depends_on: []
+
+      - id: "submit_to_broker"
+        title: Submit transaction to broker
+        category: post_closing
+        owner_role: agent
+        description: Provide all required broker documentation
+        due: "Closing"
+        due_offset: "+3d"
+        mandatory: true
+        depends_on: []
+        documents:
+          - Commission statement
+          - Transaction summary
+
+      - id: "confirm_title_policy"
+        title: Confirm title policy delivery
+        category: post_closing
+        owner_role: agent
+        description: Ensure buyer receives title insurance policy
+        due: "Closing"
+        due_offset: "+30d"
+        depends_on: []
+        documents:
+          - Title insurance policy
+
+      - id: "provide_tax_info"
+        title: Provide tax information to buyer
+        category: post_closing
+        owner_role: agent
+        description: Give buyer info for property tax setup
+        due: "Closing"
+        due_offset: "+5d"
+        depends_on: []
+        documents:
+          - Tax information sheet
+
+      - id: "update_transaction_status"
+        title: Update transaction status in system
+        category: post_closing
+        owner_role: agent
+        description: Mark transaction as complete in all systems
+        due: "Closing"
+        due_offset: "+1d"
+        mandatory: true
+        depends_on: []
+
+# Conditional tasks based on property type
+conditional_tasks:
+  - condition: "property.type == 'Condo'"
+    tasks:
+      - id: "obtain_condo_6d"
+        title: Obtain condo docs (6d certificate)
+        category: hoa_condo
+        owner_role: agent
+        description: Request 6d certificate from HOA
+        due: "Closing"
+        due_offset: "-14d"
+        milestone: true
+        applies_if: "property.type == 'Condo'"
+        depends_on: []
+        documents:
+          - 6d certificate
+          - HOA documents
+
+      - id: "review_hoa_financials"
+        title: Review HOA financials
+        category: hoa_condo
+        owner_role: buyer
+        description: Review association financial statements
+        due: "PS"
+        due_offset: "+5d"
+        applies_if: "property.type == 'Condo'"
+        depends_on: []
+        documents:
+          - HOA financials
+          - Reserve study
+
+      - id: "review_hoa_rules"
+        title: Review HOA rules and bylaws
+        category: hoa_condo
+        owner_role: buyer
+        description: Review all association governing documents
+        due: "PS"
+        due_offset: "+5d"
+        applies_if: "property.type == 'Condo'"
+        depends_on: []
+        documents:
+          - CC&Rs
+          - Bylaws
+          - Rules and regulations
+
+  - condition: "property.has_septic"
+    tasks:
+      - id: "order_septic_inspection"
+        title: Order septic inspection
+        category: property_specific
+        owner_role: buyer
+        description: Schedule Title 5 septic inspection
+        due: "PS"
+        due_offset: "+10d"
+        milestone: true
+        applies_if: "property.has_septic"
+        depends_on: []
+        documents:
+          - Title 5 report
+
+      - id: "review_septic_results"
+        title: Review septic inspection results
+        category: property_specific
+        owner_role: buyer
+        description: Review septic system condition
+        due: "PS"
+        due_offset: "+12d"
+        applies_if: "property.has_septic"
+        depends_on: ["order_septic_inspection"]
+
+      - id: "negotiate_septic_repairs"
+        title: Negotiate septic repairs
+        category: property_specific
+        owner_role: agent
+        description: Negotiate any needed septic work
+        due: "PS"
+        due_offset: "+15d"
+        applies_if: "property.has_septic && septic.needs_repair"
+        depends_on: ["review_septic_results"]
+
+  - condition: "property.has_well"
+    tasks:
+      - id: "order_well_inspection"
+        title: Order well inspection and water test
+        category: property_specific
+        owner_role: buyer
+        description: Test well flow rate and water quality
+        due: "PS"
+        due_offset: "+10d"
+        applies_if: "property.has_well"
+        depends_on: []
+        documents:
+          - Well inspection report
+          - Water quality report
+
+      - id: "review_water_test"
+        title: Review water test results
+        category: property_specific
+        owner_role: buyer
+        description: Review water quality and quantity
+        due: "PS"
+        due_offset: "+12d"
+        applies_if: "property.has_well"
+        depends_on: ["order_well_inspection"]
+
+  - condition: "property.has_pool"
+    tasks:
+      - id: "schedule_pool_inspection"
+        title: Schedule pool inspection
+        category: property_specific
+        owner_role: buyer
+        description: Inspect pool and equipment condition
+        due: "PS"
+        due_offset: "+10d"
+        applies_if: "property.has_pool"
+        depends_on: []
+        documents:
+          - Pool inspection report
+
+      - id: "transfer_pool_service"
+        title: Transfer pool service contract
+        category: property_specific
+        owner_role: seller
+        description: Transfer or cancel pool maintenance
+        due: "Closing"
+        due_offset: "-5d"
+        applies_if: "property.has_pool"
+        depends_on: []
+
+  - condition: "property.is_new_construction"
+    tasks:
+      - id: "predelivery_inspection"
+        title: Schedule pre-delivery inspection
+        category: property_specific
+        owner_role: buyer
+        description: Walk through with builder before closing
+        due: "Closing"
+        due_offset: "-7d"
+        milestone: true
+        applies_if: "property.is_new_construction"
+        depends_on: []
+
+      - id: "create_punch_list"
+        title: Create punch list
+        category: property_specific
+        owner_role: buyer
+        description: Document any incomplete items
+        due: "Closing"
+        due_offset: "-6d"
+        applies_if: "property.is_new_construction"
+        depends_on: ["predelivery_inspection"]
+        documents:
+          - Punch list
+
+      - id: "obtain_certificate_occupancy"
+        title: Obtain certificate of occupancy
+        category: compliance
+        owner_role: seller
+        description: Ensure CO is issued by municipality
+        due: "Closing"
+        due_offset: "-5d"
+        mandatory: true
+        applies_if: "property.is_new_construction"
+        depends_on: []
+        documents:
+          - Certificate of occupancy
+
+      - id: "collect_builder_warranties"
+        title: Collect builder warranties
+        category: property_specific
+        owner_role: buyer
+        description: Obtain all warranty documentation
+        due: "Closing"
+        due_offset: "-3d"
+        applies_if: "property.is_new_construction"
+        depends_on: []
+        documents:
+          - Builder warranty
+          - Appliance warranties
+
+  - condition: "transaction.is_cash"
+    tasks:
+      - id: "provide_proof_funds"
+        title: Provide proof of funds
+        category: financing
+        owner_role: buyer
+        description: Submit verification of available funds
+        due: "Offer"
+        due_offset: "+3d"
+        mandatory: true
+        applies_if: "transaction.financing_type == 'cash'"
+        depends_on: []
+        documents:
+          - Bank statements
+          - Proof of funds letter
+
+      - id: "verify_funds_source"
+        title: Verify source of funds
+        category: financing
+        owner_role: buyer
+        description: Document source for large deposits
+        due: "Offer"
+        due_offset: "+5d"
+        applies_if: "transaction.financing_type == 'cash'"
+        depends_on: []
+
+  - condition: "property.tenant_occupied"
+    tasks:
+      - id: "obtain_tenant_estoppels"
+        title: Provide tenant estoppel certificates
+        category: property_specific
+        owner_role: seller
+        description: Obtain statements from all tenants
+        due: "PS"
+        due_offset: "+10d"
+        applies_if: "property.tenant_occupied"
+        depends_on: []
+        documents:
+          - Estoppel certificates
+
+      - id: "transfer_security_deposits"
+        title: Transfer security deposits
+        category: property_specific
+        owner_role: seller
+        description: Transfer tenant deposits to buyer
+        due: "Closing"
+        due_offset: "0d"
+        applies_if: "property.tenant_occupied"
+        depends_on: []
+
+      - id: "provide_tenant_leases"
+        title: Provide copies of all leases
+        category: property_specific
+        owner_role: seller
+        description: Give buyer all current lease agreements
+        due: "PS"
+        due_offset: "+5d"
+        applies_if: "property.tenant_occupied"
+        depends_on: []
+        documents:
+          - Lease agreements
+          - Rent roll
+
+      - id: "notify_tenants_transfer"
+        title: Notify tenants of ownership change
+        category: property_specific
+        owner_role: seller
+        description: Inform tenants of new owner
+        due: "Closing"
+        due_offset: "+3d"
+        applies_if: "property.tenant_occupied"
+        depends_on: []
+
+milestones:
+  - name: "Listing Active"
+    tasks: ["property_info_mls"]
+  - name: "Under Agreement"
+    tasks: ["execute_ps_agreement"]
+  - name: "Earnest Money Deposited"
+    tasks: ["deposit_emd"]
+  - name: "Inspection Complete"
+    tasks: ["submit_repair_request"]
+  - name: "Loan Committed"
+    tasks: ["obtain_mortgage_commitment"]
+  - name: "Clear to Close"
+    tasks: ["clear_loan_conditions", "clear_title_issues"]
+  - name: "Closed"
+    tasks: ["record_deed_mortgage"]
+
+reminders:
+  global:
+    - task_pattern: "inspection"
+      days_before: 2
+      message: "Inspection deadline approaching"
+    - task_pattern: "closing"
+      days_before: 3
+      message: "Prepare for closing"
+    - task_pattern: "mortgage"
+      days_before: 5
+      message: "Check on mortgage progress"
+
+notifications:
+  - trigger: task_completed
+    recipients: [agent, transaction_coordinator]
+    template: task_completion
+  - trigger: milestone_reached
+    recipients: [all_parties]
+    template: milestone_notification
+  - trigger: task_overdue
+    recipients: [assigned_party, agent]
+    template: overdue_alert
+
+settings:
+  auto_assign: true
+  skip_weekends: true
+  business_hours:
+    start: "09:00"
+    end: "17:00"
+  timezone: "America/New_York"

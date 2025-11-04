@@ -1,0 +1,455 @@
+template_id: multifamily
+version: 2.0.0
+title: Multi-Family Residential - Enhanced
+description: Complete transaction checklist for multi-family residential properties (2-4+ units). Includes tenant coordination, income verification, rental documentation, and comprehensive workflow management with 90+ tasks.
+property_types:
+- Multifamily
+created_date: '2025-10-30'
+author: MA Deal Room Team
+transaction_side: both
+required_attributes:
+- property_type
+- state
+- year_built
+- units
+- ps_date
+- closing_date
+extends: base_transaction
+tasks:
+- id: rental_docs_gathering
+  category: property_specific
+  title: Gather All Tenant Leases and Rental Documentation
+  description: Collect current leases, rent rolls, tenant contact information, security deposit records, and rental history for all units
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Listing
+  due_offset: +7d
+  owner_role: seller
+  depends_on: []
+  reminders:
+  - offset: +3d
+    channels:
+    - email
+  - offset: +7d
+    channels:
+    - email
+    - sms
+  notes: 'Compile for each unit: current lease agreement, lease expiration date, monthly rent amount, security deposit amount (held in separate escrow account per MA law), rent payment history (last 12 months), any rent control/stabilization restrictions, Section 8/subsidized housing documentation if applicable. Vacant units: note move-out date and condition. Buyer will need this for financing and investment analysis.'
+  priority: normal
+- id: tenant_notification_prep
+  category: property_specific
+  title: Prepare Tenant Notifications (if required)
+  description: Draft required tenant notifications regarding property sale per Massachusetts law and lease terms
+  mandatory: false
+  applies_if: property.type == 'Multifamily'
+  due: Listing
+  due_offset: +14d
+  owner_role: seller_attorney
+  depends_on: []
+  reminders:
+  - offset: +7d
+    channels:
+    - email
+  - offset: +14d
+    channels:
+    - email
+  notes: Massachusetts does not require notification to tenants of pending sale for owner-occupied 2-3 unit buildings. However, check lease terms for any notification clauses. Tenants have rights to remain under existing lease terms after sale (unless owner-occupancy exemption applies). Consult attorney if uncertain.
+  priority: normal
+- id: tenant_estoppel_certificates
+  category: property_specific
+  title: Obtain Tenant Estoppel Certificates
+  description: Request estoppel certificates from all tenants confirming lease terms, rent amounts, security deposits, and no landlord breaches
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +14d
+  owner_role: seller
+  depends_on:
+  - rental_docs_gathering
+  reminders:
+  - offset: +7d
+    channels:
+    - email
+  - offset: +14d
+    channels:
+    - email
+  - offset: +21d
+    channels:
+    - email
+    - sms
+  notes: 'Estoppel certificate is tenant''s written confirmation of: current rent amount, lease expiration, security deposit held, no defaults by landlord, no oral agreements changing lease. Required by buyer''s lender. Not all tenants respond promptly; start early. If tenant doesn''t respond, proceed with lease copy and seller affidavit.'
+  priority: normal
+- id: rental_income_verification
+  category: financing
+  title: Provide Rental Income Verification to Buyer's Lender
+  description: Submit documentation verifying rental income, occupancy, and expenses for lender underwriting
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -21d
+  owner_role: seller
+  depends_on:
+  - rental_docs_gathering
+  reminders:
+  - offset: -28d
+    channels:
+    - email
+  - offset: -21d
+    channels:
+    - email
+  - offset: -14d
+    channels:
+    - email
+  notes: 'Lender requires: rent rolls (current as of date of request), lease copies for all units, 12-24 months rental income history (bank statements showing deposits), expense history (12-24 months of utility bills, insurance, property taxes, maintenance), proof of security deposits held in escrow account, tenant estoppel certificates. Gaps or inconsistencies can delay loan commitment.'
+  priority: high
+- id: tenant_notification_sale
+  category: property_specific
+  title: Notify Tenants of Ownership Transfer
+  description: Send formal written notice to all tenants regarding property sale, new owner information, and where to send rent
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  depends_on: []
+  reminders:
+  - offset: -14d
+    channels:
+    - email
+  - offset: -7d
+    channels:
+    - email
+  notes: 'Provide written notice to each tenant: closing date, new owner name and contact information, where to send rent (new address/payee), new owner will honor existing lease terms, security deposit transfer information, maintenance request procedures under new ownership. Keep proof of delivery (certified mail or hand-delivered with signed receipt).'
+  priority: normal
+- id: security_deposits_transfer
+  category: property_specific
+  title: Prepare Security Deposit Transfer Documentation
+  description: Document all tenant security deposits with amounts, interest accrued, and prepare transfer to buyer at closing
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller_attorney
+  depends_on:
+  - rental_docs_gathering
+  reminders:
+  - offset: -14d
+    channels:
+    - email
+  - offset: -7d
+    channels:
+    - email
+  notes: 'Massachusetts law: security deposits must be held in separate interest-bearing account (bank in MA). At closing, transfer deposits + accrued interest to buyer. Provide buyer with: list of deposits per unit, account statements showing balances, interest calculation per tenant, move-in condition reports. Buyer assumes responsibility for returning deposits when tenants move out. Credit seller at closing for deposit amounts + interest.'
+  priority: normal
+- id: property_ready_transfer
+  category: pre_closing
+  title: Ensure Property Ready for Ownership Transfer
+  description: Complete any agreed-upon repairs, ensure all units accessible, compile keys and documentation for buyer
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -1d
+  owner_role: seller
+  depends_on: []
+  reminders:
+  - offset: -7d
+    channels:
+    - email
+  - offset: -3d
+    channels:
+    - email
+  - offset: -1d
+    channels:
+    - email
+    - sms
+  notes: 'Complete all negotiated repairs. Ensure each unit is in condition per lease/agreement. Common areas clean and maintained. All utilities functioning. Have keys for every unit, mailboxes, common areas, storage, mechanicals. Compile: all lease files, tenant contact list, vendor contacts (plumber, electrician, HVAC, snow removal), appliance manuals, building systems documentation.'
+  priority: high
+- id: rent_roll_verification
+  category: property_specific
+  title: Verify Current Rent Roll and Income
+  description: Confirm actual rents collected match stated rent roll
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +7d
+  owner_role: agent
+  notes: 'Verify: current tenants, actual rent amounts, payment history, security deposits held, any rent concessions, Section 8 or other subsidies, parking/storage income, laundry income.'
+  priority: normal
+  depends_on: []
+- id: operating_expense_analysis
+  category: property_specific
+  title: Analyze Operating Expenses and P&L
+  description: Review 2-3 years of operating expenses and income statements
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +10d
+  owner_role: agent
+  notes: 'Review: utility bills, insurance costs, property taxes, maintenance expenses, management fees, snow removal, landscaping, trash removal, repairs history. Calculate NOI and cap rate.'
+  priority: normal
+  depends_on: []
+- id: lease_audit_review
+  category: property_specific
+  title: Audit All Existing Lease Agreements
+  description: Review every tenant lease for terms and compliance
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer_attorney
+  notes: 'Check: lease terms remaining, renewal options, rent escalations, security deposit amounts, pet deposits, parking assignments, any side agreements, compliance with local rent control.'
+  priority: normal
+  depends_on: []
+- id: security_deposit_reconciliation
+  category: property_specific
+  title: Reconcile Security Deposit Accounts
+  description: Verify all security deposits are properly accounted for
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -7d
+  owner_role: buyer_attorney
+  notes: 'Massachusetts requires separate escrow account for security deposits. Verify: account balance matches tenant deposits, interest calculations correct, proper account type, transfer arrangements at closing.'
+  priority: normal
+  depends_on: []
+- id: last_month_rent_transfer
+  category: property_specific
+  title: Account for Last Month's Rent Held
+  description: Transfer any last month's rent collected from tenants
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -3d
+  owner_role: buyer_attorney
+  notes: Many Massachusetts leases collect last month's rent. Must be transferred to buyer at closing. Include in closing statement adjustments.
+  priority: normal
+  depends_on: []
+- id: utility_separation_verification
+  category: property_specific
+  title: Verify Utility Metering and Billing
+  description: Confirm which utilities are separately metered vs owner-paid
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +10d
+  owner_role: vendor
+  notes: 'Document: separate electric meters, gas meters, water sub-metering if any, common area utilities, who pays for heat/hot water. Affects property value and operations.'
+  priority: normal
+  depends_on: []
+- id: common_area_maintenance_review
+  category: property_specific
+  title: Inspect Common Areas and Systems
+  description: Comprehensive inspection of shared spaces and building systems
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +7d
+  owner_role: vendor
+  notes: 'Inspect: hallways, stairwells, laundry rooms, basements, parking areas, exterior lighting, intercom/buzzer systems, mailboxes, shared HVAC systems, fire safety systems.'
+  priority: normal
+  depends_on: []
+- id: rental_income_tax_returns
+  category: property_specific
+  title: Review Seller's Schedule E Tax Returns
+  description: Verify reported rental income matches stated income
+  mandatory: false
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +10d
+  owner_role: agent
+  notes: Compare Schedule E from last 2-3 years to stated rent roll. Look for discrepancies, unreported income, excessive repairs that might indicate deferred maintenance.
+  priority: normal
+  depends_on: []
+- id: property_management_transition
+  category: property_specific
+  title: Coordinate Property Management Transition
+  description: Plan transition of property management responsibilities
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -14d
+  owner_role: buyer
+  notes: 'Determine: self-management vs professional, transfer existing management contract, obtain all keys/codes, emergency contacts, vendor lists, maintenance schedules.'
+  priority: normal
+  depends_on: []
+- id: tenant_notification_ownership
+  category: property_specific
+  title: Notify Tenants of Ownership Change
+  description: Formal notification to all tenants about new ownership
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: +1d
+  owner_role: buyer
+  notes: 'Send written notice with: new owner name, management contact, where to send rent, how to submit maintenance requests, emergency contacts. Include security deposit transfer confirmation.'
+  priority: normal
+  depends_on: []
+- id: rent_proration_calculation
+  category: property_specific
+  title: Calculate Rent Proration for Closing
+  description: Determine rent credits and prorations for closing date
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -3d
+  owner_role: buyer_attorney
+  notes: 'Prorate: current month''s rent, any prepaid rent, late fees due, security deposit interest. Account for rent collection timing and any tenants in arrears.'
+  priority: normal
+  depends_on: []
+- id: vendor_contract_review
+  category: property_specific
+  title: Review and Transfer Service Contracts
+  description: Evaluate existing service contracts for assumption or termination
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +14d
+  owner_role: agent
+  notes: 'Review: landscaping, snow removal, trash collection, cleaning services, laundry machine leases, elevator service, pest control, security systems. Determine which to keep, terminate, or renegotiate.'
+  priority: normal
+  depends_on: []
+- id: insurance_coverage_multifamily
+  category: property_specific
+  title: Obtain Multi-Family Property Insurance
+  description: Secure appropriate commercial property insurance
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -14d
+  owner_role: buyer
+  notes: 'Need: commercial property coverage, liability insurance, loss of rents coverage, umbrella policy. Higher limits than single-family. Some lenders require specific coverage amounts.'
+  priority: normal
+  depends_on: []
+- id: fire_safety_compliance
+  category: property_specific
+  title: Verify Fire Safety System Compliance
+  description: Confirm all fire safety systems meet code for multi-family
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +14d
+  owner_role: vendor
+  vendor_type: fire_inspector
+  notes: 'Check: smoke detectors in all units, CO detectors, fire extinguishers, emergency lighting, exit signs, sprinkler system if required, fire escapes, annual inspection certificates.'
+  priority: normal
+  depends_on: []
+- id: lead_paint_compliance_multifamily
+  category: property_specific
+  title: Verify Lead Paint Compliance for Rental Property
+  description: Ensure compliance with lead paint laws for rental properties
+  mandatory: true
+  applies_if: property.type == 'Multifamily' && property.year_built < 1978
+  due: PS
+  due_offset: +10d
+  owner_role: seller
+  notes: 'Massachusetts requires: lead inspection every 3 years for rentals with children under 6, lead-safe renovation practices, tenant notifications, possible de-leading requirements. Get compliance certificates.'
+  priority: normal
+  depends_on: []
+- id: rental_registration_transfer
+  category: property_specific
+  title: Transfer Rental Property Registration
+  description: Update rental property registration with city/town
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Many municipalities require rental registration. Update: owner information, management contact, emergency contacts. Pay any registration fees. Failure to register can result in fines.'
+  priority: normal
+  depends_on: []
+- id: eviction_moratorium_check
+  category: property_specific
+  title: Review Any Pending Evictions or Legal Actions
+  description: Disclose any ongoing eviction proceedings or tenant disputes
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Offer
+  due_offset: +1d
+  owner_role: seller
+  notes: 'Disclose: any pending evictions, court actions, tenant complaints, housing code violations, discrimination claims, security deposit disputes. Buyer may inherit these issues.'
+  priority: normal
+  depends_on: []
+- id: parking_assignment_documentation
+  category: property_specific
+  title: Document Parking Assignments and Rules
+  description: Clarify parking arrangements for all units
+  mandatory: false
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  notes: 'Provide: parking space assignments, any additional parking fees, guest parking rules, towing company contact, snow removal procedures for lot.'
+  priority: normal
+  depends_on: []
+- id: laundry_equipment_status
+  category: property_specific
+  title: Document Laundry Equipment Ownership/Leases
+  description: Clarify ownership of coin-operated laundry equipment
+  mandatory: false
+  applies_if: property.type == 'Multifamily' && property.has_laundry
+  due: PS
+  due_offset: +7d
+  owner_role: seller
+  notes: 'Determine: owned vs leased machines, lease terms and transfer, coin collection procedures, service company contact, revenue sharing if applicable.'
+  priority: normal
+  depends_on: []
+- id: master_key_system_transfer
+  category: property_specific
+  title: Transfer Master Key System and Unit Keys
+  description: Ensure buyer receives all keys for all units and common areas
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: +0d
+  owner_role: seller
+  notes: 'Provide: master keys, individual unit keys (labeled), mailbox keys, utility room keys, storage keys, laundry room keys, any electronic fob systems. Consider re-keying for security.'
+  priority: normal
+  depends_on: []
+- id: historical_vacancy_analysis
+  category: property_specific
+  title: Review Historical Vacancy Rates
+  description: Analyze vacancy trends over past 2-3 years
+  mandatory: false
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +10d
+  owner_role: agent
+  notes: 'Review: vacancy rates by unit, turnover frequency, time to re-rent, seasonal patterns, reasons for move-outs. Helps predict future income stability.'
+  priority: normal
+  depends_on: []
+- id: capital_improvement_history
+  category: property_specific
+  title: Review Capital Improvement History
+  description: Document major improvements and remaining useful life
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +10d
+  owner_role: vendor
+  notes: 'Document: roof age/condition, boiler/heating system age, window replacements, siding work, major plumbing/electrical updates. Estimate remaining life and replacement reserves needed.'
+  priority: normal
+  depends_on: []
+- id: trash_disposal_arrangements
+  category: property_specific
+  title: Document Trash and Recycling Services
+  description: Transfer or establish commercial trash service
+  mandatory: true
+  applies_if: property.type == 'Multifamily'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  notes: 'Provide: trash company contact, pickup schedule, dumpster rental terms, recycling requirements, bulk item disposal, any municipal requirements for commercial properties.'
+  priority: normal
+  depends_on: []
+- id: rental_market_analysis
+  category: property_specific
+  title: Conduct Rental Market Analysis
+  description: Compare current rents to market rates
+  mandatory: false
+  applies_if: property.type == 'Multifamily'
+  due: PS
+  due_offset: +7d
+  owner_role: agent
+  notes: 'Research: comparable rents in area, potential for rent increases, market vacancy rates, tenant demand trends. Identifies value-add opportunities or overpriced units.'
+  priority: normal
+  depends_on: []

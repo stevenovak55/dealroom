@@ -1,0 +1,4 @@
+# Prevent direct access to uploaded files
+Order deny,allow
+Deny from all
+# Files must be served through authenticated endpoint

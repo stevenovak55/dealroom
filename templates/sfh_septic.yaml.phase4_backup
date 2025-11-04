@@ -1,0 +1,415 @@
+# MA Deal Room Template: Single-Family Home (Septic System)
+# Version: 2.0.0
+# Property Type: Single-family residential with on-site septic system
+# Last Updated: 2025-10-30
+# Enhanced with comprehensive workflow tasks
+
+template_id: "sfh_septic"
+version: "2.0.0"
+title: "Single-Family Home (Septic System) - Enhanced"
+description: "Complete transaction checklist for single-family homes with on-site septic systems. Includes Title 5 inspection, well water testing, and comprehensive workflow management with 90+ tasks."
+property_types:
+  - "SFH"
+created_date: "2025-10-30"
+author: "MA Deal Room Team"
+
+required_attributes:
+  - "property_type"
+  - "state"
+  - "has_septic"
+  - "year_built"
+  - "ps_date"
+  - "closing_date"
+
+extends: "base_transaction"  # Inherits all base tasks
+
+tasks:
+  # ========================================
+  # PRE-LISTING / LISTING PHASE
+  # ========================================
+
+  # ========================================
+  # TITLE 5 SEPTIC SYSTEM COMPLIANCE
+  # ========================================
+
+  - id: "title5_septic_assessment"
+    title: "Assess Title 5 Septic Inspection Requirement"
+    category: property_specific
+    description: "Determine if property requires Title 5 inspection or has valid exemption (system installed/upgraded within last 2-3 years with Certificate of Compliance)"
+    mandatory: true
+    applies_if: "property.has_septic == true"
+    due: "ListingDate"
+    due_offset: "+7d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "+3d"
+        channels: ["email"]
+      - offset: "+7d"
+        channels: ["email"]
+    citations:
+      - url: "https://www.mass.gov/guides/buying-or-selling-property-with-a-septic-system"
+        title: "Buying or Selling Property with a Septic System | Mass.gov"
+      - url: "https://www.mass.gov/regulations/310-CMR-15000-septic-systems-title-5"
+        title: "310 CMR 15.000: Septic Systems (Title 5)"
+    notes: "Exemptions: (1) New/upgraded system with Certificate of Compliance within 2 years (3 years if pumped annually), (2) Transfer between immediate family members. If exempt, provide documentation. If not exempt, proceed with inspection."
+
+  - id: "title5_septic_inspection"
+    title: "Schedule and Complete Title 5 Septic Inspection"
+    category: property_specific
+    description: "Hire MA-certified Title 5 System Inspector to perform septic system inspection and submit report to local Board of Health"
+    mandatory: true
+    applies_if: "property.has_septic == true"
+    due: "Closing"
+    due_offset: "-90d"
+    owner_role: seller
+    vendor_type: "septic_inspector"
+    estimated_duration: "Find inspector 1-2 weeks; inspection 2-4 hours; report 1-2 weeks"
+    depends_on:
+      - "title5_septic_assessment"
+    reminders:
+      - offset: "-120d"
+        channels: ["email"]
+      - offset: "-90d"
+        channels: ["email"]
+      - offset: "-60d"
+        channels: ["email", "sms"]
+        priority: "high"
+      - offset: "-30d"
+        channels: ["email", "sms"]
+        priority: "high"
+    actions:
+      - type: "request_vendor"
+        vendor_type: "septic_inspector"
+    citations:
+      - url: "https://www.mass.gov/regulations/310-CMR-15000-septic-systems-title-5"
+        title: "310 CMR 15.000: Septic Systems (Title 5)"
+    notes: "Inspection must be within 2 years before transfer OR within 6 months after (if weather prevents pre-sale inspection). Seller must notify buyer in writing of Title 5 requirements. Inspector must be certified by MA DEP. Report submitted to local Board of Health."
+
+  - id: "title5_report_review"
+    title: "Review Title 5 Inspection Report"
+    category: property_specific
+    description: "Receive and review Title 5 inspection report from inspector; determine if system passed, conditionally passed, or failed"
+    mandatory: true
+    applies_if: "property.has_septic == true"
+    due: "Closing"
+    due_offset: "-75d"
+    owner_role: seller
+    depends_on:
+      - "title5_septic_inspection"
+    reminders:
+      - offset: "-80d"
+        channels: ["email"]
+      - offset: "-75d"
+        channels: ["email"]
+    notes: "Passing: System meets current standards. Conditional Pass: Minor repairs needed. Fail: System must be repaired or upgraded. Report valid for 2 years (3 years with annual pumping). Work with inspector and agent to understand findings."
+
+  - id: "title5_repairs"
+    title: "Complete Title 5 Septic Repairs or Upgrades"
+    category: property_specific
+    description: "Hire licensed contractor to perform required septic system repairs or upgrades as identified in Title 5 inspection report"
+    mandatory: false
+    applies_if: "property.has_septic == true"
+    due: "Closing"
+    due_offset: "-45d"
+    owner_role: seller
+    vendor_type: "septic_contractor"
+    estimated_duration: "Minor repairs: 1-2 weeks. Major upgrades: 4-8 weeks. Permitting adds time."
+    depends_on:
+      - "title5_report_review"
+    reminders:
+      - offset: "-60d"
+        channels: ["email"]
+      - offset: "-45d"
+        channels: ["email", "sms"]
+        priority: "high"
+      - offset: "-30d"
+        channels: ["email", "sms"]
+        priority: "high"
+    actions:
+      - type: "request_vendor"
+        vendor_type: "septic_contractor"
+    notes: "Only required if inspection failed or conditionally passed. Minor repairs (pumping, risers, covers) can be quick. Major upgrades (tank replacement, leach field) require permits from Board of Health and can take 6-8 weeks. Alternative: 6-month post-sale repair window if pre-approved by Board of Health and buyer agrees."
+
+  - id: "title5_reinspection"
+    title: "Schedule Title 5 Re-inspection (Post-Repair)"
+    category: property_specific
+    description: "Have original inspector return to verify repairs were completed correctly and system now passes"
+    mandatory: false
+    applies_if: "property.has_septic == true"
+    due: "Closing"
+    due_offset: "-30d"
+    owner_role: seller
+    depends_on:
+      - "title5_repairs"
+    reminders:
+      - offset: "-35d"
+        channels: ["email"]
+      - offset: "-30d"
+        channels: ["email", "sms"]
+    notes: "Only required if repairs were made. Re-inspection ensures system now meets standards. Some inspectors include one re-inspection in original fee."
+
+  - id: "title5_certificate"
+    title: "Obtain Certificate of Compliance from Board of Health"
+    category: compliance
+    description: "Receive Certificate of Compliance from local Board of Health after passing inspection"
+    mandatory: true
+    applies_if: "property.has_septic == true"
+    due: "Closing"
+    due_offset: "-14d"
+    owner_role: seller
+    depends_on:
+      - "title5_septic_inspection"
+    reminders:
+      - offset: "-21d"
+        channels: ["email"]
+      - offset: "-14d"
+        channels: ["email"]
+      - offset: "-7d"
+        channels: ["email", "sms"]
+        priority: "high"
+    notes: "Board of Health issues Certificate after reviewing passing inspection report. Required for closing. If system failed and using 6-month post-sale repair window, Certificate issued after closing. Coordinate with attorney and Board of Health."
+
+  # ========================================
+  # OFFER / PRE-P&S PHASE
+  # ========================================
+
+  # ========================================
+  # POST-P&S PHASE
+  # ========================================
+
+  # ========================================
+  # PRE-CLOSING PHASE (3-4 weeks out)
+  # ========================================
+
+  # ========================================
+  # FINAL WEEK BEFORE CLOSING
+  # ========================================
+
+  # ========================================
+  # ADDITIONAL SEPTIC/WELL-SPECIFIC TASKS
+  # ========================================
+
+  - id: "well_water_comprehensive_test"
+    category: property_specific
+    title: "Conduct Comprehensive Well Water Testing"
+    description: "Test well water for bacteria, nitrates, lead, arsenic, radon, and other contaminants"
+    mandatory: true
+    applies_if: "property.has_well"
+    due: "PS"
+    due_offset: "+10d"
+    owner_role: buyer
+    vendor_type: "well_inspector"
+    notes: "Test for: coliform bacteria, E. coli, nitrates/nitrites, lead, arsenic, radon in water, pH, hardness, iron, manganese. Use state-certified lab. Results needed for mortgage approval."
+
+  - id: "well_flow_test"
+    category: property_specific
+    title: "Perform Well Flow Rate and Recovery Test"
+    description: "Test well's gallons per minute and recovery rate"
+    mandatory: true
+    applies_if: "property.has_well"
+    due: "PS"
+    due_offset: "+10d"
+    owner_role: buyer
+    vendor_type: "well_inspector"
+    notes: "Minimum 3-5 GPM typically required. Test for sustained flow over 4 hours. Check pressure tank operation, pump condition, well depth and static water level."
+
+  - id: "septic_pumping_history"
+    category: property_specific
+    title: "Provide Septic Pumping and Maintenance Records"
+    description: "Document recent septic pumping and any maintenance/repairs"
+    mandatory: true
+    applies_if: "property.has_septic"
+    due: "PS"
+    due_offset: "+5d"
+    owner_role: seller
+    notes: "Provide: pumping receipts (last 3-5 years), repair records, system age, tank size, leach field location, any warranties. Tanks should be pumped every 2-3 years."
+
+  - id: "septic_location_diagram"
+    category: property_specific
+    title: "Provide Septic System Location Diagram"
+    description: "Document location of septic tank, distribution box, and leach field"
+    mandatory: true
+    applies_if: "property.has_septic"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: seller
+    notes: "Mark: tank location and access covers, distribution box, leach field boundaries, reserve area if designated. Include distances from well, property lines, structures."
+
+  - id: "well_septic_distance_verification"
+    category: property_specific
+    title: "Verify Well and Septic System Separation Distance"
+    description: "Confirm minimum 100-foot separation between well and septic"
+    mandatory: true
+    applies_if: "property.has_well && property.has_septic"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: vendor
+    notes: "Massachusetts requires minimum 100 feet between well and septic components. Greater distance may be required based on soil conditions. Verify neighbor's septic locations if close to property line."
+
+  - id: "septic_upgrade_reserve_area"
+    category: property_specific
+    title: "Identify Septic Reserve Area"
+    description: "Confirm location of reserve area for future septic system if required"
+    mandatory: false
+    applies_if: "property.has_septic"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: vendor
+    notes: "Many towns require designated reserve area for septic replacement. Area must be kept clear of structures, trees, driveways. Check with Board of Health for requirements."
+
+  - id: "well_head_protection"
+    category: property_specific
+    title: "Inspect Well Head Protection and Grading"
+    description: "Verify proper well head seal and surface water drainage"
+    mandatory: true
+    applies_if: "property.has_well"
+    due: "PS"
+    due_offset: "+10d"
+    owner_role: vendor
+    notes: "Check: well cap seal integrity, proper grading away from well, no surface water pooling, casing height above grade (minimum 12 inches), no cracks in casing."
+
+  - id: "septic_distribution_box_inspection"
+    category: property_specific
+    title: "Inspect Septic Distribution Box"
+    description: "Check distribution box for proper flow distribution to leach field"
+    mandatory: false
+    applies_if: "property.has_septic"
+    due: "PS"
+    due_offset: "+10d"
+    owner_role: vendor
+    notes: "If accessible, check: equal flow to all outlets, no blockages, structural integrity, proper leveling. Unequal distribution causes premature field failure."
+
+  - id: "water_treatment_system_transfer"
+    category: property_specific
+    title: "Transfer Water Treatment System Information"
+    description: "Provide details on any water softeners, filters, or treatment systems"
+    mandatory: false
+    applies_if: "property.has_well"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: seller
+    notes: "Include: system manuals, service contracts, salt/chemical sources, regeneration schedules, filter replacement schedules, UV light replacement dates if applicable."
+
+  - id: "septic_dos_donts_list"
+    category: property_specific
+    title: "Provide Septic System Do's and Don'ts"
+    description: "Educate buyer on proper septic system care"
+    mandatory: true
+    applies_if: "property.has_septic"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Provide list: what not to flush, grease disposal, garbage disposal limits, chemical restrictions, water conservation importance, vehicle traffic over field, tree planting restrictions."
+
+  - id: "well_pump_warranty_transfer"
+    category: property_specific
+    title: "Transfer Well Pump Warranty and Service Info"
+    description: "Provide well pump warranty and service contractor information"
+    mandatory: false
+    applies_if: "property.has_well"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Include: pump brand/model, installation date, warranty documentation, service contractor contact, pressure tank info, control box location, emergency shut-off location."
+
+  - id: "winter_water_system_prep"
+    category: property_specific
+    title: "Document Winter Water System Procedures"
+    description: "Provide winterization procedures for well and septic systems"
+    mandatory: false
+    applies_if: "property.has_well || property.has_septic"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Include: pipe insulation locations, heat tape operation, shut-off procedures for vacant periods, septic system winter care, well house heating if applicable."
+
+  - id: "private_road_maintenance"
+    category: property_specific
+    title: "Disclose Private Road Maintenance Agreement"
+    description: "Provide details of any private road maintenance obligations"
+    mandatory: false
+    applies_if: "property.on_private_road"
+    due: "Offer"
+    due_offset: "+1d"
+    owner_role: seller
+    notes: "Include: maintenance agreement, cost sharing formula, plowing arrangements, recent assessment history, upcoming road work, legal access rights."
+
+  - id: "propane_tank_status"
+    category: property_specific
+    title: "Document Propane Tank Ownership and Level"
+    description: "Clarify propane tank ownership (owned vs leased) and current level"
+    mandatory: false
+    applies_if: "property.heat_type == 'propane'"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: seller
+    notes: "Determine: tank ownership, lease transfer requirements, current propane level for closing adjustment, supplier contract, auto-delivery status, underground tank inspection if applicable."
+
+  - id: "septic_inspection_escrow"
+    category: property_specific
+    title: "Establish Septic Repair Escrow if Needed"
+    description: "Set up escrow account for septic repairs if Title 5 conditional pass"
+    mandatory: false
+    applies_if: "property.has_septic && septic.conditional_pass"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: buyer_attorney
+    notes: "If conditional pass: negotiate repair escrow (typically 1.5x estimated repair cost), establish timeline for repairs, specify licensed installer requirement, include inspection requirements."
+
+  - id: "well_agreement_neighboring"
+    category: property_specific
+    title: "Disclose Any Shared Well Agreements"
+    description: "Provide documentation of any shared well arrangements"
+    mandatory: false
+    applies_if: "property.has_shared_well"
+    due: "Offer"
+    due_offset: "+1d"
+    owner_role: seller
+    notes: "Include: well sharing agreement, maintenance cost allocation, access rights, decision-making process, liability provisions, backup water supply plans."
+
+  - id: "septic_easement_verification"
+    category: property_specific
+    title: "Verify Septic System Easements if Applicable"
+    description: "Confirm any septic easements on or from the property"
+    mandatory: false
+    applies_if: "property.has_septic"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: buyer_attorney
+    notes: "Check for: septic system extending onto neighbor's property, neighbor's system on this property, shared leach fields, access easements for pumping/maintenance."
+
+  - id: "water_rights_documentation"
+    category: property_specific
+    title: "Document Water Rights and Restrictions"
+    description: "Clarify any water rights, restrictions, or conservation requirements"
+    mandatory: false
+    applies_if: "property.has_well"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: buyer_attorney
+    notes: "Review: water rights documentation, any restrictions on water use, irrigation limitations, requirements during drought, grandfathered rights if applicable."
+
+  - id: "generator_septic_well_backup"
+    category: property_specific
+    title: "Explain Backup Power for Well and Septic"
+    description: "Document backup power capabilities for water and septic systems"
+    mandatory: false
+    applies_if: "(property.has_well || property.has_septic) && property.has_generator"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Explain: generator connection for well pump, septic pump alarm, transfer switch operation, manual pumping procedures if no generator, water storage capacity."
+
+  - id: "local_service_providers"
+    category: property_specific
+    title: "Provide Local Septic and Well Service Contacts"
+    description: "Share contact info for septic pumpers, well service, and water testing"
+    mandatory: true
+    applies_if: "property.has_septic || property.has_well"
+    due: "Closing"
+    due_offset: "0d"
+    owner_role: seller
+    notes: "Provide contacts for: septic pumping service, septic inspector, well pump service, water testing lab, water treatment service, emergency repair contractors."
+
+# End of template

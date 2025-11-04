@@ -1,0 +1,471 @@
+template_id: condo
+version: 2.0.0
+title: Condominium Unit - Enhanced
+description: Complete transaction checklist for condominium unit sales in Massachusetts. Includes condo-specific requirements like 6(d) certificate, HOA documentation, and comprehensive workflow management with 80+ tasks.
+property_types:
+- Condo
+created_date: '2025-10-30'
+author: MA Deal Room Team
+required_attributes:
+- property_type
+- state
+- year_built
+- ps_date
+- closing_date
+extends: base_transaction
+tasks:
+- id: condo_docs_gathering
+  category: hoa_condo
+  title: Gather Condominium Documents for Disclosure
+  description: Collect master deed, bylaws, trust documents, budget, recent meeting minutes, current reserve study, and capital improvement plans
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Listing
+  due_offset: +7d
+  owner_role: seller
+  depends_on: []
+  reminders:
+  - offset: +3d
+    channels:
+    - email
+  - offset: +7d
+    channels:
+    - email
+  notes: 'Contact HOA management company or board of trustees to request: master deed, declaration of trust, bylaws, rules & regulations, current budget, recent meeting minutes, reserve study, upcoming capital improvements, pet/rental policies. These will be needed for buyer''s lender and attorney.'
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a
+    title: M.G.L. Chapter 183A - Condominiums
+  priority: high
+- id: condo_questionnaire
+  category: hoa_condo
+  title: Complete Lender's Condo Questionnaire
+  description: HOA management or board completes and returns lender's condominium questionnaire
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +14d
+  owner_role: vendor
+  vendor_type: hoa_management
+  estimated_duration: HOA typically has 10-14 days to complete
+  depends_on: []
+  reminders:
+  - offset: +7d
+    channels:
+    - email
+  - offset: +14d
+    channels:
+    - email
+  - offset: +21d
+    channels:
+    - email
+    - sms
+  actions:
+  - type: request_vendor
+    vendor_type: hoa_management
+  notes: 'Buyer''s lender requires questionnaire to verify: HOA is properly insured, reserve fund adequacy, no pending litigation, owner-occupancy ratio, budget status, FHA/VA approval if applicable. Delays in questionnaire can delay loan commitment. Fee typically $100-$300.'
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a/Section6
+    title: M.G.L. Chapter 183A, Section 6 - Resale Documentation Requirements
+  priority: high
+- id: condo_6d_request
+  category: hoa_condo
+  title: Request Condo 6(d) Certificate from HOA
+  description: Seller's attorney requests 6(d) certificate (certification of unpaid common expenses) from HOA board or management
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -14d
+  owner_role: seller_attorney
+  vendor_type: hoa_management
+  estimated_duration: HOA has 10 days to respond by law
+  depends_on: []
+  reminders:
+  - offset: -21d
+    channels:
+    - email
+  - offset: -14d
+    channels:
+    - email
+  - offset: -7d
+    channels:
+    - email
+    - sms
+  actions:
+  - type: request_vendor
+    vendor_type: hoa_management
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a/Section6
+    title: M.G.L. Chapter 183A, Section 6(d)
+  notes: 'HOA must issue certificate within 10 days of written request per M.G.L. c.183A §6(d). Certificate shows unpaid condo fees, special assessments, late fees, attorney fees, fines. Lender requires ''clean'' 6(d) (no unpaid amounts). Super-lien provision: condo liens have priority over first mortgage for up to 6 months unpaid fees + attorney fees. Fee typically $100-$300.'
+  priority: high
+- id: condo_6d_resolve
+  category: hoa_condo
+  title: Resolve Any Unpaid Condo Fees (if 'Dirty' 6(d))
+  description: Pay off any unpaid condo fees, assessments, or charges shown on 6(d) certificate
+  mandatory: false
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  depends_on:
+  - condo_6d_request
+  reminders:
+  - offset: -5d
+    channels:
+    - email
+    - sms
+  - offset: -3d
+    channels:
+    - email
+    - sms
+    priority: high
+  - offset: -1d
+    channels:
+    - email
+    - sms
+    priority: high
+  notes: Only required if 6(d) certificate shows unpaid amounts ('dirty' 6(d)). Lender will not close with unpaid HOA fees. Amounts typically paid at closing via attorney escrow, but HOA must confirm payment before issuing clean certificate.
+  priority: critical
+  estimated_duration: Address issues within contingency period (typically 5-10 days)
+- id: condo_resale_package
+  category: hoa_condo
+  title: Provide Condo Resale Package to Buyer
+  description: Deliver complete package of condo documents to buyer's attorney for review
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -14d
+  owner_role: seller_attorney
+  depends_on:
+  - condo_docs_gathering
+  reminders:
+  - offset: -21d
+    channels:
+    - email
+  - offset: -14d
+    channels:
+    - email
+  - offset: -7d
+    channels:
+    - email
+  notes: 'Package includes: master deed, declaration of trust, bylaws, rules & regulations, recent meeting minutes (6-12 months), current budget, reserve study, insurance certificates (master policy), list of capital improvements/deferred maintenance, pet/rental policies. Buyer''s attorney and lender review for issues before closing.'
+  priority: high
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a/Section6
+    title: M.G.L. Chapter 183A, Section 6 - Required Resale Documents
+  estimated_duration: HOA must provide within 10 business days (M.G.L. requirement)
+- id: hoa_transfer_notification
+  category: hoa_condo
+  title: Notify HOA of Pending Sale and Transfer
+  description: Inform HOA management or board of upcoming ownership transfer; obtain move-in instructions for buyer
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  depends_on: []
+  reminders:
+  - offset: -14d
+    channels:
+    - email
+  - offset: -7d
+    channels:
+    - email
+  notes: 'Provide HOA with: closing date, buyer''s name and contact info, buyer''s attorney name. Obtain: building access instructions (key fobs, parking permits), move-in/move-out rules, elevator reservation procedures, trash/recycling info. Some HOAs charge transfer fees or require move deposits.'
+  priority: high
+- id: hoa_financials_review
+  category: hoa_condo
+  title: Review HOA Financial Statements and Reserves
+  description: Analyze HOA budget, reserve study, and financial health indicators for buyer
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +7d
+  assignee_role: BuyerAgent
+  depends_on:
+  - condo_docs_gathering
+  reminders:
+  - offset: +5d
+    channels:
+    - email
+  notes: 'Review: Reserve fund adequacy (aim for 10%+ of annual budget), upcoming special assessments, delinquency rates (under 5% is good), pending litigation, insurance coverage adequacy. Red flags: low reserves, high delinquencies, deferred maintenance.'
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a/Section6
+    title: M.G.L. Chapter 183A, Section 6 - Financial Statement Requirements
+  priority: high
+  estimated_duration: Review within 5-7 days of receipt; part of condo contingency period
+  owner_role: seller
+- id: hoa_meeting_minutes_review
+  category: hoa_condo
+  title: Review Recent HOA Meeting Minutes
+  description: Examine last 6-12 months of HOA board meeting minutes for issues or planned changes
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +10d
+  assignee_role: BuyerAgent
+  depends_on:
+  - condo_docs_gathering
+  notes: 'Look for: upcoming assessments, major repairs planned, disputes between owners, rule changes, management company issues, insurance claims, litigation discussions.'
+  priority: high
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a
+    title: M.G.L. Chapter 183A - Condominium Meeting Minutes Requirements
+  estimated_duration: Review within 3-5 business days
+  owner_role: seller
+- id: condo_master_insurance_review
+  category: hoa_condo
+  title: Review HOA Master Insurance Policy
+  description: Verify adequate master policy coverage and identify what buyer's HO-6 policy must cover
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +14d
+  assignee_role: BuyerAgent
+  depends_on:
+  - condo_docs_gathering
+  notes: 'Confirm: Building coverage adequate for replacement cost, liability limits sufficient, deductible amounts (buyer may need loss assessment coverage), what''s covered (walls-in vs all-in coverage).'
+  priority: high
+  estimated_duration: Review within 5 business days of receipt
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a/Section5
+    title: M.G.L. Chapter 183A, Section 5 - Master Insurance Requirements
+  owner_role: seller
+- id: hoa_rental_restrictions_check
+  category: hoa_condo
+  title: Verify HOA Rental and Occupancy Restrictions
+  description: Confirm any limitations on rentals, Airbnb, or owner-occupancy requirements
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +5d
+  assignee_role: BuyerAgent
+  depends_on:
+  - condo_docs_gathering
+  notes: 'Check for: Rental caps (may affect financing), minimum lease terms, Airbnb/short-term rental bans, owner-occupancy requirements, waiting periods before renting. FHA requires 51% owner-occupied.'
+  priority: high
+  citations:
+  - url: https://malegislature.gov/Laws/GeneralLaws/PartII/TitleI/Chapter183a/Section10
+    title: M.G.L. Chapter 183A, Section 10 - Condominium Rental Restrictions
+  owner_role: seller
+- id: parking_storage_verification
+  category: hoa_condo
+  title: Confirm Parking and Storage Unit Assignments
+  description: Verify which parking spaces and storage units convey with the unit sale
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +7d
+  owner_role: agent
+  notes: 'Clarify: Assigned vs deeded parking, guest parking availability, storage unit location and size, bike storage, any separate deeds or fees. Document in P&S agreement.'
+  priority: high
+  depends_on: []
+- id: hoa_transfer_fee_disclosure
+  category: hoa_condo
+  title: Disclose HOA Transfer Fees and Move-In Requirements
+  description: Inform buyer of any HOA transfer fees, move-in fees, or deposits required
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Offer
+  due_offset: +1d
+  owner_role: agent
+  notes: 'Disclose: Transfer/capital contribution fees, move-in/out fees or deposits, elevator reservation requirements, insurance certificate requirements for movers, approved moving hours.'
+  priority: high
+  depends_on: []
+- id: pet_policy_disclosure
+  category: hoa_condo
+  title: Confirm and Disclose HOA Pet Policies
+  description: Verify pet restrictions and inform buyer of any limitations
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Offer
+  due_offset: +2d
+  owner_role: agent
+  notes: 'Check: Number of pets allowed, size/weight restrictions, breed restrictions, pet deposits or fees, designated pet areas, noise policies.'
+  priority: high
+  depends_on: []
+- id: upcoming_assessments_disclosure
+  category: hoa_condo
+  title: Disclose Any Known Upcoming Special Assessments
+  description: Inform buyer of any planned or discussed special assessments
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Offer
+  due_offset: +1d
+  owner_role: seller
+  notes: 'Disclose: Approved but unpaid assessments, proposed assessments under discussion, major projects being planned, recent history of assessments.'
+  priority: high
+  depends_on: []
+- id: building_violations_check
+  category: compliance
+  title: Check for Building Code Violations or Citations
+  description: Verify no outstanding building violations that could affect the sale
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +14d
+  owner_role: buyer_attorney
+  notes: 'Check with: City/town building department, fire department, health department. Look for: Open permits, code violations, certificate of occupancy issues.'
+  priority: critical
+  depends_on: []
+- id: fha_va_approval_status
+  category: financing
+  title: Verify FHA/VA Approval Status if Applicable
+  description: Confirm condominium is approved for FHA/VA financing if buyer using these loans
+  mandatory: false
+  applies_if: property.type == 'Condo' && (loan.type == 'FHA' || loan.type == 'VA')
+  due: PS
+  due_offset: +3d
+  assignee_role: BuyerAgent
+  notes: 'Check HUD''s approved condo list. If not approved, determine if eligible for spot approval. Requirements: 51% owner-occupied, adequate insurance, no litigation, healthy reserves.'
+  priority: high
+  depends_on: []
+  owner_role: agent
+- id: balcony_deck_inspection
+  category: inspection
+  title: Inspect Private Balcony/Deck/Patio if Present
+  description: Verify condition and maintenance responsibility for any private outdoor space
+  mandatory: false
+  applies_if: property.type == 'Condo' && property.has_balcony
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Check: Structural condition, water damage/drainage, railings meet code, who maintains (owner vs HOA), any restrictions on use/modifications.'
+  priority: normal
+  depends_on: []
+- id: in_unit_laundry_verification
+  category: property_specific
+  title: Verify In-Unit Laundry Hookups and Permissions
+  description: Confirm if unit has or can have washer/dryer
+  mandatory: false
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +5d
+  assignee_role: BuyerAgent
+  notes: 'Verify: Existing hookups and venting, HOA rules on in-unit laundry, shared laundry facilities available, any restrictions on installation.'
+  priority: normal
+  depends_on: []
+  owner_role: agent
+- id: noise_assessment
+  category: property_specific
+  title: Assess Noise Levels and Sound Transmission
+  description: Evaluate noise from neighbors and common areas during inspection
+  mandatory: false
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Check: Sound transmission between units, noise from common areas/elevators, exterior noise (traffic, trains), quiet hours enforcement.'
+  priority: normal
+  depends_on: []
+- id: common_area_condition
+  category: inspection
+  title: Evaluate Common Area Maintenance and Condition
+  description: Assess condition of hallways, lobby, elevators, and other common areas
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +7d
+  assignee_role: BuyerAgent
+  notes: 'Evaluate: Cleanliness and maintenance level, deferred maintenance signs, security features, lighting adequacy, accessibility compliance.'
+  priority: normal
+  depends_on: []
+  owner_role: agent
+- id: hvac_responsibility_clarification
+  category: hoa_condo
+  title: Clarify HVAC System Ownership and Maintenance
+  description: Determine what HVAC components are owner vs HOA responsibility
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +10d
+  assignee_role: BuyerAgent
+  notes: 'Clarify: Who owns/maintains heating and cooling systems, filter replacement responsibility, duct cleaning requirements, any shared systems.'
+  priority: high
+  depends_on: []
+  owner_role: seller
+- id: window_responsibility_check
+  category: hoa_condo
+  title: Confirm Window and Door Maintenance Responsibility
+  description: Verify who is responsible for exterior windows and doors
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +10d
+  assignee_role: BuyerAgent
+  notes: 'Determine: Window replacement responsibility, screen maintenance, sliding door tracks, weather stripping, any HOA standards for replacements.'
+  priority: high
+  depends_on: []
+  owner_role: seller
+- id: mailbox_package_procedures
+  category: hoa_condo
+  title: Understand Mail and Package Delivery Procedures
+  description: Learn how mail and packages are handled in the building
+  mandatory: false
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  notes: 'Provide info on: Mailbox location and key, package receiving procedures, any package rooms or lockers, doorman/concierge services if applicable.'
+  priority: high
+  depends_on: []
+- id: trash_recycling_procedures
+  category: hoa_condo
+  title: Document Trash and Recycling Procedures
+  description: Provide buyer with building's waste management procedures
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -3d
+  owner_role: seller
+  notes: 'Include: Trash chute or room location, recycling requirements, bulk item disposal, hazardous waste procedures, pickup schedules if applicable.'
+  priority: high
+  depends_on: []
+- id: guest_parking_info
+  category: hoa_condo
+  title: Provide Guest Parking Information
+  description: Document guest parking availability and procedures
+  mandatory: false
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: -3d
+  owner_role: seller
+  notes: 'Include: Guest parking locations, permit or validation procedures, time limits, overnight parking rules, visitor registration if required.'
+  priority: high
+  depends_on: []
+- id: building_amenities_access
+  category: hoa_condo
+  title: Transfer Access to Building Amenities
+  description: Ensure buyer has access information for all building amenities
+  mandatory: false
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: +0d
+  owner_role: seller
+  notes: 'Provide: Gym access cards/codes, pool keys or schedules, roof deck access, community room reservation procedures, any amenity fees.'
+  priority: high
+  depends_on: []
+- id: emergency_contacts_list
+  category: hoa_condo
+  title: Provide Building Emergency Contact Information
+  description: Give buyer list of important building contacts
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: Closing
+  due_offset: +0d
+  owner_role: seller
+  notes: 'Include: Property management contact, emergency maintenance number, doorman/concierge (if applicable), HOA board president, utility shut-off locations.'
+  priority: high
+  depends_on: []
+- id: renovation_rules_disclosure
+  category: hoa_condo
+  title: Disclose HOA Renovation and Modification Rules
+  description: Inform buyer of any restrictions on unit modifications
+  mandatory: true
+  applies_if: property.type == 'Condo'
+  due: PS
+  due_offset: +5d
+  owner_role: agent
+  notes: 'Disclose: Approval requirements for renovations, permitted work hours, contractor insurance requirements, flooring restrictions, plumbing/electrical limitations.'
+  priority: high
+  depends_on: []

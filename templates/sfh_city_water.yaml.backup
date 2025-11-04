@@ -1,0 +1,697 @@
+# MA Deal Room Template: Single-Family Home (City Water/Sewer)
+# Version: 2.0.0
+# Property Type: Single-family residential on municipal water and sewer
+# Last Updated: 2025-10-30
+# Enhanced with comprehensive workflow tasks
+
+template_id: "sfh_city_water"
+version: "2.0.0"
+title: "Single-Family Home (City Water/Sewer) - Enhanced"
+description: "Complete transaction checklist for single-family homes on municipal water and sewer systems. Includes comprehensive workflow management with 80+ tasks plus SFH-specific requirements."
+property_types:
+  - "SFH"
+created_date: "2025-10-30"
+author: "MA Deal Room Team"
+
+required_attributes:
+  - "property_type"
+  - "state"
+  - "year_built"
+  - "ps_date"
+  - "closing_date"
+
+extends: "base_transaction"  # Inherits all base tasks
+
+tasks:
+  # ========================================
+  # PRE-LISTING / LISTING PHASE
+  # ========================================
+
+  - id: "agency_disclosure"
+    category: compliance
+    title: "Provide Agency Disclosure Form"
+    description: "Present Massachusetts Mandatory Licensee-Consumer Relationship Disclosure before entering into contract with seller"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "FirstMeeting"
+    due_offset: "0d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "-7d"
+        channels: ["email"]
+      - offset: "-1d"
+        channels: ["email"]
+    citations:
+      - url: "https://www.mass.gov/doc/real-estate-board-agency-disclosure-form-english/download"
+        title: "MA Mandatory Licensee-Consumer Relationship Disclosure"
+    notes: "Must be presented electronically or in person before entering into contract with consumer (2023 updated requirement). Not required at open houses."
+
+  # ========================================
+  # OFFER / PRE-P&S PHASE
+  # ========================================
+
+  - id: "lead_paint_disclosure"
+    category: compliance
+    title: "Property Transfer Lead Paint Notification"
+    description: "Provide EPA lead paint disclosure and Massachusetts Property Transfer Lead Paint Notification for homes built before 1978"
+    mandatory: true
+    applies_if: "property.year_built < 1978"
+    due: "Offer"
+    due_offset: "-2d"
+    owner_role: seller
+    depends_on: []
+    reminders:
+      - offset: "-14d"
+        channels: ["email"]
+      - offset: "-7d"
+        channels: ["email"]
+      - offset: "-2d"
+        channels: ["email", "sms"]
+        priority: "high"
+    actions:
+      - type: "send_form"
+        form_type: "lead_paint_disclosure"
+    citations:
+      - url: "https://www.mass.gov/info-details/property-transfer-lead-paint-notification"
+        title: "Property Transfer Lead Paint Notification | Mass.gov"
+      - url: "https://www.mass.gov/doc/105-cmr-460-lead-poisoning-prevention-and-control/download"
+        title: "105 CMR 460.720 - Property Transfer Lead Notification"
+    notes: "Federal EPA penalties up to $11,000 per error. Buyer has right to 10-day inspection period (can be waived). Provide EPA pamphlet 'Protect Your Family from Lead in Your Home'."
+
+  # ========================================
+  # POST-P&S PHASE
+  # ========================================
+
+  - id: "loan_commitment_track"
+    category: financing
+    title: "Monitor Buyer Loan Commitment Status"
+    description: "Check with buyer's agent regarding loan application progress and commitment timeline"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "PS"
+    due_offset: "+21d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "+14d"
+        channels: ["email"]
+      - offset: "+21d"
+        channels: ["email"]
+      - offset: "+28d"
+        channels: ["email", "sms"]
+        priority: "high"
+    notes: "Typical loan commitment arrives 3-4 weeks after P&S. Mortgage contingency usually 30-45 days from P&S. If delayed, buyer may request extension (must be in writing)."
+
+  - id: "loan_commitment_deadline"
+    category: financing
+    title: "Confirm Loan Commitment Received or Extension Granted"
+    description: "Verify buyer's lender has issued commitment letter or buyer has requested written extension"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "PS"
+    due_offset: "+35d"
+    owner_role: agent
+    depends_on:
+      - "loan_commitment_track"
+    reminders:
+      - offset: "-7d"
+        channels: ["email"]
+      - offset: "-3d"
+        channels: ["email", "sms"]
+      - offset: "-1d"
+        channels: ["email", "sms"]
+        priority: "high"
+    notes: "Mortgage contingency typically expires 30-45 days after P&S. Extension requests must be in writing. If commitment not received and no extension, seller may have option to terminate P&S."
+
+  - id: "appraisal_track"
+    category: financing
+    title: "Monitor Property Appraisal Progress"
+    description: "Confirm appraisal has been ordered and track completion status"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "+7d"
+        channels: ["email"]
+      - offset: "+14d"
+        channels: ["email"]
+      - offset: "+21d"
+        channels: ["email"]
+    notes: "Appraisal usually ordered 1-2 weeks after P&S, completed 2-3 weeks after P&S. Ensure property shows well for appraiser."
+
+  - id: "appraisal_value_check"
+    category: financing
+    title: "Verify Appraisal Supports Sales Price"
+    description: "Confirm appraisal came in at or above sales price; address low appraisal if necessary"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "PS"
+    due_offset: "+21d"
+    owner_role: agent
+    depends_on:
+      - "appraisal_track"
+    reminders:
+      - offset: "+21d"
+        channels: ["email"]
+      - offset: "+25d"
+        channels: ["email"]
+    notes: "Low appraisal may require: buyer bringing additional cash, seller reducing price, or renegotiation. Act quickly to resolve."
+
+  - id: "home_inspection_schedule"
+    category: inspection
+    title: "Coordinate Home Inspection Access"
+    description: "Work with buyer's agent to schedule home inspection and provide property access"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "+2d"
+        channels: ["email"]
+      - offset: "+5d"
+        channels: ["email"]
+      - offset: "+7d"
+        channels: ["email"]
+    notes: "Inspection contingency typically 7-15 days from P&S. Ensure utilities are on and property is accessible."
+
+  - id: "home_inspection_response"
+    category: inspection
+    title: "Respond to Inspection Report Requests"
+    description: "Review buyer's inspection report and negotiate response (repairs, credits, or price adjustment)"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "PS"
+    due_offset: "+12d"
+    owner_role: seller
+    depends_on:
+      - "home_inspection_schedule"
+    reminders:
+      - offset: "+10d"
+        channels: ["email"]
+      - offset: "+12d"
+        channels: ["email", "sms"]
+    notes: "Response typically due within a few days of receiving report. Options: make repairs, offer credit, reduce price, or decline (buyer may have right to terminate)."
+
+  # ========================================
+  # PRE-CLOSING PHASE (3-4 weeks out)
+  # ========================================
+
+  - id: "municipal_lien"
+    category: title_work
+    title: "Request Municipal Lien Certificate"
+    description: "Attorney to order municipal lien certificate from city/town tax collector"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-21d"
+    owner_role: buyer_attorney
+    depends_on: []
+    reminders:
+      - offset: "-28d"
+        channels: ["email"]
+      - offset: "-21d"
+        channels: ["email"]
+    citations:
+      - url: "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter60/Section23"
+        title: "M.G.L. Chapter 60, Section 23 - Municipal Lien Certificates"
+    notes: "Tax collector has 10 days to issue (excluding weekends/holidays). Certificate valid for 150 days when recorded. Fee typically $25-$50. Shows all unpaid taxes, assessments, water charges."
+
+  - id: "water_final_reading"
+    category: property_specific
+    title: "Order Final Water Reading"
+    description: "Contact municipal water department to schedule final meter reading for closing"
+    mandatory: false
+    applies_if: "property.city IN ['Boston', 'Lynn', 'Lawrence', 'Haverhill']"
+    due: "Closing"
+    due_offset: "-28d"
+    owner_role: seller
+    depends_on: []
+    reminders:
+      - offset: "-35d"
+        channels: ["email"]
+      - offset: "-28d"
+        channels: ["email"]
+      - offset: "-21d"
+        channels: ["email", "sms"]
+    citations:
+      - url: "https://www.bwsc.org/residential-customers/services/buying-or-selling-property"
+        title: "Buying or Selling Property | Boston Water and Sewer Commission"
+    notes: "Required in Boston, Lynn, Lawrence, Haverhill (except condos). Boston requires ~2 weeks processing time. Day-of-closing water bill is NOT sufficient due to billing backlogs. Unpaid water becomes municipal lien."
+
+  - id: "smoke_co_inspection"
+    category: compliance
+    title: "Schedule Smoke & CO Detector Inspection"
+    description: "Contact local fire department to schedule certificate of compliance inspection for smoke and carbon monoxide detectors"
+    mandatory: true
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "-21d"
+    owner_role: seller
+    vendor_type: "fire_dept_smoke_cert"
+    estimated_duration: "Schedule 2-3 weeks ahead; inspection takes 30-45 minutes"
+    depends_on: []
+    reminders:
+      - offset: "-30d"
+        channels: ["email"]
+      - offset: "-21d"
+        channels: ["email"]
+      - offset: "-14d"
+        channels: ["email", "sms"]
+    actions:
+      - type: "request_vendor"
+        vendor_type: "fire_dept_smoke_cert"
+    citations:
+      - url: "https://www.mass.gov/doc/consumer-guide-to-smoke-detectors-when-selling-home/download"
+        title: "Consumer Guide to Smoke Detectors When Selling Your Home"
+      - url: "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter148/Section26F"
+        title: "M.G.L. c.148 §26F - Smoke Detector Requirements"
+      - url: "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter148/Section26F1/2"
+        title: "M.G.L. c.148 §26F½ - Carbon Monoxide Alarm Requirements"
+    notes: "Smoke detectors: Required for pre-1975 homes. CO alarms: ALL residences. Certificate valid 60 days. Fee typically $50-$100 per municipality. Some towns have online scheduling."
+
+  - id: "smoke_co_compliance"
+    category: compliance
+    title: "Obtain Smoke & CO Certificate of Compliance"
+    description: "Receive certificate from fire department after successful inspection"
+    mandatory: true
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "-14d"
+    owner_role: seller
+    depends_on:
+      - "smoke_co_inspection"
+    reminders:
+      - offset: "-10d"
+        channels: ["email"]
+      - offset: "-7d"
+        channels: ["email"]
+      - offset: "-3d"
+        channels: ["email", "sms"]
+        priority: "high"
+    notes: "Must have certificate at closing. If inspection fails, purchase and install required detectors and schedule re-inspection. Certificate valid for 60 days from inspection date."
+
+  - id: "insurance_track"
+    category: pre_closing
+    title: "Confirm Buyer Obtained Homeowners Insurance"
+    description: "Verify buyer has secured homeowners insurance policy or binder required by lender"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-21d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "-21d"
+        channels: ["email"]
+      - offset: "-14d"
+        channels: ["email"]
+      - offset: "-7d"
+        channels: ["email"]
+    notes: "Lender requires proof of insurance before releasing funds. Policy must show lender as mortgagee. Some properties difficult to insure (old roof, outdated systems). Insurance issues can delay closing."
+
+  - id: "clear_to_close_confirm"
+    category: pre_closing
+    title: "Confirm Lender Clear to Close"
+    description: "Verify buyer's lender has issued 'clear to close' and final Closing Disclosure delivered"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-5d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "-5d"
+        channels: ["email"]
+      - offset: "-3d"
+        channels: ["email", "sms"]
+      - offset: "-2d"
+        channels: ["email", "sms"]
+        priority: "high"
+    notes: "Final underwriting must be complete. Closing Disclosure delivered to buyer 3 business days before closing. Funding confirmed. If not received 3 days before closing, investigate potential delays immediately."
+
+  # ========================================
+  # FINAL WEEK BEFORE CLOSING
+  # ========================================
+
+  - id: "utilities_transfer"
+    category: pre_closing
+    title: "Coordinate Utility Account Transfers"
+    description: "Schedule final readings and account closures for electric, gas, water, internet, etc. as of closing date"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: seller
+    depends_on: []
+    reminders:
+      - offset: "-14d"
+        channels: ["email"]
+      - offset: "-7d"
+        channels: ["email"]
+    notes: "Contact utility companies to schedule final readings as of closing date. Provide closing date and new owner information. Keep utilities on through closing day for final walkthrough."
+
+  - id: "attorney_docs_review"
+    category: pre_closing
+    title: "Review Closing Documents with Attorney"
+    description: "Meet with attorney to review HUD-1, deed, payoff statements, and all closing documents"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: seller
+    depends_on: []
+    reminders:
+      - offset: "-14d"
+        channels: ["email"]
+      - offset: "-7d"
+        channels: ["email"]
+      - offset: "-3d"
+        channels: ["email"]
+    notes: "Review estimated closing costs, net proceeds, any liens to be discharged, mortgage payoff amounts. Clarify any questions before closing day."
+
+  - id: "final_walkthrough_schedule"
+    category: pre_closing
+    title: "Schedule Final Walkthrough"
+    description: "Coordinate with buyer's agent for final walkthrough 24-48 hours before closing"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: agent
+    depends_on: []
+    reminders:
+      - offset: "-5d"
+        channels: ["email"]
+      - offset: "-3d"
+        channels: ["email"]
+    notes: "Typically scheduled 24-48 hours before closing. Buyer verifies property condition unchanged, agreed repairs completed, property vacant and broom clean."
+
+  - id: "property_vacant_clean"
+    category: pre_closing
+    title: "Ensure Property Vacant and Broom Clean"
+    description: "Remove all belongings, clean property, complete any agreed-upon repairs, and prepare for final walkthrough"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-1d"
+    owner_role: seller
+    depends_on: []
+    reminders:
+      - offset: "-7d"
+        channels: ["email"]
+      - offset: "-3d"
+        channels: ["email"]
+      - offset: "-1d"
+        channels: ["email", "sms"]
+    notes: "Property must be vacant (unless negotiated otherwise), swept clean, all trash removed. Complete all negotiated repairs. Leave appliances/fixtures that convey. Address any last-minute issues immediately."
+
+  - id: "keys_docs_ready"
+    category: pre_closing
+    title: "Prepare Keys, Manuals, and Access Information"
+    description: "Gather all keys, garage remotes, alarm codes, appliance manuals, HOA documents, and other materials for buyer"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-1d"
+    owner_role: seller
+    depends_on: []
+    reminders:
+      - offset: "-3d"
+        channels: ["email"]
+      - offset: "-1d"
+        channels: ["email"]
+    notes: "Include: house keys, garage door remotes, alarm codes/instructions, appliance manuals, warranty information, HOA rules/contacts, paint colors, contractor contacts for recent work."
+
+  - id: "final_walkthrough_complete"
+    category: pre_closing
+    title: "Complete Final Walkthrough Successfully"
+    description: "Buyer completes final walkthrough and confirms property is ready for closing"
+    mandatory: true
+    applies_if: "property.state == 'MA'"
+    due: "Closing"
+    due_offset: "-1d"
+    owner_role: seller
+    depends_on:
+      - "final_walkthrough_schedule"
+      - "property_vacant_clean"
+    reminders:
+      - offset: "-1d"
+        channels: ["email", "sms"]
+    notes: "Address any issues discovered during walkthrough immediately. Seller should be available to resolve problems. Serious issues could delay closing."
+
+  # ========================================
+  # ADDITIONAL SFH-SPECIFIC TASKS
+  # ========================================
+
+  - id: "property_survey_review"
+    category: property_specific
+    description: "Obtain and review property survey showing boundaries, easements, and encroachments"
+    mandatory: true
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: buyer_attorney
+    notes: "Review for: boundary lines, easements, encroachments, setback compliance, right-of-ways, flood zone designation. Order new survey if none exists or if existing is over 10 years old."
+
+  - id: "roof_inspection"
+    category: property_specific
+    description: "Assess roof condition, age, and remaining life expectancy"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Document: roof age, material type, visible damage, recent repairs, warranty transfers if applicable. Consider specialist inspection if roof over 15 years old."
+
+  - id: "basement_water_inspection"
+    category: property_specific
+    description: "Check basement for signs of water problems or moisture issues"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_basement"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Look for: water stains, efflorescence, musty odors, sump pump condition, foundation cracks, proper grading. Document any water mitigation systems."
+
+  - id: "garage_inspection"
+    category: property_specific
+    description: "Check garage structure and test automatic door openers"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_garage"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Test: door openers and safety sensors, check structural condition, verify electrical outlets, note storage systems that convey."
+
+  - id: "yard_maintenance_transfer"
+    category: property_specific
+    description: "Provide information about lawn care, sprinkler systems, and landscaping"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: seller
+    notes: "Include: sprinkler system operation and winterization, lawn care schedule, tree/shrub care requirements, snow removal responsibilities, any landscape service contracts."
+
+  - id: "pool_spa_inspection"
+    category: property_specific
+    description: "Comprehensive inspection of pool, spa, and related equipment"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_pool"
+    due: "PS"
+    due_offset: "+10d"
+    owner_role: buyer
+    vendor_type: "pool_inspector"
+    notes: "Inspect: pool structure, equipment condition, safety compliance, cover condition, heater function. Transfer any service contracts or warranties."
+
+  - id: "fence_boundary_verification"
+    category: property_specific
+    description: "Confirm fences are within property lines and identify ownership"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: buyer_attorney
+    notes: "Compare fence locations to survey, identify shared fence responsibilities, note any encroachments, verify compliance with local ordinances."
+
+  - id: "shed_outbuilding_inspection"
+    category: property_specific
+    description: "Check condition of any sheds, barns, or detached structures"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_outbuildings"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Verify: structures are on property, permitted if required, condition assessment, what contents convey with sale, any electrical service."
+
+  - id: "driveway_walkway_condition"
+    category: property_specific
+    description: "Evaluate condition of paved surfaces and drainage"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Check for: cracks, settling, drainage issues, ice dam potential, trip hazards. Note any shared driveway agreements or easements."
+
+  - id: "exterior_paint_siding_evaluation"
+    category: property_specific
+    description: "Assess exterior surfaces for maintenance needs"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Look for: peeling paint (lead paint concern if pre-1978), siding damage, rot, pest damage, caulking condition, trim issues."
+
+  - id: "attic_insulation_ventilation"
+    category: property_specific
+    description: "Check attic for proper insulation and ventilation"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Assess: insulation R-value, ventilation adequacy, moisture/mold issues, pest evidence, structural issues, ice dam prevention."
+
+  - id: "chimney_fireplace_inspection"
+    category: property_specific
+    description: "Evaluate condition of chimney and fireplace if present"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_fireplace"
+    due: "PS"
+    due_offset: "+10d"
+    owner_role: buyer
+    vendor_type: "chimney_inspector"
+    notes: "Check: chimney structural condition, flue lining, damper operation, firebox condition, chimney cap, recent cleaning records."
+
+  - id: "tree_hazard_assessment"
+    category: property_specific
+    description: "Evaluate large trees near house for potential hazards"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    notes: "Look for: dead/diseased trees, overhanging branches, proximity to house/power lines, root damage to foundation/pipes. Consider arborist evaluation for concerning trees."
+
+  - id: "security_system_transfer"
+    category: property_specific
+    description: "Handle transfer of security system and monitoring service"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_security"
+    due: "Closing"
+    due_offset: "-7d"
+    owner_role: seller
+    notes: "Determine: owned vs leased equipment, transfer monitoring contract, provide codes and instructions, update emergency contacts."
+
+  - id: "neighborhood_disclosure"
+    category: property_specific
+    description: "Share relevant neighborhood information with buyer"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "-14d"
+    owner_role: seller
+    notes: "Include: school bus stops, trash pickup schedule, snow plow routes, neighborhood associations (not HOA), local service providers, any known planned developments."
+
+  - id: "utility_location_documentation"
+    category: property_specific
+    description: "Provide location of all utility shut-offs and breaker panels"
+    mandatory: true
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Document: main water shut-off, gas shut-off, electrical panel, individual shut-offs, water heater, HVAC emergency switches, septic/well controls if applicable."
+
+  - id: "seasonal_equipment_transfer"
+    category: property_specific
+    description: "Provide seasonal equipment and maintenance instructions"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "0d"
+    owner_role: seller
+    notes: "Include: snow blower, lawn mower (if conveying), winterization instructions, sprinkler system controls, pool closing/opening procedures, storm windows/screens."
+
+  - id: "warranty_transfer_package"
+    category: property_specific
+    description: "Gather all applicable warranties and transfer documents"
+    mandatory: true
+    applies_if: "property.type == 'SFH'"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Include: appliance warranties, roof warranty, HVAC service contracts, pest control contracts, home warranty if purchased, any contractor warranties for recent work."
+
+  - id: "radon_testing"
+    category: property_specific
+    description: "Test for radon gas levels in basement/lower level"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_basement"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    vendor_type: "radon_inspector"
+    notes: "EPA action level is 4.0 pCi/L. If elevated, negotiate mitigation system installation. Massachusetts has moderate to high radon potential in many areas."
+
+  - id: "oil_tank_inspection"
+    category: property_specific
+    description: "Check for underground oil tank and arrange removal if present"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.heat_type == 'oil'"
+    due: "PS"
+    due_offset: "+14d"
+    owner_role: buyer
+    vendor_type: "oil_tank_inspector"
+    notes: "Underground tanks are environmental hazard. Check for: tank location, soil testing if removed, proper abandonment documentation, above-ground tank condition if present."
+
+  - id: "pest_inspection"
+    category: property_specific
+    description: "Professional inspection for termites, carpenter ants, and other pests"
+    mandatory: false
+    applies_if: "property.type == 'SFH'"
+    due: "PS"
+    due_offset: "+7d"
+    owner_role: buyer
+    vendor_type: "pest_inspector"
+    notes: "Look for: active infestations, damage evidence, conducive conditions, treatment history. Some lenders require clear pest inspection."
+
+  - id: "generator_transfer"
+    category: property_specific
+    description: "Handle transfer of backup generator if present"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_generator"
+    due: "Closing"
+    due_offset: "-3d"
+    owner_role: seller
+    notes: "Provide: operation manual, maintenance records, transfer switch location, fuel source info, service contractor contact, automatic vs manual operation instructions."
+
+  - id: "smart_home_transfer"
+    category: property_specific
+    description: "Reset and transfer control of smart home systems"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.has_smart_home"
+    due: "Closing"
+    due_offset: "0d"
+    owner_role: seller
+    notes: "Reset: smart thermostats, doorbell cameras, smart locks, lighting systems, irrigation controllers. Provide setup instructions and confirm account transfers."
+
+  - id: "historical_designation_disclosure"
+    category: property_specific
+    description: "Inform buyer if property has historical designation"
+    mandatory: false
+    applies_if: "property.type == 'SFH' && property.is_historical"
+    due: "Offer"
+    due_offset: "+1d"
+    owner_role: seller
+    notes: "Disclose: any historical district restrictions, modification approval requirements, tax credit eligibility, facade easements, required maintenance standards."
+
+# End of template

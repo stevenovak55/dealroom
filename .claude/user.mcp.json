@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "gemini-cli-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "gemini-cli-mcp-openai-bridge"],
+      "env": {
+        "GOOGLE_API_KEY": "${GOOGLE_API_KEY:-}",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY:-}"
+      }
+    }
+  }
+}

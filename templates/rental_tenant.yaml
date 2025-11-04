@@ -1,0 +1,345 @@
+template_id: rental_tenant
+version: 1.0.0
+title: Rental Property - Tenant Side
+description: Complete checklist for tenants searching for rental properties in Massachusetts. Includes application process, lease review, and move-in procedures with tenant rights guidance.
+property_types:
+- SFH
+- Condo
+- Multifamily
+created_date: '2025-10-31'
+author: MA Deal Room Team
+transaction_side: buyer
+required_attributes:
+- property_type
+- state
+- listing_date
+- ps_agreement_date
+- closing_date
+extends: base_transaction
+tasks:
+# ===== SEARCH & PREPARATION =====
+- id: define_search_criteria
+  title: Define Rental Search Criteria
+  category: search
+  description: Establish budget, location preferences, bedrooms, amenities, move-in timeline, and must-have features
+  mandatory: false
+  due: Listing
+  due_offset: +0d
+  owner_role: buyer
+  depends_on: []
+  notes: 'Consider: Monthly budget (rent should be max 30% of income), neighborhood, commute time, parking, pets allowed, laundry, outdoor space, lease length flexibility'
+  priority: normal
+
+- id: gather_application_docs
+  title: Gather Application Documents
+  category: application
+  description: Collect all documents needed for rental application to speed up process
+  mandatory: false
+  due: Listing
+  due_offset: +2d
+  owner_role: buyer
+  depends_on: []
+  notes: 'Typically needed: Government ID, 2-3 recent pay stubs, employment verification letter, previous landlord contact info, personal references, bank statements (2-3 months), copy of credit report (optional but helpful)'
+  priority: normal
+
+- id: view_properties
+  title: Schedule and Attend Property Viewings
+  category: search
+  description: View properties that match search criteria and assess condition, neighborhood, landlord responsiveness
+  mandatory: false
+  due: Listing
+  due_offset: +3d
+  owner_role: agent
+  depends_on:
+  - define_search_criteria
+  notes: 'Check: Overall condition, appliances working, water pressure, outlets, heat/AC, cell reception, noise level, parking, safety, neighbors. Ask about utilities, lease terms, pets, smoking, maintenance response time.'
+  priority: normal
+
+# ===== APPLICATION =====
+- id: submit_application
+  title: Submit Rental Application
+  category: application
+  description: Complete rental application and pay application fee (max $50 in MA per MGL c. 186 §15B)
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +0d
+  owner_role: buyer
+  depends_on: []
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-tenant
+    title: MA Tenant Rights - Application Process
+  notes: 'Fill out application completely and accurately. Include all requested documentation. Application fee limited to $50 maximum in MA. Landlord cannot charge multiple application fees.'
+  priority: high
+
+- id: await_screening
+  title: Await Background & Credit Check
+  category: application
+  description: Landlord runs credit check, background check, employment verification - respond promptly to any requests
+  mandatory: false
+  due: Offer_Accepted
+  due_offset: +2d
+  owner_role: buyer
+  depends_on:
+  - submit_application
+  notes: 'Screening typically takes 2-5 business days. Be available to respond to landlord questions. If denied, landlord must provide reason in writing (Fair Housing requirement).'
+  priority: normal
+
+- id: receive_approval
+  title: Receive Application Approval
+  category: application
+  description: Get approval notification from landlord or property manager
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +3d
+  owner_role: buyer
+  depends_on:
+  - submit_application
+  reminders:
+  - offset: +3d
+    channels:
+    - email
+  notes: Upon approval, confirm move-in date and next steps (lease signing, payment schedule)
+  priority: high
+
+# ===== LEASE REVIEW =====
+- id: receive_lease
+  title: Receive Draft Lease Agreement
+  category: legal
+  description: Obtain lease agreement from landlord for thorough review before signing
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +0d
+  owner_role: buyer
+  depends_on:
+  - receive_approval
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  notes: Request lease as soon as approved. Do not feel pressured to sign immediately - you have right to review carefully.
+  priority: high
+
+- id: review_lease_terms
+  title: Review Lease Terms Carefully
+  category: legal
+  description: Read entire lease, understand all terms, make note of questions - consider attorney review for complex situations
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +1d
+  owner_role: buyer
+  depends_on:
+  - receive_lease
+  reminders:
+  - offset: +1d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-tenant
+    title: MA Tenant Rights
+  notes: 'Key items to check: Monthly rent amount, Lease duration (month-to-month or fixed term), Security deposit (max 1 month in MA), Last month rent (max 1 month), Utilities (who pays what), Parking included?, Pets allowed?, Subletting allowed?, Late fees, Rent increase terms, Maintenance responsibilities, Notice period for termination, Prohibited uses'
+  priority: high
+
+- id: negotiate_terms
+  title: Negotiate Lease Terms (if needed)
+  category: legal
+  description: Discuss and request modifications to lease terms that are unacceptable or unclear
+  mandatory: false
+  due: PS_Agreement
+  due_offset: +2d
+  owner_role: agent
+  depends_on:
+  - review_lease_terms
+  notes: 'Negotiable items may include: Lease duration, Move-in date, Pet deposit/rent, Parking arrangements, Painting/decorating permissions, Subletting rights. Be professional and reasonable.'
+  priority: normal
+
+- id: sign_lease
+  title: Sign Lease Agreement
+  category: legal
+  description: Execute lease agreement after all questions answered and terms acceptable
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +3d
+  owner_role: buyer
+  depends_on:
+  - review_lease_terms
+  reminders:
+  - offset: +3d
+    channels:
+    - email
+  notes: 'Sign all pages where indicated. Initial any addendums. Keep copy for your records. Landlord must provide fully executed copy within 30 days (MA law).'
+  priority: high
+
+# ===== MOVE-IN =====
+- id: pay_security_deposit
+  title: Pay Security Deposit
+  category: financial
+  description: Pay security deposit (maximum 1 month's rent in MA) to landlord
+  mandatory: true
+  due: Closing
+  due_offset: -3d
+  owner_role: buyer
+  depends_on:
+  - sign_lease
+  reminders:
+  - offset: -5d
+    channels:
+    - email
+  - offset: -1d
+    channels:
+    - email
+    - sms
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-tenant
+    title: MGL c. 186 §15B - Security Deposit Limits
+  notes: 'MA law limits: Security deposit max 1 month rent. Use certified check or money order. Get receipt immediately. Landlord must deposit in separate interest-bearing MA bank account within 30 days.'
+  priority: high
+
+- id: pay_first_last
+  title: Pay First and Last Month's Rent
+  category: financial
+  description: Pay first month and last month rent as required by lease
+  mandatory: true
+  due: Closing
+  due_offset: -3d
+  owner_role: buyer
+  depends_on:
+  - sign_lease
+  reminders:
+  - offset: -5d
+    channels:
+    - email
+  notes: 'Total upfront costs limited to 4 months rent maximum in MA (first + last + security + lock fee if any). Use certified check or money order. Get receipt.'
+  priority: high
+
+- id: receive_security_deposit_receipt
+  title: Receive Security Deposit Receipt
+  category: financial
+  description: Obtain receipt with bank name, account number, and interest rate (required by MA law within 30 days)
+  mandatory: true
+  due: Closing
+  due_offset: -2d
+  owner_role: buyer
+  depends_on:
+  - pay_security_deposit
+  reminders:
+  - offset: -2d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-tenant
+    title: MGL c. 186 §15B - Security Deposit Receipt Requirements
+  notes: 'Receipt must include: Bank name and address, Account number, Amount deposited, Current interest rate. You are entitled to interest annually or at end of tenancy (5% or actual rate, whichever is less). Keep receipt with lease documents!'
+  priority: high
+
+- id: walkthrough_statement_of_condition
+  title: Complete Move-In Walkthrough & Statement of Condition
+  category: move_in
+  description: Document property condition with detailed photos and sign statement of condition form (MA law requires landlord to provide)
+  mandatory: true
+  due: Closing
+  due_offset: -1d
+  owner_role: buyer
+  depends_on: []
+  reminders:
+  - offset: -3d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-tenant
+    title: MGL c. 186 §15B(2)(a) - Statement of Condition
+  notes: 'IMPORTANT: Take extensive photos/videos of ANY existing damage, stains, scratches, holes, broken items. Document EVERYTHING. This protects your security deposit. Sign statement noting all issues. Keep copy. You have 15 days to submit additional findings.'
+  priority: high
+
+- id: receive_keys
+  title: Receive Keys and Access Codes
+  category: move_in
+  description: Obtain keys, mailbox key, parking pass, gate codes, and all access items from landlord
+  mandatory: true
+  due: Closing
+  due_offset: +0d
+  owner_role: buyer
+  depends_on:
+  - pay_security_deposit
+  - pay_first_last
+  - walkthrough_statement_of_condition
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  notes: 'Receive: apartment/house keys (test all locks), mailbox key, parking pass/fob, building entrance code, garage opener, storage key. Count and document number of keys received.'
+  priority: high
+
+- id: setup_utilities
+  title: Set Up Utilities in Tenant Name
+  category: move_in
+  description: Transfer electric, gas, water, internet, cable to tenant name per lease terms
+  mandatory: false
+  due: Closing
+  due_offset: +0d
+  owner_role: buyer
+  depends_on: []
+  notes: 'Check lease to see which utilities tenant is responsible for. Set up service before move-in date. Typical: Electric (Eversource, National Grid), Gas (National Grid), Internet/Cable (Comcast, Verizon). Water usually included in rent but confirm.'
+  priority: normal
+
+- id: renters_insurance
+  title: Obtain Renters Insurance
+  category: move_in
+  description: Purchase renters insurance policy (often required by landlord, always recommended)
+  mandatory: false
+  due: Closing
+  due_offset: +0d
+  owner_role: buyer
+  depends_on: []
+  notes: 'Renters insurance covers: Personal belongings, Liability if someone injured, Temporary housing if unit uninhabitable. Costs $15-30/month typically. Landlord insurance only covers building, not your possessions. Many landlords require proof of insurance.'
+  priority: normal
+
+- id: document_move_in
+  title: Document Move-In Day Condition
+  category: move_in
+  description: Take final photos/videos on actual move-in day as additional documentation
+  mandatory: false
+  due: Closing
+  due_offset: +0d
+  owner_role: buyer
+  depends_on:
+  - receive_keys
+  notes: Even if you did walkthrough earlier, take additional photos on move-in day before unpacking. Store digitally and in cloud. Will help if any security deposit disputes arise.
+  priority: normal
+
+- id: receive_lease_copy
+  title: Receive Fully Executed Lease Copy
+  category: legal
+  description: Obtain signed copy of lease from landlord (required by MA law within 30 days)
+  mandatory: true
+  due: Closing
+  due_offset: +0d
+  owner_role: buyer
+  depends_on:
+  - sign_lease
+  reminders:
+  - offset: +10d
+    channels:
+    - email
+  notes: Landlord must provide fully signed copy within 30 days. Keep in safe place with other rental documents (receipts, statement of condition, correspondence). You need this if any disputes arise.
+  priority: normal
+
+- id: know_tenant_rights
+  title: Understand Massachusetts Tenant Rights
+  category: tenant_education
+  description: Familiarize yourself with MA tenant rights and landlord responsibilities
+  mandatory: false
+  due: Closing
+  due_offset: +7d
+  owner_role: buyer
+  depends_on: []
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-tenant
+    title: MA Tenant Rights & Responsibilities
+  - url: https://www.masslegalhelp.org/housing
+    title: MassLegalHelp - Housing Rights
+  notes: 'Key rights: Habitability (heat, hot water, no pests, safe structure), Quiet enjoyment (no harassment), Security deposit interest, Retaliation protection, 30-day notice for rent increase/termination, Privacy (landlord must give 24hr notice for entry except emergencies). Document all maintenance requests in writing. Know your rights!'
+  priority: low

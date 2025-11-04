@@ -1,0 +1,265 @@
+template_id: sfh_city_water
+version: 2.0.0
+title: Single-Family Home (City Water/Sewer) - Enhanced
+description: Complete transaction checklist for single-family homes on municipal water and sewer systems. Includes comprehensive workflow management with 80+ tasks plus SFH-specific requirements.
+property_types:
+- SFH
+created_date: '2025-10-30'
+author: MA Deal Room Team
+required_attributes:
+- property_type
+- state
+- year_built
+- ps_date
+- closing_date
+extends: base_transaction
+tasks:
+- id: property_survey_review
+  category: property_specific
+  description: Obtain and review property survey showing boundaries, easements, and encroachments
+  mandatory: true
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +14d
+  owner_role: buyer_attorney
+  notes: 'Review for: boundary lines, easements, encroachments, setback compliance, right-of-ways, flood zone designation. Order new survey if none exists or if existing is over 10 years old.'
+  priority: normal
+- id: roof_inspection
+  category: property_specific
+  description: Assess roof condition, age, and remaining life expectancy
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Document: roof age, material type, visible damage, recent repairs, warranty transfers if applicable. Consider specialist inspection if roof over 15 years old.'
+  priority: normal
+  vendor_type: roof_inspector
+  estimated_duration: Schedule 1 week ahead; inspection 1-2 hours; report 1-3 business days
+- id: basement_water_inspection
+  category: property_specific
+  description: Check basement for signs of water problems or moisture issues
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_basement
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Look for: water stains, efflorescence, musty odors, sump pump condition, foundation cracks, proper grading. Document any water mitigation systems.'
+  priority: normal
+- id: garage_inspection
+  category: property_specific
+  description: Check garage structure and test automatic door openers
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_garage
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Test: door openers and safety sensors, check structural condition, verify electrical outlets, note storage systems that convey.'
+  priority: normal
+- id: yard_maintenance_transfer
+  category: property_specific
+  description: Provide information about lawn care, sprinkler systems, and landscaping
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  notes: 'Include: sprinkler system operation and winterization, lawn care schedule, tree/shrub care requirements, snow removal responsibilities, any landscape service contracts.'
+  priority: normal
+- id: pool_spa_inspection
+  category: property_specific
+  description: Comprehensive inspection of pool, spa, and related equipment
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_pool
+  due: PS
+  due_offset: +10d
+  owner_role: buyer
+  vendor_type: pool_inspector
+  notes: 'Inspect: pool structure, equipment condition, safety compliance, cover condition, heater function. Transfer any service contracts or warranties.'
+  priority: normal
+- id: fence_boundary_verification
+  category: property_specific
+  description: Confirm fences are within property lines and identify ownership
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +14d
+  owner_role: buyer_attorney
+  notes: Compare fence locations to survey, identify shared fence responsibilities, note any encroachments, verify compliance with local ordinances.
+  priority: normal
+- id: shed_outbuilding_inspection
+  category: property_specific
+  description: Check condition of any sheds, barns, or detached structures
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_outbuildings
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Verify: structures are on property, permitted if required, condition assessment, what contents convey with sale, any electrical service.'
+  priority: normal
+- id: driveway_walkway_condition
+  category: property_specific
+  description: Evaluate condition of paved surfaces and drainage
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Check for: cracks, settling, drainage issues, ice dam potential, trip hazards. Note any shared driveway agreements or easements.'
+  priority: normal
+- id: exterior_paint_siding_evaluation
+  category: property_specific
+  description: Assess exterior surfaces for maintenance needs
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Look for: peeling paint (lead paint concern if pre-1978), siding damage, rot, pest damage, caulking condition, trim issues.'
+  priority: normal
+- id: attic_insulation_ventilation
+  category: property_specific
+  description: Check attic for proper insulation and ventilation
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Assess: insulation R-value, ventilation adequacy, moisture/mold issues, pest evidence, structural issues, ice dam prevention.'
+  priority: normal
+- id: chimney_fireplace_inspection
+  category: property_specific
+  description: Evaluate condition of chimney and fireplace if present
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_fireplace
+  due: PS
+  due_offset: +10d
+  owner_role: buyer
+  vendor_type: chimney_inspector
+  notes: 'Check: chimney structural condition, flue lining, damper operation, firebox condition, chimney cap, recent cleaning records.'
+  priority: normal
+- id: tree_hazard_assessment
+  category: property_specific
+  description: Evaluate large trees near house for potential hazards
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  notes: 'Look for: dead/diseased trees, overhanging branches, proximity to house/power lines, root damage to foundation/pipes. Consider arborist evaluation for concerning trees.'
+  priority: normal
+- id: security_system_transfer
+  category: property_specific
+  description: Handle transfer of security system and monitoring service
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_security
+  due: Closing
+  due_offset: -7d
+  owner_role: seller
+  notes: 'Determine: owned vs leased equipment, transfer monitoring contract, provide codes and instructions, update emergency contacts.'
+  priority: normal
+- id: neighborhood_disclosure
+  category: property_specific
+  description: Share relevant neighborhood information with buyer
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: Closing
+  due_offset: -14d
+  owner_role: seller
+  notes: 'Include: school bus stops, trash pickup schedule, snow plow routes, neighborhood associations (not HOA), local service providers, any known planned developments.'
+  priority: normal
+- id: utility_location_documentation
+  category: property_specific
+  description: Provide location of all utility shut-offs and breaker panels
+  mandatory: true
+  applies_if: property.type == 'SFH'
+  due: Closing
+  due_offset: -3d
+  owner_role: seller
+  notes: 'Document: main water shut-off, gas shut-off, electrical panel, individual shut-offs, water heater, HVAC emergency switches, septic/well controls if applicable.'
+  priority: normal
+- id: seasonal_equipment_transfer
+  category: property_specific
+  description: Provide seasonal equipment and maintenance instructions
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: Closing
+  due_offset: 0d
+  owner_role: seller
+  notes: 'Include: snow blower, lawn mower (if conveying), winterization instructions, sprinkler system controls, pool closing/opening procedures, storm windows/screens.'
+  priority: normal
+- id: warranty_transfer_package
+  category: property_specific
+  description: Gather all applicable warranties and transfer documents
+  mandatory: true
+  applies_if: property.type == 'SFH'
+  due: Closing
+  due_offset: -3d
+  owner_role: seller
+  notes: 'Include: appliance warranties, roof warranty, HVAC service contracts, pest control contracts, home warranty if purchased, any contractor warranties for recent work.'
+  priority: normal
+- id: radon_testing
+  category: property_specific
+  description: Test for radon gas levels in basement/lower level
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_basement
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  vendor_type: radon_inspector
+  notes: EPA action level is 4.0 pCi/L. If elevated, negotiate mitigation system installation. Massachusetts has moderate to high radon potential in many areas.
+  priority: normal
+  estimated_duration: Testing takes 48 hours minimum; lab results 3-5 business days
+- id: oil_tank_inspection
+  category: property_specific
+  description: Check for underground oil tank and arrange removal if present
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.heat_type == 'oil'
+  due: PS
+  due_offset: +14d
+  owner_role: buyer
+  vendor_type: oil_tank_inspector
+  notes: 'Underground tanks are environmental hazard. Check for: tank location, soil testing if removed, proper abandonment documentation, above-ground tank condition if present.'
+  priority: normal
+- id: pest_inspection
+  category: property_specific
+  description: Professional inspection for termites, carpenter ants, and other pests
+  mandatory: false
+  applies_if: property.type == 'SFH'
+  due: PS
+  due_offset: +7d
+  owner_role: buyer
+  vendor_type: pest_inspector
+  notes: 'Look for: active infestations, damage evidence, conducive conditions, treatment history. Some lenders require clear pest inspection.'
+  priority: normal
+  estimated_duration: Schedule 1 week ahead; inspection 1-2 hours; report 1-2 business days
+- id: generator_transfer
+  category: property_specific
+  description: Handle transfer of backup generator if present
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_generator
+  due: Closing
+  due_offset: -3d
+  owner_role: seller
+  notes: 'Provide: operation manual, maintenance records, transfer switch location, fuel source info, service contractor contact, automatic vs manual operation instructions.'
+  priority: normal
+- id: smart_home_transfer
+  category: property_specific
+  description: Reset and transfer control of smart home systems
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.has_smart_home
+  due: Closing
+  due_offset: 0d
+  owner_role: seller
+  notes: 'Reset: smart thermostats, doorbell cameras, smart locks, lighting systems, irrigation controllers. Provide setup instructions and confirm account transfers.'
+  priority: normal
+- id: historical_designation_disclosure
+  category: property_specific
+  description: Inform buyer if property has historical designation
+  mandatory: false
+  applies_if: property.type == 'SFH' && property.is_historical
+  due: Offer
+  due_offset: +1d
+  owner_role: seller
+  notes: 'Disclose: any historical district restrictions, modification approval requirements, tax credit eligibility, facade easements, required maintenance standards.'
+  priority: normal

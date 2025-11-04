@@ -1,0 +1,435 @@
+template_id: rental_landlord
+version: 1.0.0
+title: Rental Property - Landlord Side
+description: Complete checklist for landlords listing rental properties in Massachusetts. Includes tenant screening, lease execution, and move-in procedures compliant with MA rental laws.
+property_types:
+- SFH
+- Condo
+- Multifamily
+created_date: '2025-10-31'
+author: MA Deal Room Team
+transaction_side: listing
+required_attributes:
+- property_type
+- state
+- year_built
+- listing_date
+- ps_agreement_date
+- closing_date
+extends: base_transaction
+tasks:
+# ===== PRE-LISTING PREPARATION =====
+- id: property_inspection_landlord
+  title: Inspect Property for Rentability
+  category: property_prep
+  description: Ensure property meets MA sanitary code requirements (105 CMR 410.000) including heat, hot water, structural safety, pest control
+  mandatory: true
+  due: Listing
+  due_offset: -7d
+  owner_role: agent
+  depends_on: []
+  reminders:
+  - offset: -10d
+    channels:
+    - email
+  - offset: -3d
+    channels:
+    - email
+    - sms
+  citations:
+  - url: https://www.mass.gov/regulations/105-CMR-410000-state-sanitary-code-chapter-ii-minimum-standards-of-fitness-for-human
+    title: 105 CMR 410.000 - MA Sanitary Code
+  notes: Walk through property checking heat, hot water, no leaks, working appliances, no pest issues, secure locks, smoke detectors, CO detectors
+  priority: high
+  estimated_duration: 2-3 hours
+
+- id: smoke_co_certificate
+  title: Obtain Smoke & CO Detector Certificate
+  category: property_prep
+  description: Schedule inspection with local fire department to obtain certificate showing working smoke and carbon monoxide detectors (required by MA law)
+  mandatory: true
+  due: Listing
+  due_offset: -5d
+  owner_role: agent
+  depends_on: []
+  reminders:
+  - offset: -7d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/about-the-smoke-and-carbon-monoxide-detector-law
+    title: MA Smoke & CO Detector Law
+  vendor_type: fire_dept
+  notes: Contact local fire department to schedule inspection. Typical cost $25-50. Certificate valid for duration of tenancy.
+  priority: high
+  estimated_duration: 1-2 weeks
+
+- id: lead_paint_disclosure
+  title: Prepare Lead Paint Disclosure (Pre-1978 Properties)
+  category: compliance
+  description: Prepare and provide lead paint disclosure form required for all properties built before 1978 (federal and MA law)
+  mandatory: true
+  applies_if: property.year_built < 1978
+  due: Listing
+  due_offset: -3d
+  owner_role: agent
+  depends_on: []
+  reminders:
+  - offset: -5d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/about-lead-in-paint
+    title: MA Lead Paint Law
+  - url: https://www.epa.gov/lead/real-estate-disclosure
+    title: EPA Lead Paint Disclosure Requirements
+  notes: Use EPA-approved disclosure form. Provide tenant with "Protect Your Family from Lead in Your Home" pamphlet. Keep signed disclosure on file.
+  priority: high
+
+- id: security_deposit_account
+  title: Set Up Security Deposit Bank Account
+  category: financial
+  description: Open separate, interest-bearing account in Massachusetts bank for security deposits (required by MGL c. 186 §15B)
+  mandatory: true
+  due: Listing
+  due_offset: -7d
+  owner_role: seller
+  depends_on: []
+  reminders:
+  - offset: -10d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-landlord
+    title: MGL c. 186 §15B - Security Deposits
+  notes: 'Account must be: (1) In Massachusetts bank, (2) Interest-bearing, (3) Separate from landlord personal funds, (4) Tenant name on account. Keep bank statements for 1 year after tenancy ends.'
+  priority: high
+
+- id: create_rental_listing
+  title: Create Rental Listing
+  category: marketing
+  description: Draft rental listing with photos, description, rent amount, terms, available date, and property features
+  mandatory: true
+  due: Listing
+  due_offset: +0d
+  owner_role: agent
+  depends_on:
+  - property_inspection_landlord
+  - smoke_co_certificate
+  reminders:
+  - offset: -2d
+    channels:
+    - email
+  notes: Include professional photos, accurate square footage, bedroom/bathroom count, parking details, utilities, pets policy, smoking policy, lease term
+  priority: normal
+
+- id: set_rental_criteria
+  title: Establish Tenant Screening Criteria
+  category: tenant_screening
+  description: Define consistent, non-discriminatory tenant screening criteria (income requirements, credit score, background check standards)
+  mandatory: true
+  due: Listing
+  due_offset: +1d
+  owner_role: agent
+  depends_on: []
+  citations:
+  - url: https://www.mass.gov/info-details/massachusetts-law-about-housing-discrimination
+    title: MA Fair Housing Law
+  notes: 'Standard criteria: Income 3x monthly rent, credit score 600+, no recent evictions, verify employment. Must apply same criteria to all applicants. Cannot discriminate based on race, religion, national origin, gender, disability, familial status, sexual orientation, gender identity, veteran status, source of income.'
+  priority: high
+
+# ===== MARKETING & SHOWINGS =====
+- id: list_on_platforms
+  title: Post Listing on Rental Platforms
+  category: marketing
+  description: Publish listing on MLS, Zillow, Apartments.com, Trulia, Craigslist, and other rental platforms
+  mandatory: false
+  due: Listing
+  due_offset: +1d
+  owner_role: agent
+  depends_on:
+  - create_rental_listing
+  notes: Use high-quality photos, accurate descriptions, include virtual tour if available
+  priority: normal
+
+- id: schedule_showings
+  title: Schedule and Conduct Property Showings
+  category: marketing
+  description: Coordinate showing schedule with landlord and prospective tenants
+  mandatory: false
+  due: Listing
+  due_offset: +2d
+  owner_role: agent
+  depends_on:
+  - list_on_platforms
+  notes: Consider open house format for high-demand properties. Follow up promptly with interested applicants.
+  priority: normal
+
+# ===== APPLICATION & SCREENING =====
+- id: collect_applications
+  title: Collect Rental Applications
+  category: tenant_screening
+  description: Collect completed rental applications with application fee (max $50 in MA per MGL c. 186 §15B)
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +0d
+  owner_role: agent
+  depends_on: []
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-landlord
+    title: MGL c. 186 §15B - Application Fees
+  notes: Application must include employment history, previous landlord references, consent for credit/background check. Fee limited to $50 maximum.
+  priority: high
+
+- id: credit_background_check
+  title: Run Credit & Background Checks
+  category: tenant_screening
+  description: Verify credit history, criminal background, and rental history using approved screening service
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +1d
+  owner_role: agent
+  depends_on:
+  - collect_applications
+  reminders:
+  - offset: +1d
+    channels:
+    - email
+  notes: Use FCRA-compliant screening service. Check credit score, eviction history, criminal records. Must provide adverse action notice if denying based on credit/background check.
+  priority: high
+  estimated_duration: 2-3 days
+
+- id: verify_employment
+  title: Verify Employment & Income
+  category: tenant_screening
+  description: Contact employer and review pay stubs to verify income meets 3x monthly rent requirement
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +2d
+  owner_role: agent
+  depends_on:
+  - collect_applications
+  reminders:
+  - offset: +2d
+    channels:
+    - email
+  notes: Request 2-3 recent pay stubs and contact HR to verify employment. For self-employed, request tax returns or bank statements.
+  priority: high
+
+- id: check_references
+  title: Check Previous Landlord References
+  category: tenant_screening
+  description: Contact previous landlords (ideally 2-3) to verify rental history, payment timeliness, property care
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +2d
+  owner_role: agent
+  depends_on:
+  - collect_applications
+  notes: Ask about payment history, lease violations, property damage, reason for leaving, would they rent to tenant again
+  priority: normal
+
+- id: approve_tenant
+  title: Approve Tenant Application
+  category: tenant_screening
+  description: Landlord reviews screening results and makes final decision on tenant selection
+  mandatory: true
+  due: Offer_Accepted
+  due_offset: +3d
+  owner_role: seller
+  depends_on:
+  - credit_background_check
+  - verify_employment
+  - check_references
+  reminders:
+  - offset: +3d
+    channels:
+    - email
+  notes: If denying application, provide written notice with reason (required by Fair Housing law)
+  priority: high
+
+# ===== LEASE EXECUTION =====
+- id: draft_lease
+  title: Draft Rental Lease Agreement
+  category: legal
+  description: Prepare lease agreement using MA-compliant template or attorney-drafted lease
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +0d
+  owner_role: agent
+  depends_on:
+  - approve_tenant
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-landlord
+    title: MA Landlord-Tenant Law
+  notes: 'Must include: Names of all parties, property address, lease term, rent amount & due date, security deposit amount, utilities responsibility, parking, pets policy, maintenance, prohibited uses. Consider attorney review for complex situations.'
+  priority: high
+  estimated_duration: 2-4 hours
+
+- id: review_lease_with_landlord
+  title: Review Lease with Landlord
+  category: legal
+  description: Go through lease terms with landlord, explain special conditions, rent amounts, tenant responsibilities
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +1d
+  owner_role: agent
+  depends_on:
+  - draft_lease
+  notes: Review all terms, special conditions, ensure landlord understands MA law requirements
+  priority: normal
+
+- id: tenant_lease_review
+  title: Tenant Reviews and Signs Lease
+  category: legal
+  description: Provide lease to tenant for review, answer questions, and obtain tenant signature
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +2d
+  owner_role: agent
+  depends_on:
+  - draft_lease
+  reminders:
+  - offset: +2d
+    channels:
+    - email
+  notes: Give tenant adequate time to review (minimum 24 hours recommended). Answer all questions before signing.
+  priority: high
+
+- id: landlord_signs_lease
+  title: Landlord Signs Lease
+  category: legal
+  description: Landlord executes lease agreement after tenant signature
+  mandatory: true
+  due: PS_Agreement
+  due_offset: +3d
+  owner_role: seller
+  depends_on:
+  - tenant_lease_review
+  reminders:
+  - offset: +3d
+    channels:
+    - email
+  notes: Provide fully executed copy to tenant within 30 days (MA law requirement)
+  priority: high
+
+# ===== MOVE-IN PREPARATION =====
+- id: collect_security_deposit
+  title: Collect Security Deposit
+  category: financial
+  description: Collect security deposit (maximum 1 month's rent in MA) and deposit into designated account
+  mandatory: true
+  due: Closing
+  due_offset: -3d
+  owner_role: agent
+  depends_on:
+  - landlord_signs_lease
+  reminders:
+  - offset: -5d
+    channels:
+    - email
+  - offset: -1d
+    channels:
+    - email
+    - sms
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-landlord
+    title: MGL c. 186 §15B - Security Deposit Limits
+  notes: 'MA law limits: Security deposit max 1 month rent, Last month rent max 1 month, Total upfront costs cannot exceed 4 months (first, last, security, lock fee if applicable).'
+  priority: high
+
+- id: collect_first_last_month
+  title: Collect First and Last Month's Rent
+  category: financial
+  description: Collect first and last month's rent payments from tenant
+  mandatory: true
+  due: Closing
+  due_offset: -3d
+  owner_role: agent
+  depends_on:
+  - landlord_signs_lease
+  reminders:
+  - offset: -5d
+    channels:
+    - email
+  notes: Accept certified check, money order, or cashier's check. Last month's rent goes into interest-bearing account (same as security deposit requirements).
+  priority: high
+
+- id: statement_of_condition
+  title: Complete Statement of Condition
+  category: move_in
+  description: Document property condition with detailed checklist and photos at move-in (required by MGL c. 186 §15B)
+  mandatory: true
+  due: Closing
+  due_offset: -1d
+  owner_role: agent
+  depends_on: []
+  reminders:
+  - offset: -3d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-landlord
+    title: MGL c. 186 §15B(2)(a) - Statement of Condition
+  notes: 'Take photos/videos of: walls, floors, appliances, fixtures, windows, doors. Both parties sign. Give tenant copy. Keep for entire tenancy plus 1 year. Used to determine security deposit deductions at move-out.'
+  priority: high
+
+- id: provide_keys
+  title: Provide Keys and Access Codes
+  category: move_in
+  description: Provide tenant with keys, mailbox key, parking pass, gate codes, and any other access items
+  mandatory: true
+  due: Closing
+  due_offset: +0d
+  owner_role: seller
+  depends_on:
+  - collect_security_deposit
+  - collect_first_last_month
+  - statement_of_condition
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  notes: 'Provide: apartment/house keys, mailbox key, parking pass/fob, building entrance code, garage opener, shed/storage key. Document number of keys provided.'
+  priority: high
+
+- id: provide_security_deposit_receipt
+  title: Provide Security Deposit Receipt
+  category: financial
+  description: Give tenant receipt with bank name, account number, and interest rate (required by MGL c. 186 §15B)
+  mandatory: true
+  due: Closing
+  due_offset: +0d
+  owner_role: agent
+  depends_on:
+  - collect_security_deposit
+  reminders:
+  - offset: +0d
+    channels:
+    - email
+  citations:
+  - url: https://www.mass.gov/info-details/your-rights-and-responsibilities-as-a-landlord
+    title: MGL c. 186 §15B - Security Deposit Receipt
+  notes: 'Receipt must include: Bank name and address, Account number, Amount deposited, Current interest rate. Must provide within 30 days of receipt. Tenant entitled to interest annually or at end of tenancy (5% or actual rate, whichever is less).'
+  priority: high
+
+- id: provide_lease_copy
+  title: Provide Fully Executed Lease Copy
+  category: legal
+  description: Provide tenant with signed copy of lease agreement (required within 30 days by MA law)
+  mandatory: true
+  due: Closing
+  due_offset: +0d
+  owner_role: agent
+  depends_on:
+  - landlord_signs_lease
+  notes: Keep original. Provide tenant with fully signed copy. Retain copy for landlord records.
+  priority: normal
