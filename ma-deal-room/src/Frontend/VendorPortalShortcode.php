@@ -27,7 +27,7 @@ class VendorPortalShortcode {
 	 */
 	public static function render($atts = []): string {
 		// Load the standalone vendor portal HTML
-		$plugin_path = dirname(__FILE__, 2);
+		$plugin_path = dirname(__FILE__, 3);
 		$vendor_portal_path = $plugin_path . '/assets/vendor-portal.html';
 
 		if (!file_exists($vendor_portal_path)) {
