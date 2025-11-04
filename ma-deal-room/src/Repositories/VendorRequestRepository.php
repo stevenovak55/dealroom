@@ -13,6 +13,14 @@ use MADealRoom\Models\VendorRequest;
 class VendorRequestRepository extends BaseRepository {
 	protected $table = 'ma_deal_vendor_requests';
 	protected $model_class = VendorRequest::class;
+	protected $allowed_columns = [
+		'id', 'task_id', 'transaction_id', 'party_id', 'vendor_type',
+		'vendor_name', 'vendor_company', 'average_rating', 'vendor_email',
+		'vendor_phone', 'token', 'token_expires_at', 'status',
+		'scheduled_date', 'scheduled_time', 'completion_date',
+		'completion_notes', 'document_url', 'last_opened_at',
+		'confirmation_sent_at', 'metadata', 'created_at', 'updated_at'
+	];
 
 	public function findByToken(string $token): ?object {
 		$results = $this->query(['token' => $token], ['limit' => 1]);

@@ -256,7 +256,7 @@ class VendorService {
 	 * @return int|false Message ID or false
 	 */
 	public function sendMessage(int $vendor_request_id, string $sender_type, string $sender_name, string $sender_email, string $message) {
-		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 
 		if (!$vendor_request) {
 			return false;
@@ -310,7 +310,7 @@ class VendorService {
 	 * @return string|false Document URL or false
 	 */
 	public function uploadDocument(int $vendor_request_id, array $file_data) {
-		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 
 		if (!$vendor_request) {
 			return false;
@@ -352,7 +352,7 @@ class VendorService {
 		}
 
 		// Get transaction details (limited info for vendor)
-		$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+		$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
 
 		// Get messages
 		$messages = $this->vendor_message_repository->getThreadWithMetadata($vendor_request->id);
