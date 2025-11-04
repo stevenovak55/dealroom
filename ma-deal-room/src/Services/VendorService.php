@@ -13,6 +13,7 @@ use MADealRoom\Repositories\VendorMessageRepository;
 use MADealRoom\Repositories\VendorAvailabilityRepository;
 use MADealRoom\Repositories\VendorRatingRepository;
 use MADealRoom\Repositories\TransactionRepository;
+use MADealRoom\Repositories\TaskRepository;
 use MADealRoom\Services\EmailService;
 use MADealRoom\Services\FileStorageService;
 
@@ -25,6 +26,7 @@ class VendorService {
 	private $vendor_availability_repository;
 	private $vendor_rating_repository;
 	private $transaction_repository;
+	private $task_repository;
 	private $email_service;
 	private $file_storage_service;
 
@@ -34,6 +36,7 @@ class VendorService {
 		VendorAvailabilityRepository $vendor_availability_repository,
 		VendorRatingRepository $vendor_rating_repository,
 		TransactionRepository $transaction_repository,
+		TaskRepository $task_repository,
 		EmailService $email_service,
 		FileStorageService $file_storage_service
 	) {
@@ -42,6 +45,7 @@ class VendorService {
 		$this->vendor_availability_repository = $vendor_availability_repository;
 		$this->vendor_rating_repository = $vendor_rating_repository;
 		$this->transaction_repository = $transaction_repository;
+		$this->task_repository = $task_repository;
 		$this->email_service = $email_service;
 		$this->file_storage_service = $file_storage_service;
 	}
@@ -237,8 +241,24 @@ class VendorService {
 
 		$result = $this->vendor_request_repository->update($request_id, $update_data);
 
-		// Send completion notification to agent
+		// Auto-complete associated task if it exists
 		if ($result) {
+			$vendor_request = $this->vendor_request_repository->findById($request_id);
+			if ($vendor_request && $vendor_request->task_id) {
+				try {
+					$task = $this->task_repository->findById($vendor_request->task_id);
+					if ($task && $task->status !== 'completed') {
+						$this->task_repository->update($vendor_request->task_id, [
+							'status' => 'completed',
+							'completed_at' => current_time('mysql'),
+						]);
+					}
+				} catch (\Exception $e) {
+					error_log("VendorService: Failed to auto-complete task {$vendor_request->task_id}: " . $e->getMessage());
+				}
+			}
+
+			// Send completion notification to agent
 			$this->sendCompletionNotificationEmail($request_id);
 		}
 
@@ -256,7 +276,7 @@ class VendorService {
 	 * @return int|false Message ID or false
 	 */
 	public function sendMessage(int $vendor_request_id, string $sender_type, string $sender_name, string $sender_email, string $message) {
-		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
 
 		if (!$vendor_request) {
 			return false;
@@ -310,7 +330,7 @@ class VendorService {
 	 * @return string|false Document URL or false
 	 */
 	public function uploadDocument(int $vendor_request_id, array $file_data) {
-		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
 
 		if (!$vendor_request) {
 			return false;
@@ -352,7 +372,7 @@ class VendorService {
 		}
 
 		// Get transaction details (limited info for vendor)
-		$transaction = $this->transaction_repository->find($vendor_request->transaction_id);
+		$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
 
 		// Get messages
 		$messages = $this->vendor_message_repository->getThreadWithMetadata($vendor_request->id);
@@ -389,8 +409,23 @@ class VendorService {
 	 * @return void
 	 */
 	private function sendScheduleConfirmationEmail(int $vendor_request_id): void {
-		// TODO: Implement email sending with EmailService
-		// This will notify the agent that the vendor has scheduled an appointment
+		try {
+			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			if (!$vendor_request) {
+				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
+				return;
+			}
+
+			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			if (!$transaction) {
+				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
+				return;
+			}
+
+			$this->email_service->sendVendorScheduleConfirmation($vendor_request, $transaction);
+		} catch (\Exception $e) {
+			error_log("VendorService: Failed to send schedule confirmation email: " . $e->getMessage());
+		}
 	}
 
 	/**
@@ -400,8 +435,23 @@ class VendorService {
 	 * @return void
 	 */
 	private function sendCompletionNotificationEmail(int $vendor_request_id): void {
-		// TODO: Implement email sending with EmailService
-		// This will notify the agent that the vendor has completed their work
+		try {
+			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			if (!$vendor_request) {
+				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
+				return;
+			}
+
+			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			if (!$transaction) {
+				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
+				return;
+			}
+
+			$this->email_service->sendVendorCompletionNotification($vendor_request, $transaction);
+		} catch (\Exception $e) {
+			error_log("VendorService: Failed to send completion notification email: " . $e->getMessage());
+		}
 	}
 
 	/**
@@ -414,8 +464,36 @@ class VendorService {
 	 * @return void
 	 */
 	private function sendMessageNotificationEmail(int $vendor_request_id, string $sender_type, string $sender_name, string $message): void {
-		// TODO: Implement email sending with EmailService
-		// This will notify the recipient of a new message
+		try {
+			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			if (!$vendor_request) {
+				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
+				return;
+			}
+
+			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			if (!$transaction) {
+				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
+				return;
+			}
+
+			// Determine recipient email based on sender type
+			$recipient_email = ($sender_type === 'vendor')
+				? $transaction->agent_email ?? null
+				: $vendor_request->vendor_email;
+
+			if ($recipient_email) {
+				$this->email_service->sendVendorMessageNotification(
+					$vendor_request,
+					$transaction,
+					$recipient_email,
+					$sender_name,
+					$message
+				);
+			}
+		} catch (\Exception $e) {
+			error_log("VendorService: Failed to send message notification email: " . $e->getMessage());
+		}
 	}
 
 	/**
@@ -425,8 +503,30 @@ class VendorService {
 	 * @return void
 	 */
 	private function sendAvailabilityNotificationEmail(int $vendor_request_id): void {
-		// TODO: Implement email sending with EmailService
-		// This will notify the agent that the vendor has submitted their availability
+		try {
+			$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+			if (!$vendor_request) {
+				error_log("VendorService: Vendor request not found: {$vendor_request_id}");
+				return;
+			}
+
+			$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+			if (!$transaction) {
+				error_log("VendorService: Transaction not found: {$vendor_request->transaction_id}");
+				return;
+			}
+
+			// Get availability slots
+			$availability_slots = $this->vendor_availability_repository->getByVendorRequest($vendor_request_id);
+
+			$this->email_service->sendVendorAvailabilityNotification(
+				$vendor_request,
+				$transaction,
+				$availability_slots
+			);
+		} catch (\Exception $e) {
+			error_log("VendorService: Failed to send availability notification email: " . $e->getMessage());
+		}
 	}
 
 	/**
