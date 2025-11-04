@@ -19,6 +19,9 @@ use MADealRoom\Repositories\PartyRepository;
 use MADealRoom\Repositories\AccountRepository;
 use MADealRoom\Repositories\ReminderRepository;
 use MADealRoom\Repositories\VendorRequestRepository;
+use MADealRoom\Repositories\VendorMessageRepository;
+use MADealRoom\Repositories\VendorAvailabilityRepository;
+use MADealRoom\Repositories\VendorRatingRepository;
 use MADealRoom\Repositories\DocumentRepository;
 use MADealRoom\Repositories\EventRepository;
 use MADealRoom\Repositories\NotificationRepository;
@@ -35,6 +38,7 @@ use MADealRoom\Services\ReminderService;
 use MADealRoom\Services\NotificationService;
 use MADealRoom\Services\VendorService;
 use MADealRoom\Services\EmailService;
+use MADealRoom\Services\FileStorageService;
 use MADealRoom\Services\TaskAssignmentService;
 use MADealRoom\Services\AuthService;
 use MADealRoom\Services\EmailVerificationService;
@@ -260,9 +264,27 @@ class Plugin {
 			);
 		});
 
+		$this->container->register('vendor_message_repository', function($container) {
+			return new VendorMessageRepository();
+		});
+
+		$this->container->register('vendor_availability_repository', function($container) {
+			return new VendorAvailabilityRepository();
+		});
+
+		$this->container->register('vendor_rating_repository', function($container) {
+			return new VendorRatingRepository();
+		});
+
 		$this->container->register('vendor_service', function($container) {
 			return new VendorService(
-				$container->get('vendor_request_repository')
+				$container->get('vendor_request_repository'),
+				$container->get('vendor_message_repository'),
+				$container->get('vendor_availability_repository'),
+				$container->get('vendor_rating_repository'),
+				$container->get('transaction_repository'),
+				$container->get('email_service'),
+				$container->get('file_storage_service')
 			);
 		});
 
@@ -458,6 +480,7 @@ class Plugin {
 		$this->container->register('vendor_portal_controller', function($container) {
 			return new VendorPortalController(
 				$container->get('vendor_service'),
+				$container->get('vendor_message_repository'),
 				$container->get('event_repository')
 			);
 		});
