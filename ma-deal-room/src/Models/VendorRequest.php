@@ -17,6 +17,9 @@ class VendorRequest {
 	public int $transaction_id;
 	public ?int $party_id = null;
 	public string $vendor_type; // fire_dept, septic_inspector, hoa_manager, title_company, appraiser, inspector, other
+	public ?string $vendor_name = null;
+	public ?string $vendor_company = null;
+	public ?float $average_rating = null;
 	public string $vendor_email;
 	public ?string $vendor_phone = null;
 	public string $token;
@@ -24,9 +27,11 @@ class VendorRequest {
 	public string $status = 'sent'; // sent, opened, scheduled, completed, expired, cancelled
 	public ?string $scheduled_date = null;
 	public ?string $scheduled_time = null;
+	public ?string $completion_date = null;
 	public ?string $completion_notes = null;
 	public ?string $document_url = null;
 	public ?string $last_opened_at = null;
+	public ?string $confirmation_sent_at = null;
 	public ?array $metadata = null;
 	public string $created_at;
 	public string $updated_at;

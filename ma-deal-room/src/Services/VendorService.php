@@ -9,15 +9,41 @@
 namespace MADealRoom\Services;
 
 use MADealRoom\Repositories\VendorRequestRepository;
+use MADealRoom\Repositories\VendorMessageRepository;
+use MADealRoom\Repositories\VendorAvailabilityRepository;
+use MADealRoom\Repositories\VendorRatingRepository;
+use MADealRoom\Repositories\TransactionRepository;
+use MADealRoom\Services\EmailService;
+use MADealRoom\Services\FileStorageService;
 
 /**
  * Vendor coordination service
  */
 class VendorService {
 	private $vendor_request_repository;
+	private $vendor_message_repository;
+	private $vendor_availability_repository;
+	private $vendor_rating_repository;
+	private $transaction_repository;
+	private $email_service;
+	private $file_storage_service;
 
-	public function __construct(VendorRequestRepository $vendor_request_repository) {
+	public function __construct(
+		VendorRequestRepository $vendor_request_repository,
+		VendorMessageRepository $vendor_message_repository,
+		VendorAvailabilityRepository $vendor_availability_repository,
+		VendorRatingRepository $vendor_rating_repository,
+		TransactionRepository $transaction_repository,
+		EmailService $email_service,
+		FileStorageService $file_storage_service
+	) {
 		$this->vendor_request_repository = $vendor_request_repository;
+		$this->vendor_message_repository = $vendor_message_repository;
+		$this->vendor_availability_repository = $vendor_availability_repository;
+		$this->vendor_rating_repository = $vendor_rating_repository;
+		$this->transaction_repository = $transaction_repository;
+		$this->email_service = $email_service;
+		$this->file_storage_service = $file_storage_service;
 	}
 
 	/**
@@ -144,5 +170,289 @@ class VendorService {
 		$string = str_replace(',', '\\,', $string);
 		$string = str_replace("\r\n", '\\n', $string);
 		return $string;
+	}
+
+	/**
+	 * Update vendor request with scheduling information
+	 *
+	 * @param int $request_id Vendor request ID
+	 * @param array $schedule_data Schedule data (scheduled_date, scheduled_time)
+	 * @return bool
+	 */
+	public function scheduleAppointment(int $request_id, array $schedule_data): bool {
+		$update_data = [];
+
+		if (isset($schedule_data['scheduled_date'])) {
+			$update_data['scheduled_date'] = $schedule_data['scheduled_date'];
+		}
+
+		if (isset($schedule_data['scheduled_time'])) {
+			$update_data['scheduled_time'] = $schedule_data['scheduled_time'];
+		}
+
+		if (isset($schedule_data['vendor_name'])) {
+			$update_data['vendor_name'] = $schedule_data['vendor_name'];
+		}
+
+		if (isset($schedule_data['vendor_company'])) {
+			$update_data['vendor_company'] = $schedule_data['vendor_company'];
+		}
+
+		// Update status to scheduled if date is provided
+		if (isset($schedule_data['scheduled_date'])) {
+			$update_data['status'] = 'scheduled';
+			$update_data['confirmation_sent_at'] = current_time('mysql');
+		}
+
+		$result = $this->vendor_request_repository->update($request_id, $update_data);
+
+		// Send confirmation email to agent
+		if ($result && isset($schedule_data['scheduled_date'])) {
+			$this->sendScheduleConfirmationEmail($request_id);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Complete a vendor request
+	 *
+	 * @param int $request_id Vendor request ID
+	 * @param array $completion_data Completion data (notes, document)
+	 * @return bool
+	 */
+	public function completeRequest(int $request_id, array $completion_data): bool {
+		$update_data = [
+			'status' => 'completed',
+			'completion_date' => $completion_data['completion_date'] ?? date('Y-m-d'),
+		];
+
+		if (isset($completion_data['completion_notes'])) {
+			$update_data['completion_notes'] = $completion_data['completion_notes'];
+		}
+
+		if (isset($completion_data['document_url'])) {
+			$update_data['document_url'] = $completion_data['document_url'];
+		}
+
+		$result = $this->vendor_request_repository->update($request_id, $update_data);
+
+		// Send completion notification to agent
+		if ($result) {
+			$this->sendCompletionNotificationEmail($request_id);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send message from vendor to agent or vice versa
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @param string $sender_type 'vendor' or 'agent'
+	 * @param string $sender_name Sender name
+	 * @param string $sender_email Sender email
+	 * @param string $message Message content
+	 * @return int|false Message ID or false
+	 */
+	public function sendMessage(int $vendor_request_id, string $sender_type, string $sender_name, string $sender_email, string $message) {
+		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+
+		if (!$vendor_request) {
+			return false;
+		}
+
+		$message_id = $this->vendor_message_repository->createMessage([
+			'vendor_request_id' => $vendor_request_id,
+			'transaction_id' => $vendor_request->transaction_id,
+			'sender_type' => $sender_type,
+			'sender_name' => $sender_name,
+			'sender_email' => $sender_email,
+			'message' => $message,
+		]);
+
+		// Send email notification to recipient
+		if ($message_id) {
+			$this->sendMessageNotificationEmail($vendor_request_id, $sender_type, $sender_name, $message);
+		}
+
+		return $message_id;
+	}
+
+	/**
+	 * Submit vendor availability windows
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @param array $availability_windows Array of availability data
+	 * @return bool
+	 */
+	public function submitAvailability(int $vendor_request_id, array $availability_windows): bool {
+		// Clear existing availability
+		$this->vendor_availability_repository->clearAvailability($vendor_request_id);
+
+		// Add new availability windows
+		foreach ($availability_windows as $window) {
+			$window['vendor_request_id'] = $vendor_request_id;
+			$this->vendor_availability_repository->addAvailability($window);
+		}
+
+		// Notify agent of availability submission
+		$this->sendAvailabilityNotificationEmail($vendor_request_id);
+
+		return true;
+	}
+
+	/**
+	 * Upload completion document
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @param array $file_data Uploaded file data
+	 * @return string|false Document URL or false
+	 */
+	public function uploadDocument(int $vendor_request_id, array $file_data) {
+		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+
+		if (!$vendor_request) {
+			return false;
+		}
+
+		// Store file
+		$result = $this->file_storage_service->storeFile(
+			$file_data,
+			'vendor_documents',
+			[
+				'vendor_request_id' => $vendor_request_id,
+				'transaction_id' => $vendor_request->transaction_id,
+			]
+		);
+
+		if ($result && isset($result['url'])) {
+			// Update vendor request with document URL
+			$this->vendor_request_repository->update($vendor_request_id, [
+				'document_url' => $result['url'],
+			]);
+
+			return $result['url'];
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get vendor portal data
+	 *
+	 * @param string $token Vendor token
+	 * @return array|null Portal data or null if invalid
+	 */
+	public function getVendorPortalData(string $token): ?array {
+		$vendor_request = $this->validateToken($token);
+
+		if (!$vendor_request) {
+			return null;
+		}
+
+		// Get transaction details (limited info for vendor)
+		$transaction = $this->transaction_repository->findById($vendor_request->transaction_id);
+
+		// Get messages
+		$messages = $this->vendor_message_repository->getThreadWithMetadata($vendor_request->id);
+
+		// Get availability
+		$availability = $this->vendor_availability_repository->getByVendorRequest($vendor_request->id, false);
+
+		// Get rating (if completed)
+		$rating = null;
+		if ($vendor_request->status === 'completed') {
+			$rating = $this->vendor_rating_repository->getByVendorRequest($vendor_request->id);
+		}
+
+		return [
+			'vendor_request' => $vendor_request,
+			'transaction' => [
+				'id' => $transaction->id,
+				'property_address' => $transaction->property_address,
+				'property_city' => $transaction->property_city,
+				'property_state' => $transaction->property_state,
+				'property_zip' => $transaction->property_zip,
+				'closing_date' => $transaction->closing_date,
+			],
+			'messages' => $messages,
+			'availability' => $availability,
+			'rating' => $rating,
+		];
+	}
+
+	/**
+	 * Send schedule confirmation email to agent
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @return void
+	 */
+	private function sendScheduleConfirmationEmail(int $vendor_request_id): void {
+		// TODO: Implement email sending with EmailService
+		// This will notify the agent that the vendor has scheduled an appointment
+	}
+
+	/**
+	 * Send completion notification email to agent
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @return void
+	 */
+	private function sendCompletionNotificationEmail(int $vendor_request_id): void {
+		// TODO: Implement email sending with EmailService
+		// This will notify the agent that the vendor has completed their work
+	}
+
+	/**
+	 * Send message notification email
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @param string $sender_type Sender type
+	 * @param string $sender_name Sender name
+	 * @param string $message Message content
+	 * @return void
+	 */
+	private function sendMessageNotificationEmail(int $vendor_request_id, string $sender_type, string $sender_name, string $message): void {
+		// TODO: Implement email sending with EmailService
+		// This will notify the recipient of a new message
+	}
+
+	/**
+	 * Send availability notification email to agent
+	 *
+	 * @param int $vendor_request_id Vendor request ID
+	 * @return void
+	 */
+	private function sendAvailabilityNotificationEmail(int $vendor_request_id): void {
+		// TODO: Implement email sending with EmailService
+		// This will notify the agent that the vendor has submitted their availability
+	}
+
+	/**
+	 * Get vendor profile and statistics
+	 *
+	 * @param string $vendor_email Vendor email
+	 * @return array Vendor profile data
+	 */
+	public function getVendorProfile(string $vendor_email): array {
+		$stats = $this->vendor_rating_repository->getVendorStats($vendor_email);
+		$distribution = $this->vendor_rating_repository->getRatingDistribution($vendor_email);
+		$recent_reviews = $this->vendor_rating_repository->getRecentReviews($vendor_email, 5);
+
+		// Get request history
+		$requests = $this->vendor_request_repository->query(['vendor_email' => $vendor_email], [
+			'order' => 'created_at',
+			'direction' => 'DESC',
+			'limit' => 10,
+		]);
+
+		return [
+			'vendor_email' => $vendor_email,
+			'stats' => $stats,
+			'rating_distribution' => $distribution,
+			'recent_reviews' => $recent_reviews,
+			'recent_requests' => $requests,
+		];
 	}
 }
