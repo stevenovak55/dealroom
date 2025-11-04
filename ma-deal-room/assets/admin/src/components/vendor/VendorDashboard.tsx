@@ -21,7 +21,6 @@ interface VendorDashboardProps {
 export default function VendorDashboard({
   vendorRequest,
   transaction,
-  rating,
 }: VendorDashboardProps) {
   const formatDate = (date?: string) => {
     if (!date) return 'Not set';

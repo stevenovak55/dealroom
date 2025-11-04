@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   createVendorPortalAPI,
@@ -21,7 +21,6 @@ export default function VendorPortal() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const [api, setApi] = useState<ReturnType<typeof createVendorPortalAPI> | null>(null);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (token) {

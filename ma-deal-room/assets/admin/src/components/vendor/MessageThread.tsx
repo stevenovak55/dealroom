@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { Send, MessageSquare, User, UserCircle } from 'lucide-react';
 import { VendorMessage, VendorRequest, MessageData } from '../../api/vendorPortalClient';
 
@@ -67,14 +67,6 @@ export default function MessageThread({
       return `Yesterday ${format(date, 'h:mm a')}`;
     } else {
       return format(date, 'MMM dd, h:mm a');
-    }
-  };
-
-  const getRelativeTime = (timestamp: string): string => {
-    try {
-      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-    } catch {
-      return '';
     }
   };
 
