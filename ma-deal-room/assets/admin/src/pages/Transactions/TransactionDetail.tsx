@@ -19,9 +19,10 @@ import { DocumentList } from '@/components/Documents/DocumentList';
 import { DocumentEditModal } from '@/components/Documents/DocumentEditModal';
 import { EditableTransactionTimeline } from '@/components/Timeline/EditableTransactionTimeline';
 import { EditablePropertyDetails } from '@/components/Transactions/EditablePropertyDetails';
+import { VendorRequestsList } from '@/components/VendorRequestsList';
 import type { Party, Task, Document } from '@/api/types';
 
-type TabType = 'details' | 'tasks' | 'parties' | 'documents' | 'activity';
+type TabType = 'details' | 'tasks' | 'parties' | 'documents' | 'vendors' | 'activity';
 
 export const TransactionDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -156,6 +157,7 @@ export const TransactionDetail = () => {
     { id: 'tasks', label: `Tasks (${tasks.length})` },
     { id: 'parties', label: `Parties (${parties?.length || 0})` },
     { id: 'documents', label: 'Documents' },
+    { id: 'vendors', label: 'Vendor Requests' },
     { id: 'activity', label: 'Activity' },
   ];
 
@@ -412,6 +414,13 @@ export const TransactionDetail = () => {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {activeTab === 'vendors' && (
+        <VendorRequestsList
+          transactionId={transactionId}
+          tasks={tasks}
+        />
       )}
 
       {activeTab === 'activity' && (

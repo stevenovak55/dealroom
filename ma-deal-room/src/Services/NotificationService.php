@@ -265,4 +265,133 @@ class NotificationService {
 
 		return $this->sendEmail($vendor_request->vendor_email, $subject, $body);
 	}
+
+	/**
+	 * Send vendor schedule confirmation email to agent
+	 *
+	 * @param object $vendor_request VendorRequest model
+	 * @param object $transaction Transaction model
+	 * @return bool
+	 */
+	public function sendVendorScheduleConfirmation($vendor_request, $transaction): bool {
+		// Get agent email from transaction
+		$agent_email = $transaction->agent_email ?? null;
+		if (!$agent_email) {
+			error_log('NotificationService: No agent email found for transaction ' . $transaction->id);
+			return false;
+		}
+
+		$subject = "Vendor Scheduled: {$vendor_request->vendor_type} for {$transaction->property_address}";
+
+		$scheduled_datetime = $vendor_request->scheduled_date;
+		if ($vendor_request->scheduled_time) {
+			$scheduled_datetime .= ' at ' . $vendor_request->scheduled_time;
+		}
+
+		$body = $this->renderTemplate('vendor-schedule-confirmation', [
+			'agent_name' => $transaction->agent_name ?? 'Agent',
+			'vendor_type' => ucwords(str_replace('_', ' ', $vendor_request->vendor_type)),
+			'vendor_name' => $vendor_request->vendor_name ?? 'Vendor',
+			'vendor_email' => $vendor_request->vendor_email,
+			'vendor_phone' => $vendor_request->vendor_phone ?? 'Not provided',
+			'property_address' => $transaction->property_address,
+			'scheduled_datetime' => $scheduled_datetime,
+			'dashboard_url' => admin_url('admin.php?page=ma-deal-room&transaction_id=' . $transaction->id),
+		]);
+
+		return $this->sendEmail($agent_email, $subject, $body);
+	}
+
+	/**
+	 * Send vendor work completion notification to agent
+	 *
+	 * @param object $vendor_request VendorRequest model
+	 * @param object $transaction Transaction model
+	 * @return bool
+	 */
+	public function sendVendorCompletionNotification($vendor_request, $transaction): bool {
+		// Get agent email from transaction
+		$agent_email = $transaction->agent_email ?? null;
+		if (!$agent_email) {
+			error_log('NotificationService: No agent email found for transaction ' . $transaction->id);
+			return false;
+		}
+
+		$subject = "Vendor Completed Work: {$vendor_request->vendor_type} for {$transaction->property_address}";
+
+		$body = $this->renderTemplate('vendor-completion-notification', [
+			'agent_name' => $transaction->agent_name ?? 'Agent',
+			'vendor_type' => ucwords(str_replace('_', ' ', $vendor_request->vendor_type)),
+			'vendor_name' => $vendor_request->vendor_name ?? 'Vendor',
+			'vendor_email' => $vendor_request->vendor_email,
+			'property_address' => $transaction->property_address,
+			'completion_notes' => $vendor_request->completion_notes ?? 'No notes provided',
+			'document_url' => $vendor_request->document_url ?? null,
+			'dashboard_url' => admin_url('admin.php?page=ma-deal-room&transaction_id=' . $transaction->id),
+		]);
+
+		return $this->sendEmail($agent_email, $subject, $body);
+	}
+
+	/**
+	 * Send vendor availability notification to agent
+	 *
+	 * @param object $vendor_request VendorRequest model
+	 * @param object $transaction Transaction model
+	 * @param array $availability_slots Array of available date/time slots
+	 * @return bool
+	 */
+	public function sendVendorAvailabilityNotification($vendor_request, $transaction, array $availability_slots): bool {
+		// Get agent email from transaction
+		$agent_email = $transaction->agent_email ?? null;
+		if (!$agent_email) {
+			error_log('NotificationService: No agent email found for transaction ' . $transaction->id);
+			return false;
+		}
+
+		$subject = "Vendor Availability Received: {$vendor_request->vendor_type} for {$transaction->property_address}";
+
+		// Format availability slots
+		$formatted_slots = [];
+		foreach ($availability_slots as $slot) {
+			$formatted_slots[] = date('l, F j, Y', strtotime($slot['available_date'])) . ' at ' . $slot['available_time'];
+		}
+
+		$body = $this->renderTemplate('vendor-availability-notification', [
+			'agent_name' => $transaction->agent_name ?? 'Agent',
+			'vendor_type' => ucwords(str_replace('_', ' ', $vendor_request->vendor_type)),
+			'vendor_name' => $vendor_request->vendor_name ?? 'Vendor',
+			'vendor_email' => $vendor_request->vendor_email,
+			'property_address' => $transaction->property_address,
+			'availability_slots' => $formatted_slots,
+			'dashboard_url' => admin_url('admin.php?page=ma-deal-room&transaction_id=' . $transaction->id),
+		]);
+
+		return $this->sendEmail($agent_email, $subject, $body);
+	}
+
+	/**
+	 * Send new message notification
+	 *
+	 * @param object $vendor_request VendorRequest model
+	 * @param object $transaction Transaction model
+	 * @param string $recipient_email Email of message recipient
+	 * @param string $sender_name Name of sender
+	 * @param string $message Message text
+	 * @return bool
+	 */
+	public function sendVendorMessageNotification($vendor_request, $transaction, string $recipient_email, string $sender_name, string $message): bool {
+		$subject = "New Message: {$transaction->property_address}";
+
+		$body = $this->renderTemplate('vendor-message-notification', [
+			'recipient_name' => $recipient_email,
+			'sender_name' => $sender_name,
+			'vendor_type' => ucwords(str_replace('_', ' ', $vendor_request->vendor_type)),
+			'property_address' => $transaction->property_address,
+			'message' => $message,
+			'portal_url' => home_url('/agent-dashboard/#/vendor-portal?token=' . $vendor_request->token),
+		]);
+
+		return $this->sendEmail($recipient_email, $subject, $body);
+	}
 }

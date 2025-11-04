@@ -1,31 +1,61 @@
+import { useState } from 'react';
 import { Modal, ModalFooter } from '@/components/shared/Modal';
 import { Button } from '@/components/shared/Button';
 import { Badge } from '@/components/shared/Badge';
 import { formatDateTime } from '@/utils/formatDate';
+import { UserPlus } from 'lucide-react';
+import { VendorRequestForm } from '../VendorRequestForm';
 import type { Task } from '@/api/types';
 
 interface TaskDetailModalProps {
   task: Task;
   isOpen: boolean;
   onClose: () => void;
+  onRequestVendor?: () => void;
 }
 
-export const TaskDetailModal = ({ task, isOpen, onClose }: TaskDetailModalProps) => {
+export const TaskDetailModal = ({ task, isOpen, onClose, onRequestVendor }: TaskDetailModalProps) => {
+  const [showVendorForm, setShowVendorForm] = useState(false);
+
+  // Check if task can have vendor requested
+  const canRequestVendor = task.owner_role === 'vendor' && task.status !== 'completed';
+
+  const handleRequestVendor = () => {
+    setShowVendorForm(true);
+  };
+
+  const handleVendorRequestSuccess = () => {
+    setShowVendorForm(false);
+    onRequestVendor?.();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Task Details" size="lg">
-      <div className="space-y-6">
-        {/* Title and status */}
-        <div>
-          <div className="flex items-start justify-between gap-4">
-            <h3 className="text-xl font-semibold text-gray-900">{task.title}</h3>
-            <Badge variant={task.status === 'completed' ? 'success' : 'warning'}>
-              {task.status}
-            </Badge>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} title="Task Details" size="lg">
+        <div className="space-y-6">
+          {/* Title and status */}
+          <div>
+            <div className="flex items-start justify-between gap-4">
+              <h3 className="text-xl font-semibold text-gray-900">{task.title}</h3>
+              <Badge variant={task.status === 'completed' ? 'success' : 'warning'}>
+                {task.status}
+              </Badge>
+            </div>
+            {task.description && (
+              <p className="text-sm text-gray-600 mt-2">{task.description}</p>
+            )}
+            {canRequestVendor && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800 mb-3">
+                  This task is assigned to a vendor. Request a vendor to complete this work:
+                </p>
+                <Button variant="primary" size="sm" onClick={handleRequestVendor}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Request Vendor
+                </Button>
+              </div>
+            )}
           </div>
-          {task.description && (
-            <p className="text-sm text-gray-600 mt-2">{task.description}</p>
-          )}
-        </div>
 
         {/* Details */}
         <div className="grid grid-cols-2 gap-6">
@@ -78,5 +108,17 @@ export const TaskDetailModal = ({ task, isOpen, onClose }: TaskDetailModalProps)
         </Button>
       </ModalFooter>
     </Modal>
+
+      {/* Vendor Request Form */}
+      {showVendorForm && (
+        <VendorRequestForm
+          isOpen={showVendorForm}
+          onClose={() => setShowVendorForm(false)}
+          transactionId={task.transaction_id}
+          taskId={task.id}
+          onSuccess={handleVendorRequestSuccess}
+        />
+      )}
+    </>
   );
 };
