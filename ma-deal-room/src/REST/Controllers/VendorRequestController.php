@@ -173,7 +173,11 @@ class VendorRequestController extends BaseController {
 			return $this->error('Invalid vendor type', 400);
 		}
 
-		// Prepare vendor request data
+		// Generate secure token before creating the request (required by database constraint)
+		$token = bin2hex(random_bytes(32));
+		$token_expires_at = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+		// Prepare vendor request data WITH token
 		$data = [
 			'transaction_id' => (int) $request->get_param('transaction_id'),
 			'task_id' => $request->get_param('task_id') ? (int) $request->get_param('task_id') : null,
@@ -183,21 +187,20 @@ class VendorRequestController extends BaseController {
 			'vendor_phone' => $request->get_param('vendor_phone') ? sanitize_text_field($request->get_param('vendor_phone')) : null,
 			'vendor_name' => $request->get_param('vendor_name') ? sanitize_text_field($request->get_param('vendor_name')) : null,
 			'vendor_company' => $request->get_param('vendor_company') ? sanitize_text_field($request->get_param('vendor_company')) : null,
+			'token' => $token,
+			'token_expires_at' => $token_expires_at,
 			'status' => 'sent',
 			'created_at' => current_time('mysql'),
 			'updated_at' => current_time('mysql'),
 			'metadata' => $request->get_param('notes') ? json_encode(['notes' => sanitize_textarea_field($request->get_param('notes'))]) : null,
 		];
 
-		// Create vendor request
+		// Create vendor request with token already included
 		$vendor_request = $this->vendor_request_repository->create($data);
 
 		if (!$vendor_request) {
 			return $this->error('Failed to create vendor request', 500);
 		}
-
-		// Generate secure token and portal URL
-		$token = $this->vendor_service->generateSignedUrl($vendor_request->id, 30);
 
 		// Generate portal URL
 		$portal_url = home_url('/agent-dashboard/#/vendor-portal?token=' . $token);
@@ -224,8 +227,8 @@ class VendorRequestController extends BaseController {
 			$vendor_request->transaction_id
 		);
 
-		// Refresh vendor request to get token
-		$vendor_request = $this->vendor_request_repository->findById($vendor_request->id);
+		// Refresh vendor request to get token from database
+		$vendor_request = $this->vendor_request_repository->find($vendor_request->id);
 
 		return $this->success([
 			'vendor_request' => $vendor_request->toArray(),
@@ -242,7 +245,7 @@ class VendorRequestController extends BaseController {
 	 */
 	public function get_vendor_request(WP_REST_Request $request) {
 		$id = (int) $request->get_param('id');
-		$vendor_request = $this->vendor_request_repository->findById($id);
+		$vendor_request = $this->vendor_request_repository->find($id);
 
 		if (!$vendor_request) {
 			return $this->error('Vendor request not found', 404);
@@ -268,7 +271,7 @@ class VendorRequestController extends BaseController {
 	 */
 	public function update_vendor_request(WP_REST_Request $request) {
 		$id = (int) $request->get_param('id');
-		$vendor_request = $this->vendor_request_repository->findById($id);
+		$vendor_request = $this->vendor_request_repository->find($id);
 
 		if (!$vendor_request) {
 			return $this->error('Vendor request not found', 404);
@@ -325,7 +328,7 @@ class VendorRequestController extends BaseController {
 		);
 
 		// Get updated vendor request
-		$updated_vendor_request = $this->vendor_request_repository->findById($id);
+		$updated_vendor_request = $this->vendor_request_repository->find($id);
 
 		return $this->success([
 			'vendor_request' => $updated_vendor_request->toArray(),
@@ -340,7 +343,7 @@ class VendorRequestController extends BaseController {
 	 */
 	public function delete_vendor_request(WP_REST_Request $request) {
 		$id = (int) $request->get_param('id');
-		$vendor_request = $this->vendor_request_repository->findById($id);
+		$vendor_request = $this->vendor_request_repository->find($id);
 
 		if (!$vendor_request) {
 			return $this->error('Vendor request not found', 404);
@@ -380,7 +383,7 @@ class VendorRequestController extends BaseController {
 	 */
 	public function resend_invitation(WP_REST_Request $request) {
 		$id = (int) $request->get_param('id');
-		$vendor_request = $this->vendor_request_repository->findById($id);
+		$vendor_request = $this->vendor_request_repository->find($id);
 
 		if (!$vendor_request) {
 			return $this->error('Vendor request not found', 404);
@@ -394,7 +397,7 @@ class VendorRequestController extends BaseController {
 		// Generate new token if expired or missing
 		if (!$vendor_request->token || strtotime($vendor_request->token_expires_at) < time()) {
 			$token = $this->vendor_service->generateSignedUrl($vendor_request->id, 30);
-			$vendor_request = $this->vendor_request_repository->findById($id); // Refresh
+			$vendor_request = $this->vendor_request_repository->find($id); // Refresh
 		}
 
 		// Generate portal URL
@@ -437,7 +440,7 @@ class VendorRequestController extends BaseController {
 	 */
 	public function rate_vendor(WP_REST_Request $request) {
 		$vendor_request_id = (int) $request->get_param('id');
-		$vendor_request = $this->vendor_request_repository->findById($vendor_request_id);
+		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 
 		if (!$vendor_request) {
 			return $this->error('Vendor request not found', 404);
