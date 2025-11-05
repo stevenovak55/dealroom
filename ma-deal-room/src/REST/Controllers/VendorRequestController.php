@@ -196,10 +196,17 @@ class VendorRequestController extends BaseController {
 		];
 
 		// Create vendor request with token already included
-		$vendor_request = $this->vendor_request_repository->create($data);
+		$vendor_request_id = $this->vendor_request_repository->create($data);
+
+		if (!$vendor_request_id) {
+			return $this->error('Failed to create vendor request', 500);
+		}
+
+		// Fetch the full vendor request object
+		$vendor_request = $this->vendor_request_repository->find($vendor_request_id);
 
 		if (!$vendor_request) {
-			return $this->error('Failed to create vendor request', 500);
+			return $this->error('Failed to retrieve vendor request', 500);
 		}
 
 		// Generate portal URL
@@ -207,13 +214,19 @@ class VendorRequestController extends BaseController {
 
 		// Send invitation email
 		try {
+			error_log('VendorRequestController: Attempting to send email to ' . $vendor_email);
+			error_log('VendorRequestController: Portal URL: ' . $portal_url);
+
 			$email_sent = $this->notification_service->sendVendorRequest($vendor_request, $portal_url);
 
 			if (!$email_sent) {
 				error_log('VendorRequestController: Failed to send invitation email to ' . $vendor_email);
+			} else {
+				error_log('VendorRequestController: Email sent successfully to ' . $vendor_email);
 			}
 		} catch (\Exception $e) {
 			error_log('VendorRequestController: Email error - ' . $e->getMessage());
+			$email_sent = false;
 		}
 
 		// Log event
@@ -227,8 +240,7 @@ class VendorRequestController extends BaseController {
 			$vendor_request->transaction_id
 		);
 
-		// Refresh vendor request to get token from database
-		$vendor_request = $this->vendor_request_repository->find($vendor_request->id);
+		// No need to refresh - we already have the full vendor request object
 
 		return $this->success([
 			'vendor_request' => $vendor_request->toArray(),
