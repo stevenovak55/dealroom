@@ -46,14 +46,22 @@ See `docs/RESEARCH.md` for detailed regulatory research with citations.
 
 ## Quick Start
 
-### Prerequisites
+### For Users (Installing on WordPress)
+
+**📚 [QUICK START USER GUIDE](QUICK_START_GUIDE.md)** - Step-by-step guide for using the plugin
+
+If you've already installed the plugin and want to learn how to add vendors, manage tasks, and use the interface, **start with the Quick Start Guide**.
+
+### For Developers (Setting Up Development Environment)
+
+#### Prerequisites
 
 - Docker & Docker Compose
 - Node.js 18+ (for React development)
 - PHP 8.2+ (for local development without Docker)
 - Composer (PHP dependency manager)
 
-### Installation
+#### Installation
 
 1. **Clone and configure**:
 ```bash
@@ -202,12 +210,21 @@ ma-deal-room/
 
 ## Documentation
 
+### User Documentation
+- **[Quick Start Guide](QUICK_START_GUIDE.md)**: How to add vendors, manage tasks, and use the interface
+- **[Installation Guide](INSTALLATION_GUIDE.txt)**: Installing the plugin on production WordPress
+
+### Developer Documentation
 - **[API Reference](docs/API.md)**: Complete REST endpoint documentation
 - **[Template DSL](docs/TEMPLATES.md)**: How to create custom task templates
 - **[Research](docs/RESEARCH.md)**: MA regulatory requirements with citations
 - **[ADRs](docs/DECISIONS.md)**: Architecture decisions and rationale
 - **[Roadmap](docs/ROADMAP.md)**: Planned features and milestones
 - **[Development](docs/DEVELOPMENT.md)**: Detailed development guide
+
+### Production Deployment
+- **[Production Checklist](PRODUCTION_READY_CHECKLIST.md)**: Pre-deployment verification steps
+- **[Plugin Activation Test Report](PLUGIN_ACTIVATION_TEST_REPORT.md)**: Test results and readiness assessment
 
 ## Testing
 
