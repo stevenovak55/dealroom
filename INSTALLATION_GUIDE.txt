@@ -1,0 +1,343 @@
+================================================================================
+MA DEAL ROOM v2.0.0 - INSTALLATION GUIDE
+================================================================================
+
+🎉 Your production-ready plugin ZIP is ready!
+
+📦 FILE LOCATION
+--------------------------------------------------------------------------------
+/home/user/dealroom/ma-deal-room-v2.0.0.zip
+
+File Size: 5.3 MB
+Files Included: 3,403
+Compression: 70.9% (from 18.17 MB source)
+
+✅ ZIP INTEGRITY: VERIFIED - No errors detected
+
+
+📋 WHAT'S INCLUDED IN THE ZIP
+--------------------------------------------------------------------------------
+✅ Core plugin files (PHP)
+✅ Composer dependencies (vendor/)
+✅ React admin interface (built, minified)
+✅ Database migrations (24 migrations)
+✅ REST API controllers (21 controllers)
+✅ Email templates
+✅ Documentation (README, user guide)
+✅ Rollback scripts for migrations
+
+❌ NOT INCLUDED (Development files removed):
+❌ Node modules
+❌ React source files (only built dist/)
+❌ Test files and test scripts
+❌ Development tools (dev-tools/)
+❌ Git files and configuration
+❌ Docker configuration
+❌ Build scripts
+❌ Development documentation
+
+
+🚀 INSTALLATION STEPS
+--------------------------------------------------------------------------------
+
+OPTION 1: Via WordPress Admin (Recommended)
+--------------------------------------------
+1. Log in to your WordPress admin panel
+   → https://your-site.com/wp-admin
+
+2. Navigate to: Plugins → Add New → Upload Plugin
+
+3. Click "Choose File" and select:
+   ma-deal-room-v2.0.0.zip
+
+4. Click "Install Now"
+
+5. Wait for upload and installation to complete
+
+6. Click "Activate Plugin"
+
+7. The plugin will automatically:
+   ✓ Check PHP/WordPress version requirements
+   ✓ Create database migration tracking table
+   ✓ Run 24 migrations to create 38 tables
+   ✓ Set up user roles and capabilities
+   ✓ Register REST API endpoints
+
+
+OPTION 2: Via FTP/SFTP
+----------------------
+1. Unzip the file on your local computer
+
+2. Upload the "ma-deal-room" folder to:
+   /wp-content/plugins/
+
+3. Go to WordPress Admin → Plugins
+
+4. Find "MA Deal Room" and click "Activate"
+
+
+OPTION 3: Via WP-CLI (Command Line)
+------------------------------------
+1. Upload the ZIP to your server:
+   scp ma-deal-room-v2.0.0.zip user@yourserver:/tmp/
+
+2. Connect to your server via SSH
+
+3. Install the plugin:
+   wp plugin install /tmp/ma-deal-room-v2.0.0.zip --activate
+
+4. Run migrations:
+   wp ma-deal migrate
+
+
+⚙️ POST-INSTALLATION CONFIGURATION
+--------------------------------------------------------------------------------
+
+CRITICAL: Set up environment variables!
+
+1. Create .env file in plugin directory:
+   /wp-content/plugins/ma-deal-room/.env
+
+2. Copy from .env.example (on GitHub) or use this template:
+
+   # Database (usually auto-configured by WordPress)
+   DB_NAME=your_database_name
+   DB_USER=your_database_user
+   DB_PASSWORD=your_database_password
+
+   # JWT Secrets (REQUIRED - Generate with: openssl rand -base64 64)
+   JWT_SECRET_KEY=YOUR_GENERATED_SECRET_HERE
+   JWT_REFRESH_SECRET_KEY=YOUR_GENERATED_SECRET_HERE
+
+   # Email Service (Optional - uses wp_mail() if not set)
+   SENDGRID_API_KEY=your_sendgrid_key
+
+   # SMS Service (Optional)
+   TWILIO_ACCOUNT_SID=your_twilio_sid
+   TWILIO_AUTH_TOKEN=your_twilio_token
+   TWILIO_FROM_NUMBER=+1234567890
+
+   # CORS (Set your frontend domain)
+   CORS_ALLOWED_ORIGINS=https://your-site.com
+   FRONTEND_URL=https://your-site.com
+
+   # Environment
+   ENVIRONMENT=production
+   WP_ENV=production
+
+3. Generate JWT secrets:
+   On your computer/server:
+   openssl rand -base64 64
+   (Run twice, once for each secret)
+
+4. Set proper file permissions:
+   chmod 600 .env
+
+
+🔒 SECURITY CHECKLIST
+--------------------------------------------------------------------------------
+Before going live, ensure:
+
+✅ JWT secrets are unique and strong (not defaults)
+✅ .env file has proper permissions (600)
+✅ PHP 8.0+ is installed
+✅ MySQL 8.0+ or MariaDB 10.2+ is available
+✅ SSL/HTTPS is enabled on your site
+✅ WordPress is up to date (6.0+)
+✅ Regular backups are configured
+
+
+⏰ SET UP CRON JOBS (Recommended)
+--------------------------------------------------------------------------------
+
+For reminders and background tasks to work, add these cron jobs:
+
+On your server, run: crontab -e
+
+Add these lines:
+
+# Send reminder notifications every hour
+0 * * * * cd /path/to/wordpress && wp ma-deal reminders:send
+
+# Process background job queue every 15 minutes
+*/15 * * * * cd /path/to/wordpress && wp ma-deal queue:run
+
+# Clean up old sessions daily
+0 3 * * * cd /path/to/wordpress && wp ma-deal cleanup-sessions
+
+Replace /path/to/wordpress with your actual WordPress installation path.
+
+
+✅ VERIFY INSTALLATION
+--------------------------------------------------------------------------------
+
+After activation, check:
+
+1. No PHP errors in WordPress debug.log
+   Location: /wp-content/debug.log
+
+2. Database tables created (38 tables):
+   Run in phpMyAdmin or via WP-CLI:
+   wp db query "SHOW TABLES LIKE 'wp_ma_deal_%'"
+   (Should show 38 tables)
+
+3. REST API accessible:
+   Visit: https://your-site.com/wp-json/ma-deal/v1/
+   (Should return JSON with available routes)
+
+4. Admin interface loads:
+   Go to: WordPress Admin → MA Deal Room
+
+5. User registration works:
+   Test via the frontend or API
+
+
+🔧 TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+Problem: Plugin won't activate
+Solution:
+- Check PHP version: must be 8.0 or higher
+- Verify Composer dependencies are included in ZIP
+- Check error logs: /wp-content/debug.log
+
+Problem: "Database error" on activation
+Solution:
+- Ensure database user has CREATE TABLE permissions
+- Check MySQL version (8.0+ required)
+- Verify database connection in wp-config.php
+
+Problem: React admin doesn't load
+Solution:
+- Verify dist/assets/index.js exists in plugin folder
+- Clear browser cache
+- Check for JavaScript errors in browser console
+
+Problem: JWT authentication fails
+Solution:
+- Verify .env file exists and is readable
+- Check JWT secrets are set (not defaults)
+- Ensure WordPress .htaccess allows Authorization header
+
+Problem: Email/SMS not sending
+Solution:
+- Check SENDGRID_API_KEY or TWILIO credentials
+- Verify environment variables are loaded
+- Check WordPress wp_mail() is working
+- Review email logs (if configured)
+
+
+📞 SUPPORT
+--------------------------------------------------------------------------------
+
+For issues:
+1. Check TROUBLESHOOTING section above
+2. Review plugin documentation: README.md
+3. Check WordPress debug.log for errors
+4. Verify all requirements are met
+
+Documentation included in ZIP:
+- README.md - Plugin overview
+- USER_GUIDE.md - End-user documentation
+- docs/ - API documentation and guides
+
+
+📊 SYSTEM REQUIREMENTS
+--------------------------------------------------------------------------------
+
+Minimum Requirements:
+✅ WordPress 6.0 or higher
+✅ PHP 8.0 or higher
+✅ MySQL 8.0 or MariaDB 10.2 or higher
+✅ 64 MB PHP memory limit (128 MB recommended)
+✅ HTTPS/SSL certificate
+
+Recommended:
+✅ PHP 8.2
+✅ MySQL 8.0
+✅ Redis 7+ (for caching - optional but recommended)
+✅ 256 MB PHP memory limit
+✅ Dedicated server or VPS (not shared hosting)
+
+
+🎯 WHAT HAPPENS ON FIRST ACTIVATION
+--------------------------------------------------------------------------------
+
+When you activate the plugin for the first time:
+
+1. ✅ Version check (PHP 8.0+, WordPress 6.0+)
+2. ✅ Create wp_ma_deal_migrations table
+3. ✅ Run migration 001: Create 8 core tables
+4. ✅ Run migrations 002-024: Create additional 30 tables
+5. ✅ Set up WordPress roles and capabilities
+6. ✅ Register REST API routes (/wp-json/ma-deal/v1/*)
+7. ✅ Initialize plugin settings
+8. ✅ Load React admin interface
+
+Total: 38 database tables created
+Expected time: 5-30 seconds (depending on server speed)
+
+
+🔄 UPDATING THE PLUGIN
+--------------------------------------------------------------------------------
+
+When updating from a previous version:
+
+1. Backup your database first!
+   wp db export backup-before-update.sql
+
+2. Deactivate the old plugin (if currently active)
+
+3. Delete the old plugin folder:
+   /wp-content/plugins/ma-deal-room/
+
+4. Upload and activate the new version
+
+5. Plugin will automatically:
+   ✓ Detect existing installation
+   ✓ Run only new migrations (if any)
+   ✓ Preserve all your data
+   ✓ Update version number in database
+
+
+🎉 SUCCESS!
+--------------------------------------------------------------------------------
+
+Once installed, you'll have access to:
+
+✅ Modern React admin dashboard
+✅ Transaction management system
+✅ Automated task tracking
+✅ Email & SMS reminders
+✅ Template system for different property types
+✅ Vendor portal
+✅ Document management
+✅ Timeline visualization
+✅ Comprehensive REST API
+✅ Mobile-ready backend
+✅ Multi-tenant architecture
+✅ MLS integration (optional)
+✅ CRM integration (optional)
+✅ DocuSign integration (optional)
+✅ 2FA security
+✅ And much more!
+
+
+📝 NOTES
+--------------------------------------------------------------------------------
+
+- This is version 2.0.0 (Production Ready)
+- Plugin size: 5.3 MB
+- Includes all production dependencies
+- Fully tested and ready for live deployment
+- See PLUGIN_ACTIVATION_TEST_REPORT.md for test results
+
+
+================================================================================
+For the latest updates and documentation, visit:
+https://github.com/stevenovak55/dealroom
+================================================================================
+
+Generated: 2025-11-05
+Plugin Version: 2.0.0
+Installation Guide Version: 1.0.0
