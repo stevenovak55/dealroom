@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, FileText, Layout, Library, Bell, Settings, Menu, FolderOpen, Database, FileSignature, Users } from 'lucide-react';
+import { Home, FileText, Layout, Library, Bell, Settings, Menu, FolderOpen, Database, FileSignature, Users, Building2 } from 'lucide-react';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/utils/cn';
 
@@ -7,6 +7,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Transactions', href: '/transactions', icon: FileText },
   { name: 'Documents', href: '/documents', icon: FolderOpen },
+  { name: 'Vendor Network', href: '/vendors', icon: Building2 },
   { name: 'MLS Integration', href: '/mls', icon: Database },
   { name: 'CRM Integration', href: '/integrations/crm', icon: Users },
   { name: 'DocuSign', href: '/integrations/docusign', icon: FileSignature },

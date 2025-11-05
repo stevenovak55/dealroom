@@ -18,6 +18,7 @@ import { DocuSignSettings } from '@/pages/Integrations/DocuSign';
 import CRMIntegrationPage from '@/pages/Integrations/CRM';
 import { Settings } from '@/pages/Settings/Settings';
 import { UserProfile } from '@/pages/UserProfile';
+import { VendorDirectory } from '@/pages/VendorDirectory';
 import {
   LoginPage,
   RegisterPage,
@@ -68,6 +69,7 @@ export const AppRoutes = () => {
         </Route>
         <Route path="task-library" element={<TaskLibraryEnhanced />} />
         <Route path="reminders" element={<RemindersList />} />
+        <Route path="vendors" element={<VendorDirectory />} />
         <Route path="mls" element={<MLSDashboard />} />
         <Route path="integrations/docusign" element={<DocuSignSettings />} />
         <Route path="integrations/crm" element={<CRMIntegrationPage />} />

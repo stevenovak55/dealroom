@@ -22,6 +22,7 @@ use MADealRoom\Repositories\VendorRequestRepository;
 use MADealRoom\Repositories\VendorMessageRepository;
 use MADealRoom\Repositories\VendorAvailabilityRepository;
 use MADealRoom\Repositories\VendorRatingRepository;
+use MADealRoom\Repositories\VendorProfileRepository;
 use MADealRoom\Repositories\DocumentRepository;
 use MADealRoom\Repositories\EventRepository;
 use MADealRoom\Repositories\NotificationRepository;
@@ -37,6 +38,7 @@ use MADealRoom\Services\TaskScheduler;
 use MADealRoom\Services\ReminderService;
 use MADealRoom\Services\NotificationService;
 use MADealRoom\Services\VendorService;
+use MADealRoom\Services\VendorNetworkService;
 use MADealRoom\Services\EmailService;
 use MADealRoom\Services\FileStorageService;
 use MADealRoom\Services\TaskAssignmentService;
@@ -59,6 +61,7 @@ use MADealRoom\REST\Controllers\TaskDefinitionController;
 use MADealRoom\REST\Controllers\ReminderController;
 use MADealRoom\REST\Controllers\VendorPortalController;
 use MADealRoom\REST\Controllers\VendorRequestController;
+use MADealRoom\REST\Controllers\VendorNetworkController;
 use MADealRoom\REST\Controllers\DocumentController;
 use MADealRoom\REST\Controllers\NotificationController;
 use MADealRoom\REST\Controllers\SettingsController;
@@ -278,6 +281,10 @@ class Plugin {
 			return new VendorRatingRepository();
 		});
 
+		$this->container->register('vendor_profile_repository', function($container) {
+			return new VendorProfileRepository();
+		});
+
 		$this->container->register('vendor_service', function($container) {
 			return new VendorService(
 				$container->get('vendor_request_repository'),
@@ -288,6 +295,13 @@ class Plugin {
 				$container->get('task_repository'),
 				$container->get('email_service'),
 				$container->get('file_storage_service')
+			);
+		});
+
+		$this->container->register('vendor_network_service', function($container) {
+			return new VendorNetworkService(
+				$container->get('vendor_profile_repository'),
+				$container->get('vendor_request_repository')
 			);
 		});
 
@@ -498,6 +512,13 @@ class Plugin {
 			);
 		});
 
+		$this->container->register('vendor_network_controller', function($container) {
+			return new VendorNetworkController(
+				$container->get('vendor_network_service'),
+				$container->get('notification_service')
+			);
+		});
+
 		$this->container->register('document_controller', function($container) {
 			return new DocumentController(
 				$container->get('document_repository'),
@@ -669,6 +690,7 @@ class Plugin {
 		$this->container->get('reminder_controller')->register_routes();
 		$this->container->get('vendor_portal_controller')->register_routes();
 		$this->container->get('vendor_request_controller')->register_routes();
+		$this->container->get('vendor_network_controller')->register_routes();
 		$this->container->get('document_controller')->register_routes();
 		$this->container->get('notification_controller')->register_routes();
 		$this->container->get('settings_controller')->register_routes();
