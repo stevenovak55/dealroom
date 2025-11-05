@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../shared/Button';
 import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/utils/cn';
+
+/**
+ * VerifyEmailForm Component (Mobile-First Redesign)
+ *
+ * Responsive email verification form with mobile-first design:
+ * - Touch-friendly buttons (44px minimum from Phase 1)
+ * - Responsive text sizing
+ * - Three states: pending, verified, resent notification
+ *
+ * Features:
+ * - Automatic verification with token
+ * - Manual verification button
+ * - Resend verification email
+ * - Success/error/resent notifications
+ * - Touch-optimized buttons
+ */
 
 export interface VerifyEmailFormProps {
   token?: string;
@@ -57,15 +74,21 @@ export const VerifyEmailForm = ({
 
   if (verified) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5 md:space-y-6">
+        {/* Success state - responsive sizing */}
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success-100">
+          <div className={cn(
+            'mx-auto flex items-center justify-center rounded-full bg-success-100',
+            // Larger icon on mobile
+            'h-14 w-14 md:h-12 md:w-12'
+          )}>
             <svg
-              className="h-6 w-6 text-success-600"
+              className="h-7 w-7 md:h-6 md:w-6 text-success-600"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -75,14 +98,21 @@ export const VerifyEmailForm = ({
               />
             </svg>
           </div>
-          <h2 className="mt-4 text-2xl font-bold text-gray-900">Email verified!</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="mt-4 text-xl md:text-2xl font-bold text-gray-900">
+            Email verified!
+          </h2>
+          <p className="mt-2 text-sm md:text-base text-gray-600">
             Your email has been successfully verified. You can now access all features of your
             account.
           </p>
         </div>
 
-        <Button type="button" className="w-full" onClick={onBackToLogin}>
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={onBackToLogin}
+        >
           Continue to sign in
         </Button>
       </div>
@@ -90,15 +120,21 @@ export const VerifyEmailForm = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 md:space-y-6">
+      {/* Pending verification state - responsive sizing */}
       <div className="text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+        <div className={cn(
+          'mx-auto flex items-center justify-center rounded-full bg-primary-100',
+          // Larger icon on mobile
+          'h-14 w-14 md:h-12 md:w-12'
+        )}>
           <svg
-            className="h-6 w-6 text-primary-600"
+            className="h-7 w-7 md:h-6 md:w-6 text-primary-600"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -108,8 +144,10 @@ export const VerifyEmailForm = ({
             />
           </svg>
         </div>
-        <h2 className="mt-4 text-2xl font-bold text-gray-900">Verify your email</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="mt-4 text-xl md:text-2xl font-bold text-gray-900">
+          Verify your email
+        </h2>
+        <p className="mt-2 text-sm md:text-base text-gray-600">
           {email ? (
             <>
               We've sent a verification email to <strong>{email}</strong>. Please check your inbox
@@ -121,15 +159,20 @@ export const VerifyEmailForm = ({
         </p>
       </div>
 
+      {/* Error notification - responsive sizing */}
       {error && (
-        <div className="rounded-md bg-danger-50 p-4">
+        <div className={cn(
+          'rounded-md bg-danger-50',
+          'p-3 md:p-4'
+        )}>
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-danger-400"
+                className="h-5 w-5 md:h-6 md:w-6 text-danger-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -139,21 +182,28 @@ export const VerifyEmailForm = ({
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-danger-800">{error}</h3>
+              <h3 className="text-sm md:text-base font-medium text-danger-800">
+                {error}
+              </h3>
             </div>
           </div>
         </div>
       )}
 
+      {/* Resent success notification - responsive sizing */}
       {resent && (
-        <div className="rounded-md bg-success-50 p-4">
+        <div className={cn(
+          'rounded-md bg-success-50',
+          'p-3 md:p-4'
+        )}>
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-success-400"
+                className="h-5 w-5 md:h-6 md:w-6 text-success-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -163,7 +213,7 @@ export const VerifyEmailForm = ({
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-success-800">
+              <h3 className="text-sm md:text-base font-medium text-success-800">
                 Verification email sent! Check your inbox.
               </h3>
             </div>
@@ -171,15 +221,18 @@ export const VerifyEmailForm = ({
         </div>
       )}
 
-      <div className="space-y-3">
-        <p className="text-sm text-gray-500">
+      {/* Instructions and action buttons */}
+      <div className="space-y-3 md:space-y-4">
+        <p className="text-sm md:text-base text-gray-500">
           Didn't receive the email? Check your spam folder or request a new verification email.
         </p>
 
+        {/* Action buttons - Button component already mobile-first from Phase 1 */}
         <div className="space-y-3">
           {token && (
             <Button
               type="button"
+              size="lg"
               className="w-full"
               onClick={handleVerify}
               isLoading={isLoading}
@@ -191,6 +244,7 @@ export const VerifyEmailForm = ({
           <Button
             type="button"
             variant="secondary"
+            size="lg"
             className="w-full"
             onClick={handleResend}
             isLoading={resending}
@@ -202,6 +256,7 @@ export const VerifyEmailForm = ({
           <Button
             type="button"
             variant="ghost"
+            size="lg"
             className="w-full"
             onClick={onBackToLogin}
             disabled={isLoading || resending}
