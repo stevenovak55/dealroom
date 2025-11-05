@@ -214,17 +214,14 @@ class NotificationService {
 			return "Template not found: {$template_name}";
 		}
 
-		// Start output buffering to capture rendered template
-		ob_start();
+		// Read the template file content
+		$content = file_get_contents($template_path);
 
-		// Extract variables into the current symbol table
-		extract($vars);
-
-		// Include the template file
-		include $template_path;
-
-		// Get the buffered content and clean the buffer
-		$content = ob_get_clean();
+		// Replace {{variable}} placeholders with actual values
+		foreach ($vars as $key => $value) {
+			$placeholder = '{{' . $key . '}}';
+			$content = str_replace($placeholder, $value, $content);
+		}
 
 		return $content;
 	}

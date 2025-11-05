@@ -209,8 +209,8 @@ class VendorRequestController extends BaseController {
 			return $this->error('Failed to retrieve vendor request', 500);
 		}
 
-		// Generate portal URL
-		$portal_url = home_url('/agent-dashboard/#/vendor-portal?token=' . $token);
+		// Generate portal URL (public vendor portal, not agent dashboard)
+		$portal_url = home_url('/vendor-portal/?token=' . $token);
 
 		// Send invitation email
 		try {
