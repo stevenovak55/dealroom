@@ -26,18 +26,30 @@ class VendorPortalShortcode {
 	 * @return string HTML output
 	 */
 	public static function render($atts = []): string {
-		// Load the standalone vendor portal HTML
-		$plugin_path = dirname(__FILE__, 3);
-		$vendor_portal_path = $plugin_path . '/assets/vendor-portal.html';
+		// Get the token from URL parameters
+		$token = isset($_GET['token']) ? sanitize_text_field($_GET['token']) : '';
 
-		if (!file_exists($vendor_portal_path)) {
+		if (empty($token)) {
 			return '<div class="vendor-portal-error" style="padding: 20px; background: #fee; border: 1px solid #fcc; color: #c00; border-radius: 8px;">
-				<h2>Vendor Portal Not Found</h2>
-				<p>The vendor portal file is missing or inaccessible.</p>
+				<h2>Invalid Access</h2>
+				<p>No token provided. Please use the link from your invitation email.</p>
 			</div>';
 		}
 
-		// Read and return the HTML file
-		return file_get_contents($vendor_portal_path);
+		// Redirect to the React app vendor portal with the token
+		$vendor_portal_url = home_url('/agent-dashboard/#/vendor-portal?token=' . $token);
+
+		// Use JavaScript redirect to handle the hash routing
+		return '<div style="padding: 40px; text-align: center;">
+			<h2>Loading Vendor Portal...</h2>
+			<p>Please wait while we redirect you to the vendor portal.</p>
+			<script>
+				window.location.href = "' . esc_js($vendor_portal_url) . '";
+			</script>
+			<noscript>
+				<p>JavaScript is required for the vendor portal.</p>
+				<p><a href="' . esc_attr($vendor_portal_url) . '">Click here to continue</a></p>
+			</noscript>
+		</div>';
 	}
 }
