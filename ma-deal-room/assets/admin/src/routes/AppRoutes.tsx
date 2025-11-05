@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AppShell } from '@/components/Layout/AppShell';
+import { ResponsiveLayout } from '@/components/Layout/ResponsiveLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import Dashboard from '@/pages/Dashboard/Dashboard';
 import { TransactionsList } from '@/pages/Transactions/TransactionsList';
@@ -43,7 +43,7 @@ export const AppRoutes = () => {
         path="/"
         element={
           <ProtectedRoute redirectTo="/auth/login">
-            <AppShell />
+            <ResponsiveLayout />
           </ProtectedRoute>
         }
       >
