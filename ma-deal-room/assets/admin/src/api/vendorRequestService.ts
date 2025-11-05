@@ -107,7 +107,8 @@ export const vendorRequestService = {
     per_page?: number;
   }): Promise<ListVendorRequestsResponse> {
     const response = await api.get('/vendor-requests', { params });
-    return response.data;
+    // WordPress REST API wraps response in { success, data, message }
+    return response.data.data || response.data;
   },
 
   /**
@@ -118,7 +119,8 @@ export const vendorRequestService = {
     portal_url: string;
   }> {
     const response = await api.get(`/vendor-requests/${id}`);
-    return response.data;
+    // WordPress REST API wraps response in { success, data, message }
+    return response.data.data || response.data;
   },
 
   /**
@@ -130,7 +132,8 @@ export const vendorRequestService = {
     email_sent: boolean;
   }> {
     const response = await api.post('/vendor-requests', data);
-    return response.data;
+    // WordPress REST API wraps response in { success, data, message }
+    return response.data.data || response.data;
   },
 
   /**
