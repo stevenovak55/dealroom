@@ -282,7 +282,8 @@ class AuthController extends BaseController {
 
         // Record security event - temporarily disabled
         
-        $this->security_service->record_event(
+        // Record security event
+        // $this->security_service->record_event(
         //     $result['user_id'],
         //     'custom',
         //     'user_registered',

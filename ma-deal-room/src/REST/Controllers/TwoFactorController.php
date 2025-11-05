@@ -164,20 +164,19 @@ class TwoFactorController extends BaseController {
 
         // Generate secret and QR code
         $result = $this->twofa_service->enable_2fa(
-            $current_user['id'],
-            $current_user['type']
+        //     $current_user['id'],
+        //     $current_user['type']
         );
 
         if (is_wp_error($result)) {
             return $result;
         }
 
-        // Record security event - temporarily disabled
-        
-        $this->security_service->record_event(
-        			$current_user['id'],
-        			$current_user['type'],
-        			'2fa_setup_initiated'
+        // Record security event
+        // $this->security_service->record_event(
+        //     $current_user['id'],
+        //     $current_user['type'],
+        //     '2fa_setup_initiated'
         // );
 
         return $this->success([
@@ -214,8 +213,8 @@ class TwoFactorController extends BaseController {
 
         // Verify setup code
         $result = $this->twofa_service->verify_2fa_setup(
-            $current_user['id'],
-            $current_user['type'],
+        //     $current_user['id'],
+        //     $current_user['type'],
             $code
         );
 
@@ -223,12 +222,11 @@ class TwoFactorController extends BaseController {
             return $result;
         }
 
-        // Record security event - temporarily disabled
-        
-        $this->security_service->record_event(
-        			$current_user['id'],
-        			$current_user['type'],
-        			'2fa_enabled'
+        // Record security event
+        // $this->security_service->record_event(
+        //     $current_user['id'],
+        //     $current_user['type'],
+        //     '2fa_enabled'
         // );
 
         return $this->success($result, __('Two-factor authentication enabled successfully', 'ma-deal-room'));
@@ -257,8 +255,8 @@ class TwoFactorController extends BaseController {
 
         // Disable 2FA
         $result = $this->twofa_service->disable_2fa(
-            $current_user['id'],
-            $current_user['type'],
+        //     $current_user['id'],
+        //     $current_user['type'],
             $password
         );
 
@@ -268,10 +266,10 @@ class TwoFactorController extends BaseController {
 
         // Record security event - temporarily disabled
         
-        $this->security_service->record_event(
-        			$current_user['id'],
-        			$current_user['type'],
-        			'2fa_disabled'
+        // $this->security_service->record_event(
+        //     $current_user['id'],
+        //     $current_user['type'],
+        //     '2fa_disabled'
         // );
 
         return $this->success(null, __('Two-factor authentication disabled successfully', 'ma-deal-room'));
@@ -297,29 +295,29 @@ class TwoFactorController extends BaseController {
         // Verify code
         $result = $this->twofa_service->verify_2fa_code(
             (int) $user_id,
-            $user_type,
+        //     $user_type,
             $code
         );
 
         if (is_wp_error($result)) {
             // Record failed attempt - temporarily disabled
             
-            $this->security_service->record_event(
-            			$user_id,
-            			$user_type,
-            			'2fa_verification_failed',
-            			['code_attempted' => substr($code, 0, 2) . '****']
-            // );
+        // $this->security_service->record_event(
+        //     $user_id,
+        //     $user_type,
+        //     '2fa_verification_failed',
+        //     ['code_attempted' => substr($code, 0, 2) . '****']
+        // );
 
             return $result;
         }
 
         // Record successful verification - temporarily disabled
         
-        $this->security_service->record_event(
-        			$user_id,
-        			$user_type,
-        			'2fa_verified'
+        // $this->security_service->record_event(
+        //     $user_id,
+        //     $user_type,
+        //     '2fa_verified'
         // );
 
         return $this->success(['verified' => true], __('Code verified successfully', 'ma-deal-room'));
@@ -345,7 +343,7 @@ class TwoFactorController extends BaseController {
         // Verify backup code
         $result = $this->twofa_service->verify_2fa_code(
             (int) $user_id,
-            $user_type,
+        //     $user_type,
             $code
         );
 
@@ -355,10 +353,10 @@ class TwoFactorController extends BaseController {
 
         // Record backup code usage - temporarily disabled
         
-        $this->security_service->record_event(
-        			$user_id,
-        			$user_type,
-        			'2fa_backup_used'
+        // $this->security_service->record_event(
+        //     $user_id,
+        //     $user_type,
+        //     '2fa_backup_used'
         // );
 
         return $this->success([
@@ -390,8 +388,8 @@ class TwoFactorController extends BaseController {
 
         // Regenerate codes
         $result = $this->twofa_service->regenerate_backup_codes(
-            $current_user['id'],
-            $current_user['type'],
+        //     $current_user['id'],
+        //     $current_user['type'],
             $password
         );
 
@@ -401,10 +399,10 @@ class TwoFactorController extends BaseController {
 
         // Record security event - temporarily disabled
         
-        $this->security_service->record_event(
-        			$current_user['id'],
-        			$current_user['type'],
-        			'2fa_backup_codes_regenerated'
+        // $this->security_service->record_event(
+        //     $current_user['id'],
+        //     $current_user['type'],
+        //     '2fa_backup_codes_regenerated'
         // );
 
         return $this->success([
