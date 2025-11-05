@@ -21,6 +21,28 @@
     @apply bg-gray-50 text-gray-900;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Mobile optimizations */
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .safe-area-pb {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .safe-area-pt {
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+
+  /* iOS momentum scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text size adjustment on mobile */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
 }
 
 @layer utilities {
@@ -65,6 +87,38 @@
     animation: slideInRight 0.3s ease-out;
   }
 
+  /* Slide in from left (mobile drawer) */
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.3s ease-out;
+  }
+
+  /* Slide up (mobile modal) */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
   /* Scale up animation */
   @keyframes scaleUp {
     from {
@@ -86,8 +140,22 @@
     transition: all 0.2s ease-in-out;
   }
 
-  .card-hover-effect:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  @media (min-width: 768px) {
+    .card-hover-effect:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Touch feedback */
+  .touch-feedback:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  /* Minimum touch target size */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 }

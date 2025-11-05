@@ -19,7 +19,7 @@ interface CardHeaderProps {
 }
 
 export const CardHeader = ({ children, className }: CardHeaderProps) => {
-  return <div className={cn('px-6 py-4 border-b border-gray-200', className)}>{children}</div>;
+  return <div className={cn('px-4 py-3 md:px-6 md:py-4 border-b border-gray-200', className)}>{children}</div>;
 };
 
 interface CardTitleProps {
@@ -28,7 +28,7 @@ interface CardTitleProps {
 }
 
 export const CardTitle = ({ children, className }: CardTitleProps) => {
-  return <h3 className={cn('text-lg font-semibold text-gray-900', className)}>{children}</h3>;
+  return <h3 className={cn('text-base md:text-lg font-semibold text-gray-900', className)}>{children}</h3>;
 };
 
 interface CardContentProps {
@@ -37,7 +37,7 @@ interface CardContentProps {
 }
 
 export const CardContent = ({ children, className }: CardContentProps) => {
-  return <div className={cn('px-6 py-4', className)}>{children}</div>;
+  return <div className={cn('px-4 py-3 md:px-6 md:py-4', className)}>{children}</div>;
 };
 
 interface CardFooterProps {
@@ -47,7 +47,7 @@ interface CardFooterProps {
 
 export const CardFooter = ({ children, className }: CardFooterProps) => {
   return (
-    <div className={cn('px-6 py-4 border-t border-gray-200 bg-gray-50', className)}>
+    <div className={cn('px-4 py-3 md:px-6 md:py-4 border-t border-gray-200 bg-gray-50', className)}>
       {children}
     </div>
   );

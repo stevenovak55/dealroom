@@ -53,6 +53,22 @@ export default {
           900: '#7f1d1d',
         },
       },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
+      minHeight: {
+        'touch': '44px',
+      },
+      minWidth: {
+        'touch': '44px',
+      },
+      boxShadow: {
+        'mobile': '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'mobile-lg': '0 4px 16px rgba(0, 0, 0, 0.12)',
+      },
     },
   },
   plugins: [],

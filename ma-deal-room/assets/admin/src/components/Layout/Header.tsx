@@ -1,7 +1,8 @@
-import { Search, Bell, User, LogOut, Settings, CheckCheck } from 'lucide-react';
+import { Search, Bell, User, LogOut, Settings, CheckCheck, Menu } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useUIStore } from '@/store/useUIStore';
 import { useGetNotifications, useGetUnreadCount, useMarkAsRead, useMarkAllAsRead } from '../../api/queries/useNotifications';
 import { useSearch } from '../../api/queries/useSearch';
 import { GlobalSearchDropdown } from '../Search/GlobalSearchDropdown';
@@ -10,11 +11,13 @@ import { formatDistanceToNow } from 'date-fns';
 export const Header = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { toggleMobileMenu } = useUIStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -82,10 +85,18 @@ export const Header = () => {
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-      {/* Search */}
-      <div className="flex-1 max-w-lg" ref={searchRef}>
-        <div className="relative">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
+      {/* Mobile menu button */}
+      <button
+        onClick={toggleMobileMenu}
+        className="md:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors touch-target"
+      >
+        <Menu className="h-6 w-6" />
+      </button>
+
+      {/* Search - Desktop */}
+      <div className="hidden md:flex flex-1 max-w-lg" ref={searchRef}>
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
           <input
             type="text"
@@ -113,15 +124,63 @@ export const Header = () => {
         </div>
       </div>
 
+      {/* Search - Mobile (icon only, expands on tap) */}
+      <div className="md:hidden flex-1 flex justify-center" ref={searchRef}>
+        {searchExpanded ? (
+          <div className="relative w-full max-w-md animate-scale-up">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => {
+                if (searchQuery.length >= 2) {
+                  setShowSearchResults(true);
+                }
+              }}
+              onBlur={() => {
+                setTimeout(() => {
+                  if (!searchQuery) {
+                    setSearchExpanded(false);
+                  }
+                }, 200);
+              }}
+              autoFocus
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+            {showSearchResults && searchResults && (
+              <GlobalSearchDropdown
+                results={searchResults}
+                isLoading={isSearching}
+                query={searchQuery}
+                onClose={() => {
+                  setShowSearchResults(false);
+                  setSearchQuery('');
+                  setSearchExpanded(false);
+                }}
+              />
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => setSearchExpanded(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors touch-target"
+          >
+            <Search className="h-6 w-6" />
+          </button>
+        )}
+      </div>
+
       {/* Right side */}
-      <div className="flex items-center gap-4 ml-6">
+      <div className="flex items-center gap-2 md:gap-4 md:ml-6">
         {/* Notifications */}
         <div className="relative" ref={notificationsRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors touch-target"
           >
-            <Bell className="h-5 w-5" />
+            <Bell className="h-5 w-5 md:h-6 md:w-6" />
             {hasUnread && (
               <span className="absolute top-1 right-1 h-2 w-2 bg-danger-500 rounded-full" />
             )}
@@ -129,7 +188,7 @@ export const Header = () => {
 
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            <div className="absolute right-0 mt-2 w-screen max-w-md md:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-scale-up">
               <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900">
                   Notifications {hasUnread && <span className="text-primary-600">({unreadCount})</span>}
@@ -188,19 +247,19 @@ export const Header = () => {
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center gap-2 p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors touch-target"
           >
             <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
               <User className="h-5 w-5 text-white" />
             </div>
-            <span className="text-sm font-medium">
+            <span className="hidden md:block text-sm font-medium">
               {user ? `${user.first_name || user.email?.split('@')[0] || 'User'}` : 'Admin'}
             </span>
           </button>
 
           {/* User Menu Dropdown */}
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-scale-up">
               <div className="p-2">
                 <button
                   onClick={() => {

@@ -9,19 +9,19 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95';
 
     const variants = {
-      primary: 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-600',
-      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500',
-      danger: 'bg-danger-600 text-white hover:bg-danger-700 focus-visible:ring-danger-600',
-      ghost: 'hover:bg-gray-100 text-gray-700 focus-visible:ring-gray-500',
+      primary: 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus-visible:ring-primary-600',
+      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300 focus-visible:ring-gray-500',
+      danger: 'bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800 focus-visible:ring-danger-600',
+      ghost: 'hover:bg-gray-100 active:bg-gray-200 text-gray-700 focus-visible:ring-gray-500',
     };
 
     const sizes = {
-      sm: 'h-8 px-3 text-sm',
-      md: 'h-10 px-4 text-sm',
-      lg: 'h-11 px-8 text-base',
+      sm: 'h-9 px-3 text-sm min-h-[36px]',
+      md: 'h-10 px-4 text-sm min-h-[44px]',
+      lg: 'h-12 px-8 text-base min-h-[48px]',
     };
 
     return (
