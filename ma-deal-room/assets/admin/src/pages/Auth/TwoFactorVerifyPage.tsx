@@ -2,6 +2,22 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { TwoFactorVerifyForm } from '@/components/Auth/TwoFactorVerifyForm';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
+import { cn } from '@/utils/cn';
+
+/**
+ * TwoFactorVerifyPage Component (Mobile-First Redesign)
+ *
+ * Responsive 2FA verification page with mobile-first design:
+ * - Mobile (<768px): Full-width with touch-friendly spacing
+ * - Desktop (>=768px): Centered card with max-width
+ *
+ * Features:
+ * - TOTP code or backup code entry
+ * - Touch-friendly code input
+ * - Responsive text sizing
+ * - Security info banner
+ * - Auto-redirect after successful verification
+ */
 
 export const TwoFactorVerifyPage = () => {
   const navigate = useNavigate();
@@ -37,27 +53,45 @@ export const TwoFactorVerifyPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+    <div className={cn(
+      'flex min-h-screen items-center justify-center',
+      'bg-gray-50',
+      // Mobile-first padding
+      'px-4 py-8 md:px-6 md:py-12 lg:px-8'
+    )}>
+      <div className="w-full max-w-md space-y-6 md:space-y-8">
+        {/* Header - responsive text sizing */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900">MA Deal Room</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            MA Deal Room
+          </h1>
+          <p className="mt-2 text-sm md:text-base text-gray-600">
             Real estate transaction management platform
           </p>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white px-8 py-10 shadow-sm">
+        {/* Form card - responsive padding */}
+        <div className={cn(
+          'rounded-lg border border-gray-200 bg-white shadow-sm',
+          // Mobile-first padding: larger on mobile for easier touch
+          'px-5 py-8 md:px-8 md:py-10'
+        )}>
           <TwoFactorVerifyForm onSuccess={handleSuccess} onCancel={handleCancel} />
         </div>
 
-        <div className="rounded-md bg-gray-50 p-4">
+        {/* Security info banner - responsive sizing */}
+        <div className={cn(
+          'rounded-md bg-gray-50',
+          'p-3 md:p-4'
+        )}>
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-gray-400"
+                className="h-5 w-5 md:h-6 md:w-6 text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -67,7 +101,7 @@ export const TwoFactorVerifyPage = () => {
               </svg>
             </div>
             <div className="ml-3 flex-1 text-left">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm md:text-base text-gray-700">
                 Two-factor authentication adds an extra layer of security to your account. Keep
                 your backup codes in a safe place.
               </p>
