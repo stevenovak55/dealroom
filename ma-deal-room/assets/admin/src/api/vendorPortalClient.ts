@@ -109,7 +109,7 @@ class VendorPortalAPI {
   private client: AxiosInstance;
   private token: string;
 
-  constructor(token: string, baseURL: string = '/wp-json/ma-deal/v1') {
+  constructor(token: string, baseURL: string = '/wp-json/ma-deal-room/v1') {
     this.token = token;
     this.client = axios.create({
       baseURL,
