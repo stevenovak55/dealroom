@@ -100,6 +100,9 @@ class AuthService {
         $this->jwt_access_secret = $this->get_jwt_secret('access');
         $this->jwt_refresh_secret = $this->get_jwt_secret('refresh');
 
+        // Security check: Warn if default/weak JWT secrets are being used
+        $this->check_jwt_secret_security();
+
         // Allow customization via filters
         $this->access_token_expiry = apply_filters('ma_deal_access_token_expiry', $this->access_token_expiry);
         $this->refresh_token_expiry = apply_filters('ma_deal_refresh_token_expiry', $this->refresh_token_expiry);
@@ -795,6 +798,71 @@ class AuthService {
         }
 
         return $secret;
+    }
+
+    /**
+     * Check JWT secret security
+     *
+     * Warns if default or weak JWT secrets are being used
+     *
+     * @return void
+     */
+    private function check_jwt_secret_security(): void {
+        $weak_patterns = [
+            'your-super-secret',
+            'change-this',
+            'CHANGE_THIS',
+            'example',
+            'test',
+            'default',
+            'secret',
+        ];
+
+        // Check access secret
+        foreach ($weak_patterns as $pattern) {
+            if (stripos($this->jwt_access_secret, $pattern) !== false) {
+                $message = 'MA Deal Room CRITICAL SECURITY WARNING: JWT access secret appears to be using a default/weak value! ' .
+                          'Generate a secure secret with: openssl rand -base64 64';
+
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log($message);
+                }
+
+                // Show admin notice
+                add_action('admin_notices', function() use ($message) {
+                    echo '<div class="error"><p><strong>' . esc_html($message) . '</strong></p></div>';
+                });
+                break;
+            }
+        }
+
+        // Check refresh secret
+        foreach ($weak_patterns as $pattern) {
+            if (stripos($this->jwt_refresh_secret, $pattern) !== false) {
+                $message = 'MA Deal Room CRITICAL SECURITY WARNING: JWT refresh secret appears to be using a default/weak value! ' .
+                          'Generate a secure secret with: openssl rand -base64 64';
+
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log($message);
+                }
+
+                // Show admin notice
+                add_action('admin_notices', function() use ($message) {
+                    echo '<div class="error"><p><strong>' . esc_html($message) . '</strong></p></div>';
+                });
+                break;
+            }
+        }
+
+        // Check minimum length (should be at least 64 characters for base64-encoded secrets)
+        if (strlen($this->jwt_access_secret) < 40 || strlen($this->jwt_refresh_secret) < 40) {
+            $message = 'MA Deal Room SECURITY WARNING: JWT secrets appear to be too short. ' .
+                      'Use secrets of at least 64 characters. Generate with: openssl rand -base64 64';
+
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log($message);
+            }
+        }
     }
 
     /**

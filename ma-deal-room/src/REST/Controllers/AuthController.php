@@ -62,6 +62,13 @@ class AuthController extends BaseController {
     private $validation_service;
 
     /**
+     * Account security service
+     *
+     * @var AccountSecurityService
+     */
+    private $security_service;
+
+    /**
      * Constructor
      *
      * @param AuthService $auth_service Auth service instance
@@ -69,13 +76,15 @@ class AuthController extends BaseController {
      * @param EmailVerificationService $email_verification_service Email verification service instance
      * @param PasswordResetService $password_reset_service Password reset service instance
      * @param ValidationService $validation_service Validation service instance
+     * @param AccountSecurityService $security_service Account security service instance
      */
     public function __construct(
         AuthService $auth_service,
         $custom_user_repository,
         EmailVerificationService $email_verification_service,
         PasswordResetService $password_reset_service,
-        ValidationService $validation_service
+        ValidationService $validation_service,
+        AccountSecurityService $security_service = null
     ) {
         parent::__construct();
         $this->auth_service = $auth_service;
@@ -83,6 +92,7 @@ class AuthController extends BaseController {
         $this->email_verification_service = $email_verification_service;
         $this->password_reset_service = $password_reset_service;
         $this->validation_service = $validation_service;
+        $this->security_service = $security_service ?? new AccountSecurityService();
     }
 
     /**
@@ -271,8 +281,8 @@ class AuthController extends BaseController {
         );
 
         // Record security event - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
+        
+        $this->security_service->record_event(
         //     $result['user_id'],
         //     'custom',
         //     'user_registered',
@@ -310,7 +320,7 @@ class AuthController extends BaseController {
         }
 
         // Check if account is locked - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
+        
         // $lockout_info = $this->security_service->is_account_locked($email);
         // if ($lockout_info) {
         //     return $this->error(
@@ -336,13 +346,13 @@ class AuthController extends BaseController {
 
         if (is_wp_error($result)) {
             // Record failed login attempt - temporarily disabled
-            // TODO: Add AccountSecurityService to constructor
+            
             // $this->security_service->record_failed_login($email, $device_info['ip_address'], $result->get_error_code());
             return $result;
         }
 
         // Record successful login - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
+        
         // $this->security_service->record_successful_login(
         //     $result['user_id'],
         //     $result['user_type'],

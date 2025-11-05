@@ -45,18 +45,28 @@ class TwoFactorController extends BaseController {
     private $custom_user_repository;
 
     /**
+     * Account security service
+     *
+     * @var AccountSecurityService
+     */
+    private $security_service;
+
+    /**
      * Constructor
      *
      * @param TwoFactorAuthService $twofa_service Two-factor auth service instance
      * @param \MADealRoom\Repositories\CustomUserRepository $custom_user_repository Custom user repository instance
+     * @param AccountSecurityService $security_service Account security service instance
      */
     public function __construct(
         TwoFactorAuthService $twofa_service,
-        $custom_user_repository
+        $custom_user_repository,
+        AccountSecurityService $security_service = null
     ) {
         parent::__construct();
         $this->twofa_service = $twofa_service;
         $this->custom_user_repository = $custom_user_repository;
+        $this->security_service = $security_service ?? new AccountSecurityService();
     }
 
     /**
@@ -163,11 +173,11 @@ class TwoFactorController extends BaseController {
         }
 
         // Record security event - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
-        //     $current_user['id'],
-        //     $current_user['type'],
-        //     '2fa_setup_initiated'
+        
+        $this->security_service->record_event(
+        			$current_user['id'],
+        			$current_user['type'],
+        			'2fa_setup_initiated'
         // );
 
         return $this->success([
@@ -214,11 +224,11 @@ class TwoFactorController extends BaseController {
         }
 
         // Record security event - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
-        //     $current_user['id'],
-        //     $current_user['type'],
-        //     '2fa_enabled'
+        
+        $this->security_service->record_event(
+        			$current_user['id'],
+        			$current_user['type'],
+        			'2fa_enabled'
         // );
 
         return $this->success($result, __('Two-factor authentication enabled successfully', 'ma-deal-room'));
@@ -257,11 +267,11 @@ class TwoFactorController extends BaseController {
         }
 
         // Record security event - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
-        //     $current_user['id'],
-        //     $current_user['type'],
-        //     '2fa_disabled'
+        
+        $this->security_service->record_event(
+        			$current_user['id'],
+        			$current_user['type'],
+        			'2fa_disabled'
         // );
 
         return $this->success(null, __('Two-factor authentication disabled successfully', 'ma-deal-room'));
@@ -293,23 +303,23 @@ class TwoFactorController extends BaseController {
 
         if (is_wp_error($result)) {
             // Record failed attempt - temporarily disabled
-            // TODO: Add AccountSecurityService to constructor
-            // $this->security_service->record_event(
-            //     $user_id,
-            //     $user_type,
-            //     '2fa_verification_failed',
-            //     ['code_attempted' => substr($code, 0, 2) . '****']
+            
+            $this->security_service->record_event(
+            			$user_id,
+            			$user_type,
+            			'2fa_verification_failed',
+            			['code_attempted' => substr($code, 0, 2) . '****']
             // );
 
             return $result;
         }
 
         // Record successful verification - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
-        //     $user_id,
-        //     $user_type,
-        //     '2fa_verified'
+        
+        $this->security_service->record_event(
+        			$user_id,
+        			$user_type,
+        			'2fa_verified'
         // );
 
         return $this->success(['verified' => true], __('Code verified successfully', 'ma-deal-room'));
@@ -344,11 +354,11 @@ class TwoFactorController extends BaseController {
         }
 
         // Record backup code usage - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
-        //     $user_id,
-        //     $user_type,
-        //     '2fa_backup_used'
+        
+        $this->security_service->record_event(
+        			$user_id,
+        			$user_type,
+        			'2fa_backup_used'
         // );
 
         return $this->success([
@@ -390,11 +400,11 @@ class TwoFactorController extends BaseController {
         }
 
         // Record security event - temporarily disabled
-        // TODO: Add AccountSecurityService to constructor
-        // $this->security_service->record_event(
-        //     $current_user['id'],
-        //     $current_user['type'],
-        //     '2fa_backup_codes_regenerated'
+        
+        $this->security_service->record_event(
+        			$current_user['id'],
+        			$current_user['type'],
+        			'2fa_backup_codes_regenerated'
         // );
 
         return $this->success([

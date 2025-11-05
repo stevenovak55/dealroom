@@ -65,6 +65,9 @@ build/
 *.temp
 .cache/
 
+# Development tools (should not be in production)
+/dev-tools/
+
 # Database
 *.sql
 !ma-deal-room/database/**/*.sql

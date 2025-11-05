@@ -58,15 +58,23 @@ $tables = [
 	$prefix . 'ma_deal_task_categories',
 	$prefix . 'ma_deal_transaction_types',
 
-	// Integration tables (from migrations 021, 023)
+	// Integration tables (from migrations 021, 023, 026, 027)
 	$prefix . 'ma_deal_mls_config',
 	$prefix . 'ma_deal_crm_config',
+	$prefix . 'ma_deal_contacts',
+	$prefix . 'ma_deal_docusign_config',
+
+	// DocuSign tables (from migrations 028, 029)
+	$prefix . 'ma_deal_docusign_envelopes',
+	$prefix . 'ma_deal_docusign_webhook_log',
 
 	// Queue system tables (from migration 019)
 	$prefix . 'ma_deal_job_queue',
 
 	// Security tables (from migration 014)
 	$prefix . 'ma_deal_rate_limits',
+	$prefix . 'ma_deal_security_events',
+	$prefix . 'ma_deal_login_attempts',
 
 	// Audit and logging
 	$prefix . 'ma_deal_audit_log',
