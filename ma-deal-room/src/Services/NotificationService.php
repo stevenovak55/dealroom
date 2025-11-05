@@ -121,8 +121,11 @@ class NotificationService {
 		array $headers = [],
 		?string $notification_type = null
 	): bool {
+		error_log("[Notifications] sendEmail called - To: {$to}, Subject: {$subject}");
+
 		// Get user ID from email
 		$user_id = $this->preferences_service->get_user_id_by_email($to);
+		error_log("[Notifications] User ID for {$to}: " . ($user_id ?? 'not found'));
 
 		if ($user_id) {
 			// Check if user has email notifications enabled
@@ -143,7 +146,11 @@ class NotificationService {
 			$headers = ['Content-Type: text/html; charset=UTF-8'];
 		}
 
-		return wp_mail($to, $subject, $body, $headers);
+		error_log("[Notifications] Calling wp_mail to {$to}");
+		$mail_result = wp_mail($to, $subject, $body, $headers);
+		error_log("[Notifications] wp_mail result: " . ($mail_result ? 'Success' : 'Failed'));
+
+		return $mail_result;
 	}
 
 	/**
@@ -255,6 +262,9 @@ class NotificationService {
 	 * @return bool
 	 */
 	public function sendVendorRequest($vendor_request, string $signed_url): bool {
+		error_log('NotificationService::sendVendorRequest - Starting email send');
+		error_log('NotificationService::sendVendorRequest - To: ' . $vendor_request->vendor_email);
+
 		$subject = "MA Deal Room: Action Required";
 
 		$body = $this->renderTemplate('vendor-request', [
@@ -263,7 +273,11 @@ class NotificationService {
 			'expires_at' => date('F j, Y', strtotime($vendor_request->token_expires_at)),
 		]);
 
-		return $this->sendEmail($vendor_request->vendor_email, $subject, $body);
+		error_log('NotificationService::sendVendorRequest - Template rendered, sending email...');
+		$result = $this->sendEmail($vendor_request->vendor_email, $subject, $body);
+		error_log('NotificationService::sendVendorRequest - Email send result: ' . ($result ? 'Success' : 'Failed'));
+
+		return $result;
 	}
 
 	/**
