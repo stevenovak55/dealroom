@@ -39,7 +39,7 @@ export const ResponsiveLayout = () => {
 
           {/* Main Content */}
           <main className="flex-1 pt-14 pb-16 overflow-y-auto">
-            <div className="container mx-auto px-1 py-1">
+            <div className="w-full px-2 py-2">
               <Outlet />
             </div>
           </main>
