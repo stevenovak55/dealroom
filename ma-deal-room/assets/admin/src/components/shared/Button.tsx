@@ -3,25 +3,58 @@ import { cn } from '@/utils/cn';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
+  /**
+   * Mobile variant - ensures touch-friendly sizing on mobile
+   * Automatically uses min 44px height/width on mobile
+   */
+  isMobile?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+  ({ className, variant = 'primary', size = 'md', isLoading, isMobile = false, children, disabled, ...props }, ref) => {
+    // Base styles - mobile-first with touch-friendly defaults
+    const baseStyles = cn(
+      'inline-flex items-center justify-center',
+      'rounded-lg font-medium',
+      'transition-all duration-fast',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+      'disabled:pointer-events-none disabled:opacity-50',
+      'active:scale-95', // Tactile feedback on press
+      // Touch-friendly minimum on mobile
+      isMobile && 'min-h-touch min-w-touch'
+    );
 
     const variants = {
-      primary: 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-600',
-      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500',
-      danger: 'bg-danger-600 text-white hover:bg-danger-700 focus-visible:ring-danger-600',
-      ghost: 'hover:bg-gray-100 text-gray-700 focus-visible:ring-gray-500',
+      primary: 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus-visible:ring-primary-600 shadow-sm hover:shadow',
+      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300 focus-visible:ring-gray-500 border border-gray-300',
+      danger: 'bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800 focus-visible:ring-danger-600 shadow-sm hover:shadow',
+      ghost: 'hover:bg-gray-100 active:bg-gray-200 text-gray-700 focus-visible:ring-gray-500',
     };
 
+    // Mobile-first sizes - start small, scale up on desktop
     const sizes = {
-      sm: 'h-8 px-3 text-sm',
-      md: 'h-10 px-4 text-sm',
-      lg: 'h-11 px-8 text-base',
+      // Small: Touch-friendly on mobile, compact on desktop
+      sm: cn(
+        'min-h-touch px-3 py-2 text-sm',
+        'md:h-9 md:px-3 md:py-1.5'
+      ),
+      // Medium: Comfortable touch target on mobile, standard on desktop
+      md: cn(
+        'min-h-touch px-4 py-3 text-base',
+        'md:h-10 md:px-4 md:py-2 md:text-sm'
+      ),
+      // Large: Extra comfortable on mobile, prominent on desktop
+      lg: cn(
+        'min-h-touch-lg px-6 py-3 text-lg',
+        'md:h-12 md:px-8 md:py-3 md:text-base'
+      ),
+      // Icon: Perfect square touch target
+      icon: cn(
+        'min-h-touch min-w-touch p-0',
+        'md:h-10 md:w-10'
+      ),
     };
 
     return (

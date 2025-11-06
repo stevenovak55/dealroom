@@ -10,6 +10,22 @@ import { Input } from '@/components/shared/Input';
 import { Select } from '@/components/shared/Select';
 import { mlsService } from '@/api/mlsService';
 import type { CreateTransactionInput } from '@/api/types';
+import { cn } from '@/utils/cn';
+
+/**
+ * CreateTransactionWizard Component (Mobile-First Redesign)
+ *
+ * Responsive multi-step transaction creation wizard with mobile-first design:
+ * - Mobile (<768px): Vertical progress, stacked form fields, full-width buttons
+ * - Desktop (>=768px): Horizontal progress, multi-column grids
+ *
+ * Features:
+ * - 3-step wizard: Property Details → Template → Review
+ * - MLS import or manual entry
+ * - Template selection with filtering
+ * - Form validation with React Hook Form
+ * - Touch-friendly inputs and buttons
+ */
 
 const propertyTypeOptions = [
   { value: 'SFH', label: 'Single Family Home' },
@@ -146,32 +162,52 @@ export const CreateTransactionWizard = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/transactions')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
+      {/* Header - responsive layout */}
+      <div className={cn(
+        'flex flex-col space-y-3',
+        'md:flex-row md:items-center md:gap-4 md:space-y-0'
+      )}>
+        <Button
+          variant="ghost"
+          size="md"
+          onClick={() => navigate('/transactions')}
+          className="w-fit"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
           Back
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Create New Transaction</h1>
-          <p className="text-sm text-gray-500 mt-1">Follow the steps to create a transaction</p>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+            Create New Transaction
+          </h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">
+            Follow the steps to create a transaction
+          </p>
         </div>
       </div>
 
-      {/* Progress steps */}
-      <div className="flex items-center justify-between">
+      {/* Progress steps - responsive: vertical on mobile, horizontal on desktop */}
+      <div className={cn(
+        'flex flex-col space-y-4',
+        'md:flex-row md:items-center md:justify-between md:space-y-0'
+      )}>
         {steps.map((step, index) => (
-          <div key={step.id} className="flex items-center flex-1">
-            <div className="flex items-center">
+          <div key={step.id} className={cn(
+            'flex items-center',
+            'md:flex-1'
+          )}>
+            <div className="flex items-center flex-1 md:flex-initial">
               <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                className={cn(
+                  'flex items-center justify-center rounded-full border-2',
+                  'w-10 h-10 md:w-10 md:h-10',
                   currentStep > step.id
                     ? 'bg-primary-600 border-primary-600'
                     : currentStep === step.id
                     ? 'border-primary-600 text-primary-600'
                     : 'border-gray-300 text-gray-400'
-                }`}
+                )}
               >
                 {currentStep > step.id ? (
                   <Check className="h-5 w-5 text-white" />
@@ -179,15 +215,35 @@ export const CreateTransactionWizard = () => {
                   <span className="text-sm font-medium">{step.id}</span>
                 )}
               </div>
-              <div className="ml-3">
-                <p className={`text-sm font-medium ${currentStep >= step.id ? 'text-gray-900' : 'text-gray-400'}`}>
+              <div className="ml-3 flex-1">
+                <p className={cn(
+                  'font-medium',
+                  'text-sm md:text-sm',
+                  currentStep >= step.id ? 'text-gray-900' : 'text-gray-400'
+                )}>
                   {step.name}
                 </p>
-                <p className="text-xs text-gray-500">{step.description}</p>
+                <p className="text-xs md:text-xs text-gray-500 mt-0.5">
+                  {step.description}
+                </p>
               </div>
             </div>
+            {/* Connector line - vertical on mobile, horizontal on desktop */}
             {index < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.id ? 'bg-primary-600' : 'bg-gray-300'}`} />
+              <>
+                {/* Mobile: vertical line */}
+                <div className={cn(
+                  'ml-5 w-0.5 h-6',
+                  'md:hidden',
+                  currentStep > step.id ? 'bg-primary-600' : 'bg-gray-300'
+                )} />
+                {/* Desktop: horizontal line */}
+                <div className={cn(
+                  'hidden md:block',
+                  'flex-1 h-0.5 mx-4',
+                  currentStep > step.id ? 'bg-primary-600' : 'bg-gray-300'
+                )} />
+              </>
             )}
           </div>
         ))}
@@ -196,14 +252,16 @@ export const CreateTransactionWizard = () => {
       {/* Step content */}
       <Card>
         <CardHeader>
-          <CardTitle>{steps[currentStep - 1].name}</CardTitle>
+          <CardTitle className="text-lg md:text-xl">
+            {steps[currentStep - 1].name}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(handleStepSubmit, (errors) => {
             console.log('Form validation errors:', errors);
           })}>
             {currentStep === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-5 md:space-y-4">
                 <Select
                   label="Transaction Side"
                   options={transactionSideOptions}
@@ -213,81 +271,113 @@ export const CreateTransactionWizard = () => {
                   required
                 />
 
-                {/* Import Mode Selector */}
-                <div className="border-t border-b border-gray-200 py-4 my-4">
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">
+                {/* Import Mode Selector - responsive grid */}
+                <div className="border-t border-b border-gray-200 py-4 md:py-4 my-4">
+                  <label className="text-sm md:text-base font-medium text-gray-700 mb-3 block">
                     How would you like to add property details?
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setImportMode('manual')}
-                      className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                      className={cn(
+                        'border-2 rounded-lg text-left transition-colors',
+                        // Touch-friendly padding
+                        'p-4 md:p-4',
                         importMode === 'manual'
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      )}
                     >
-                      <div className="font-medium text-gray-900">Manual Entry</div>
-                      <div className="text-sm text-gray-500 mt-1">Enter property details manually</div>
+                      <div className="text-base md:text-base font-medium text-gray-900">
+                        Manual Entry
+                      </div>
+                      <div className="text-sm md:text-sm text-gray-500 mt-1">
+                        Enter property details manually
+                      </div>
                     </button>
                     <button
                       type="button"
                       onClick={() => setImportMode('mls')}
-                      className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                      className={cn(
+                        'border-2 rounded-lg text-left transition-colors',
+                        // Touch-friendly padding
+                        'p-4 md:p-4',
                         importMode === 'mls'
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      )}
                     >
-                      <div className="flex items-center gap-2 font-medium text-gray-900">
-                        <Database className="h-4 w-4" />
+                      <div className="flex items-center gap-2 font-medium text-gray-900 text-base md:text-base">
+                        <Database className="h-5 w-5 md:h-4 md:w-4" />
                         Import from MLS
                       </div>
-                      <div className="text-sm text-gray-500 mt-1">Search by MLS number</div>
+                      <div className="text-sm md:text-sm text-gray-500 mt-1">
+                        Search by MLS number
+                      </div>
                     </button>
                   </div>
                 </div>
 
-                {/* MLS Search Section */}
+                {/* MLS Search Section - responsive */}
                 {importMode === 'mls' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                    <label className="block text-sm font-medium text-gray-900">
+                  <div className={cn(
+                    'bg-blue-50 border border-blue-200 rounded-lg space-y-3',
+                    'p-4 md:p-4'
+                  )}>
+                    <label className="block text-sm md:text-base font-medium text-gray-900">
                       MLS Number
                     </label>
-                    <div className="flex gap-2">
+                    <div className={cn(
+                      'flex flex-col space-y-2',
+                      'sm:flex-row sm:gap-2 sm:space-y-0'
+                    )}>
                       <input
                         type="text"
                         value={mlsNumber}
                         onChange={(e) => setMlsNumber(e.target.value)}
                         placeholder="e.g., 73429927"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className={cn(
+                          'flex-1 px-4 border border-gray-300 rounded-lg',
+                          'focus:ring-2 focus:ring-primary-500 focus:border-transparent',
+                          'text-base md:text-sm',
+                          // Touch-friendly height
+                          'py-3 md:py-2'
+                        )}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleMLSSearch())}
                       />
                       <button
                         type="button"
                         onClick={handleMLSSearch}
                         disabled={isSearching}
-                        className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2"
+                        className={cn(
+                          'bg-primary-600 text-white rounded-lg',
+                          'hover:bg-primary-700 disabled:opacity-50',
+                          'flex items-center justify-center gap-2',
+                          'text-base md:text-sm font-medium',
+                          // Touch-friendly size
+                          'px-6 py-3 md:px-4 md:py-2',
+                          'w-full sm:w-auto'
+                        )}
                       >
                         {isSearching ? (
                           <>
-                            <RefreshCw className="h-4 w-4 animate-spin" />
+                            <RefreshCw className="h-5 w-5 md:h-4 md:w-4 animate-spin" />
                             Searching...
                           </>
                         ) : (
                           <>
-                            <Search className="h-4 w-4" />
+                            <Search className="h-5 w-5 md:h-4 md:w-4" />
                             Search
                           </>
                         )}
                       </button>
                     </div>
                     {mlsSearchError && (
-                      <p className="text-sm text-red-600">{mlsSearchError}</p>
+                      <p className="text-sm md:text-sm text-red-600">{mlsSearchError}</p>
                     )}
                     {formData.mls_number && !mlsSearchError && (
-                      <p className="text-sm text-green-600">
+                      <p className="text-sm md:text-sm text-green-600">
                         ✓ Property found! Form fields have been auto-filled. You can edit them below if needed.
                       </p>
                     )}
@@ -301,7 +391,8 @@ export const CreateTransactionWizard = () => {
                   error={errors.property_address ? 'Address is required' : undefined}
                   required
                 />
-                <div className="grid grid-cols-3 gap-4">
+                {/* City/State/ZIP - responsive grid: 1 col mobile → 3 cols desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Input
                     label="City"
                     placeholder="Boston"
@@ -348,41 +439,56 @@ export const CreateTransactionWizard = () => {
             )}
 
             {currentStep === 2 && (
-              <div className="space-y-4">
+              <div className="space-y-5 md:space-y-4">
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm md:text-base text-gray-600">
                     Select a template to auto-generate tasks for this transaction
                   </p>
                   {watchedPropertyType && watchedTransactionSide && (
-                    <p className="text-sm text-primary-600 mt-2 font-medium">
+                    <p className="text-sm md:text-sm text-primary-600 mt-2 font-medium">
                       {templates.length} template{templates.length !== 1 ? 's' : ''} available for {' '}
                       {watchedTransactionSide === 'listing' ? 'listing-side' : 'buyer-side'} {' '}
                       {watchedPropertyType} transactions
                     </p>
                   )}
                   {templates.length === 0 && watchedPropertyType && (
-                    <p className="text-sm text-orange-600 mt-2">
+                    <p className="text-sm md:text-sm text-orange-600 mt-2">
                       No templates found. Please check your property type and transaction side selections.
                     </p>
                   )}
                 </div>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-3 md:gap-3">
                   {templates.map((template) => (
                     <label
                       key={template.template_id}
-                      className="flex items-start p-4 border-2 rounded-lg cursor-pointer hover:border-primary-300 transition-colors"
+                      className={cn(
+                        'flex items-start border-2 rounded-lg cursor-pointer',
+                        'hover:border-primary-300 transition-colors',
+                        // Touch-friendly padding
+                        'p-4 md:p-4'
+                      )}
                     >
                       <input
                         type="radio"
                         value={template.template_id}
                         defaultChecked={formData.template_id === template.template_id.toString()}
                         {...register('template_id')}
-                        className="mt-1"
+                        className={cn(
+                          'mt-1',
+                          // Touch-friendly radio button size
+                          'w-5 h-5 md:w-4 md:h-4'
+                        )}
                       />
                       <div className="ml-3 flex-1">
-                        <p className="font-medium text-gray-900">{template.name}</p>
-                        <p className="text-sm text-gray-500 mt-1">{template.description}</p>
-                        <p className="text-xs text-gray-400 mt-2">{template.task_count} tasks</p>
+                        <p className="text-base md:text-base font-medium text-gray-900">
+                          {template.name}
+                        </p>
+                        <p className="text-sm md:text-sm text-gray-500 mt-1">
+                          {template.description}
+                        </p>
+                        <p className="text-xs md:text-xs text-gray-400 mt-2">
+                          {template.task_count} tasks
+                        </p>
                       </div>
                     </label>
                   ))}
@@ -391,45 +497,53 @@ export const CreateTransactionWizard = () => {
             )}
 
             {currentStep === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-5 md:space-y-6">
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-4">Review Transaction Details</h3>
-                  <dl className="space-y-3">
+                  <h3 className="text-base md:text-lg font-medium text-gray-900 mb-4">
+                    Review Transaction Details
+                  </h3>
+                  <dl className="space-y-4 md:space-y-3">
                     <div>
-                      <dt className="text-sm text-gray-500">Transaction Side</dt>
-                      <dd className="text-sm font-medium text-gray-900 mt-1">
+                      <dt className="text-sm md:text-sm text-gray-500">Transaction Side</dt>
+                      <dd className="text-sm md:text-base font-medium text-gray-900 mt-1">
                         {formData.transaction_side === 'listing' ? 'Listing (Seller) Side' : 'Buyer Side'}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm text-gray-500">Property Address</dt>
-                      <dd className="text-sm font-medium text-gray-900 mt-1">
+                      <dt className="text-sm md:text-sm text-gray-500">Property Address</dt>
+                      <dd className="text-sm md:text-base font-medium text-gray-900 mt-1">
                         {formData.property_address}, {formData.property_city}, {formData.property_state} {formData.property_zip}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm text-gray-500">Property Type</dt>
-                      <dd className="text-sm font-medium text-gray-900 mt-1">{formData.property_type}</dd>
+                      <dt className="text-sm md:text-sm text-gray-500">Property Type</dt>
+                      <dd className="text-sm md:text-base font-medium text-gray-900 mt-1">
+                        {formData.property_type}
+                      </dd>
                     </div>
                     {formData.sale_price && (
                       <div>
-                        <dt className="text-sm text-gray-500">Sale Price</dt>
-                        <dd className="text-sm font-medium text-gray-900 mt-1">
+                        <dt className="text-sm md:text-sm text-gray-500">Sale Price</dt>
+                        <dd className="text-sm md:text-base font-medium text-gray-900 mt-1">
                           ${Number(formData.sale_price).toLocaleString()}
                         </dd>
                       </div>
                     )}
                     {formData.template_id && (
                       <div>
-                        <dt className="text-sm text-gray-500">Template Selected</dt>
-                        <dd className="text-sm font-medium text-gray-900 mt-1">
+                        <dt className="text-sm md:text-sm text-gray-500">Template Selected</dt>
+                        <dd className="text-sm md:text-base font-medium text-gray-900 mt-1">
                           {templates.find(t => t.template_id.toString() === formData.template_id)?.name}
                         </dd>
                       </div>
                     )}
                   </dl>
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-sm text-blue-800">
+                  <div className={cn(
+                    'bg-blue-50 border border-blue-200 rounded-md',
+                    'mt-5 md:mt-6',
+                    'p-4 md:p-4'
+                  )}>
+                    <p className="text-sm md:text-sm text-blue-800">
                       <strong>Next Step:</strong> After creating this transaction, you'll be taken to the timeline
                       view where you can add milestone dates and manage tasks.
                     </p>
@@ -438,30 +552,45 @@ export const CreateTransactionWizard = () => {
               </div>
             )}
 
-            {/* Navigation buttons */}
-            <div className="flex items-center justify-between mt-8">
+            {/* Navigation buttons - responsive sizing */}
+            <div className={cn(
+              'flex items-center justify-between',
+              'mt-8 md:mt-8',
+              'gap-3 md:gap-0'
+            )}>
               <Button
                 type="button"
                 variant="secondary"
+                size="lg"
                 onClick={prevStep}
                 disabled={currentStep === 1}
+                className="flex-1 sm:flex-initial"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Previous
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Back</span>
               </Button>
               {currentStep < steps.length ? (
-                <Button type="submit" variant="primary">
-                  Next
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="flex-1 sm:flex-initial"
+                >
+                  <span>Next</span>
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
               ) : (
                 <Button
                   type="button"
                   variant="primary"
+                  size="lg"
                   onClick={handleFinalSubmit}
                   isLoading={createMutation.isPending}
+                  className="flex-1 sm:flex-initial"
                 >
-                  Create Transaction
+                  <span className="hidden sm:inline">Create Transaction</span>
+                  <span className="sm:hidden">Create</span>
                 </Button>
               )}
             </div>

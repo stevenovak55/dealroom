@@ -1,0 +1,27 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ResponsiveLayout } from '@/components/Layout/ResponsiveLayout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Dashboard from '@/pages/Dashboard/Dashboard';
+import { TransactionsList } from '@/pages/Transactions/TransactionsList';
+import { TransactionDetail } from '@/pages/Transactions/TransactionDetail';
+import { CreateTransactionWizard } from '@/pages/Transactions/CreateTransactionWizard';
+import { EditTransactionForm } from '@/pages/Transactions/EditTransactionForm';
+import { TimelineView } from '@/pages/Timeline/TimelineView';
+import { DocumentManager } from '@/pages/Documents/DocumentManager';
+import { TemplatesList } from '@/pages/Templates/TemplatesList';
+import { TemplateBuilder } from '@/pages/TemplateBuilder/TemplateBuilder';
+import { TemplateAnalytics } from '@/pages/Templates/TemplateAnalytics';
+import { TaskLibraryEnhanced } from '@/pages/TaskLibrary/TaskLibraryEnhanced';
+import { RemindersList } from '@/pages/Reminders/RemindersList';
+import { VendorRequestsList } from '@/pages/Vendors';
+import { UsersList, UserDetail } from '@/pages/Users';
+import { MLSDashboard } from '@/pages/MLS/MLSDashboard';
+import { DocuSignSettings } from '@/pages/Integrations/DocuSign';
+import CRMIntegrationPage from '@/pages/Integrations/CRM';
+import { Settings } from '@/pages/Settings/Settings';
+import { UserProfile } from '@/pages/UserProfile';
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage, TwoFactorVerifyPage, } from '@/pages/Auth';
+export const AppRoutes = () => {
+    return (_jsxs(Routes, { children: [_jsx(Route, { path: "/auth/login", element: _jsx(LoginPage, {}) }), _jsx(Route, { path: "/auth/register", element: _jsx(RegisterPage, {}) }), _jsx(Route, { path: "/auth/forgot-password", element: _jsx(ForgotPasswordPage, {}) }), _jsx(Route, { path: "/auth/reset-password", element: _jsx(ResetPasswordPage, {}) }), _jsx(Route, { path: "/auth/verify-email", element: _jsx(VerifyEmailPage, {}) }), _jsx(Route, { path: "/auth/2fa-verify", element: _jsx(TwoFactorVerifyPage, {}) }), _jsxs(Route, { path: "/", element: _jsx(ProtectedRoute, { redirectTo: "/auth/login", children: _jsx(ResponsiveLayout, {}) }), children: [_jsx(Route, { index: true, element: _jsx(Dashboard, {}) }), _jsxs(Route, { path: "transactions", children: [_jsx(Route, { index: true, element: _jsx(TransactionsList, {}) }), _jsx(Route, { path: "new", element: _jsx(CreateTransactionWizard, {}) }), _jsx(Route, { path: ":id", element: _jsx(TransactionDetail, {}) }), _jsx(Route, { path: ":id/edit", element: _jsx(EditTransactionForm, {}) }), _jsx(Route, { path: ":id/timeline", element: _jsx(TimelineView, {}) })] }), _jsx(Route, { path: "documents", element: _jsx(DocumentManager, {}) }), _jsx(Route, { path: "vendors", element: _jsx(VendorRequestsList, {}) }), _jsxs(Route, { path: "users", children: [_jsx(Route, { index: true, element: _jsx(UsersList, {}) }), _jsx(Route, { path: ":id", element: _jsx(UserDetail, {}) })] }), _jsxs(Route, { path: "templates", children: [_jsx(Route, { index: true, element: _jsx(TemplatesList, {}) }), _jsx(Route, { path: "new", element: _jsx(TemplateBuilder, {}) }), _jsx(Route, { path: ":id/edit", element: _jsx(TemplateBuilder, {}) }), _jsx(Route, { path: ":id/analytics", element: _jsx(TemplateAnalytics, {}) })] }), _jsx(Route, { path: "task-library", element: _jsx(TaskLibraryEnhanced, {}) }), _jsx(Route, { path: "reminders", element: _jsx(RemindersList, {}) }), _jsx(Route, { path: "mls", element: _jsx(MLSDashboard, {}) }), _jsx(Route, { path: "integrations/docusign", element: _jsx(DocuSignSettings, {}) }), _jsx(Route, { path: "integrations/crm", element: _jsx(CRMIntegrationPage, {}) }), _jsx(Route, { path: "settings", element: _jsx(Settings, {}) }), _jsx(Route, { path: "profile", element: _jsx(UserProfile, {}) }), _jsx(Route, { path: "*", element: _jsx(Navigate, { to: "/", replace: true }) })] })] }));
+};

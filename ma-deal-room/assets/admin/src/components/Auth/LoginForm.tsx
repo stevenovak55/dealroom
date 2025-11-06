@@ -2,6 +2,24 @@ import { useState, FormEvent } from 'react';
 import { Input } from '../shared/Input';
 import { Button } from '../shared/Button';
 import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/utils/cn';
+
+/**
+ * LoginForm Component (Mobile-First Redesign)
+ *
+ * Responsive login form with mobile-first design:
+ * - Touch-friendly inputs (44px minimum from Phase 1 Input component)
+ * - Mobile keyboard optimization (inputMode="email" from Phase 1)
+ * - Responsive text sizing
+ * - Touch-friendly checkbox and links
+ *
+ * Features:
+ * - Email/password authentication
+ * - Remember me option
+ * - Error message display
+ * - Loading states
+ * - Touch-optimized interactive elements
+ */
 
 export interface LoginFormProps {
   onSuccess?: () => void;
@@ -35,30 +53,43 @@ export const LoginForm = ({ onSuccess, onForgotPassword, onRegister }: LoginForm
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+      {/* Header - responsive text sizing */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Sign in to your account</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+          Sign in to your account
+        </h2>
+        <p className="mt-2 text-sm md:text-base text-gray-600">
           Or{' '}
           <button
             type="button"
             onClick={onRegister}
-            className="font-medium text-primary-600 hover:text-primary-500"
+            className={cn(
+              'font-medium text-primary-600 hover:text-primary-500',
+              'underline',
+              // Touch-friendly padding
+              'py-1'
+            )}
           >
             create a new account
           </button>
         </p>
       </div>
 
+      {/* Error message - responsive sizing */}
       {error && (
-        <div className="rounded-md bg-danger-50 p-4">
+        <div className={cn(
+          'rounded-md bg-danger-50',
+          'p-3 md:p-4'
+        )}>
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-danger-400"
+                className="h-5 w-5 md:h-6 md:w-6 text-danger-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -68,13 +99,16 @@ export const LoginForm = ({ onSuccess, onForgotPassword, onRegister }: LoginForm
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-danger-800">{error}</h3>
+              <h3 className="text-sm md:text-base font-medium text-danger-800">
+                {error}
+              </h3>
             </div>
           </div>
         </div>
       )}
 
-      <div className="space-y-4">
+      {/* Form fields - Input component already mobile-first from Phase 1 */}
+      <div className="space-y-4 md:space-y-5">
         <Input
           label="Email address"
           type="email"
@@ -84,6 +118,7 @@ export const LoginForm = ({ onSuccess, onForgotPassword, onRegister }: LoginForm
           autoComplete="email"
           placeholder="you@example.com"
           disabled={isLoading}
+          // inputMode="email" is auto-applied in Phase 1 Input component
         />
 
         <Input
@@ -98,7 +133,12 @@ export const LoginForm = ({ onSuccess, onForgotPassword, onRegister }: LoginForm
         />
       </div>
 
-      <div className="flex items-center justify-between">
+      {/* Remember me and forgot password - mobile-first layout */}
+      <div className={cn(
+        'flex flex-col space-y-3',
+        'md:flex-row md:items-center md:justify-between md:space-y-0'
+      )}>
+        {/* Remember me checkbox - touch-friendly */}
         <div className="flex items-center">
           <input
             id="remember-me"
@@ -106,19 +146,40 @@ export const LoginForm = ({ onSuccess, onForgotPassword, onRegister }: LoginForm
             type="checkbox"
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
+            className={cn(
+              // Touch-friendly size on mobile
+              'h-5 w-5 md:h-4 md:w-4',
+              'rounded border-gray-300 text-primary-600',
+              'focus:ring-primary-600 focus:ring-2',
+              'cursor-pointer'
+            )}
             disabled={isLoading}
           />
-          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+          <label
+            htmlFor="remember-me"
+            className={cn(
+              'ml-2 block text-sm md:text-base text-gray-900',
+              'cursor-pointer',
+              // Larger touch target
+              'py-1'
+            )}
+          >
             Remember me
           </label>
         </div>
 
-        <div className="text-sm">
+        {/* Forgot password link - touch-friendly */}
+        <div className="text-sm md:text-base">
           <button
             type="button"
             onClick={onForgotPassword}
-            className="font-medium text-primary-600 hover:text-primary-500"
+            className={cn(
+              'font-medium text-primary-600 hover:text-primary-500',
+              'underline',
+              // Touch-friendly padding
+              'py-1 px-1',
+              'transition-colors duration-fast'
+            )}
             disabled={isLoading}
           >
             Forgot your password?
@@ -126,7 +187,13 @@ export const LoginForm = ({ onSuccess, onForgotPassword, onRegister }: LoginForm
         </div>
       </div>
 
-      <Button type="submit" className="w-full" isLoading={isLoading}>
+      {/* Submit button - Button component already mobile-first from Phase 1 */}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        isLoading={isLoading}
+      >
         Sign in
       </Button>
     </form>

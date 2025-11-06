@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AppShell } from '@/components/Layout/AppShell';
+import { ResponsiveLayout } from '@/components/Layout/ResponsiveLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import Dashboard from '@/pages/Dashboard/Dashboard';
 import { TransactionsList } from '@/pages/Transactions/TransactionsList';
@@ -13,6 +13,7 @@ import { TemplateBuilder } from '@/pages/TemplateBuilder/TemplateBuilder';
 import { TemplateAnalytics } from '@/pages/Templates/TemplateAnalytics';
 import { TaskLibraryEnhanced } from '@/pages/TaskLibrary/TaskLibraryEnhanced';
 import { RemindersList } from '@/pages/Reminders/RemindersList';
+import { VendorRequestsList } from '@/pages/Vendors';
 import { MLSDashboard } from '@/pages/MLS/MLSDashboard';
 import { DocuSignSettings } from '@/pages/Integrations/DocuSign';
 import CRMIntegrationPage from '@/pages/Integrations/CRM';
@@ -43,7 +44,7 @@ export const AppRoutes = () => {
         path="/"
         element={
           <ProtectedRoute redirectTo="/auth/login">
-            <AppShell />
+            <ResponsiveLayout />
           </ProtectedRoute>
         }
       >
@@ -56,6 +57,7 @@ export const AppRoutes = () => {
           <Route path=":id/timeline" element={<TimelineView />} />
         </Route>
         <Route path="documents" element={<DocumentManager />} />
+        <Route path="vendors" element={<VendorRequestsList />} />
         <Route path="templates">
           <Route index element={<TemplatesList />} />
           <Route path="new" element={<TemplateBuilder />} />

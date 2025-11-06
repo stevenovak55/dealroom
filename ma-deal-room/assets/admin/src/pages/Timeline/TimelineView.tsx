@@ -6,6 +6,22 @@ import { useGetTasks } from '../../api/queries/useTasks';
 import { GanttChart } from '../../components/Timeline/GanttChart';
 import type { Task } from '../../api/types';
 import toast from 'react-hot-toast';
+import { cn } from '@/utils/cn';
+
+/**
+ * TimelineView Component (Mobile-First Redesign)
+ *
+ * Responsive Gantt chart timeline view with mobile-first design:
+ * - Mobile (<768px): Stacked layout, scrollable filters, vertical controls
+ * - Desktop (>=768px): Grid layouts, horizontal controls
+ *
+ * Features:
+ * - Interactive Gantt chart with task dependencies
+ * - Search and filter tasks
+ * - Toggle dependencies, milestones, and phase grouping
+ * - Export timeline (coming soon)
+ * - Touch-friendly controls
+ */
 
 export const TimelineView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -100,57 +116,86 @@ export const TimelineView: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white shadow-sm rounded-lg p-6">
-        <div className="flex items-start justify-between">
+    <div className="space-y-5 md:space-y-6">
+      {/* Header - responsive layout */}
+      <div className="bg-white shadow-sm rounded-lg p-5 md:p-6">
+        <div className={cn(
+          'flex flex-col space-y-4',
+          'md:flex-row md:items-start md:justify-between md:space-y-0'
+        )}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Timeline View</h1>
-            <p className="text-gray-600 mt-1">{transaction.property_address}</p>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+              Timeline View
+            </h1>
+            <p className="text-base md:text-lg text-gray-600 mt-1">
+              {transaction.property_address}
+            </p>
+            <p className="text-sm md:text-base text-gray-500 mt-0.5">
               {transaction.property_city}, {transaction.property_state} {transaction.property_zip}
             </p>
           </div>
-          <div className="flex gap-2">
+          {/* Action buttons - responsive layout */}
+          <div className={cn(
+            'flex flex-col space-y-2',
+            'sm:flex-row sm:gap-2 sm:space-y-0'
+          )}>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className={cn(
+                'flex items-center justify-center gap-2',
+                'px-6 py-3 md:px-4 md:py-2',
+                'border border-gray-300 rounded-md',
+                'hover:bg-gray-50 transition-colors',
+                'text-base md:text-sm font-medium',
+                'w-full sm:w-auto'
+              )}
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-5 h-5 md:w-4 md:h-4" />
               Export
             </button>
             <button
               onClick={() => navigate(`/transactions/${transactionId}`)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className={cn(
+                'px-6 py-3 md:px-4 md:py-2',
+                'bg-blue-500 text-white rounded-md',
+                'hover:bg-blue-600 transition-colors',
+                'text-base md:text-sm font-medium',
+                'w-full sm:w-auto'
+              )}
             >
               Back to Details
             </button>
           </div>
         </div>
 
-        {/* Transaction Info */}
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 uppercase">Status</p>
-            <p className="text-sm font-semibold text-gray-900 capitalize mt-1">
+        {/* Transaction Info - responsive grid */}
+        <div className={cn(
+          'mt-5 md:mt-4',
+          'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4'
+        )}>
+          <div className="bg-gray-50 rounded-lg p-4 md:p-3">
+            <p className="text-xs md:text-xs text-gray-500 uppercase">Status</p>
+            <p className="text-sm md:text-sm font-semibold text-gray-900 capitalize mt-1">
               {transaction.status.replace('_', ' ')}
             </p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 uppercase">Property Type</p>
-            <p className="text-sm font-semibold text-gray-900 mt-1">{transaction.property_type}</p>
+          <div className="bg-gray-50 rounded-lg p-4 md:p-3">
+            <p className="text-xs md:text-xs text-gray-500 uppercase">Property Type</p>
+            <p className="text-sm md:text-sm font-semibold text-gray-900 mt-1">
+              {transaction.property_type}
+            </p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 uppercase">P&S Date</p>
-            <p className="text-sm font-semibold text-gray-900 mt-1">
+          <div className="bg-gray-50 rounded-lg p-4 md:p-3">
+            <p className="text-xs md:text-xs text-gray-500 uppercase">P&S Date</p>
+            <p className="text-sm md:text-sm font-semibold text-gray-900 mt-1">
               {transaction.ps_agreement_date
                 ? new Date(transaction.ps_agreement_date).toLocaleDateString()
                 : 'Not set'}
             </p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 uppercase">Closing Date</p>
-            <p className="text-sm font-semibold text-gray-900 mt-1">
+          <div className="bg-gray-50 rounded-lg p-4 md:p-3">
+            <p className="text-xs md:text-xs text-gray-500 uppercase">Closing Date</p>
+            <p className="text-sm md:text-sm font-semibold text-gray-900 mt-1">
               {transaction.closing_date
                 ? new Date(transaction.closing_date).toLocaleDateString()
                 : 'Not set'}
@@ -159,29 +204,44 @@ export const TimelineView: React.FC = () => {
         </div>
       </div>
 
-      {/* Filters and Controls */}
-      <div className="bg-white shadow-sm rounded-lg p-4">
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* Search */}
-          <div className="flex-1 min-w-[200px]">
+      {/* Filters and Controls - responsive layout */}
+      <div className="bg-white shadow-sm rounded-lg p-4 md:p-4">
+        <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center">
+          {/* Search - full-width on mobile */}
+          <div className="flex-1 min-w-full md:min-w-[200px]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className={cn(
+                'absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400',
+                'w-5 h-5 md:w-4 md:h-4'
+              )} />
               <input
                 type="text"
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={cn(
+                  'w-full border border-gray-300 rounded-md',
+                  'focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  'text-base md:text-sm',
+                  // Touch-friendly padding
+                  'pl-10 pr-4 py-3 md:py-2'
+                )}
               />
             </div>
           </div>
 
-          {/* Status Filter */}
-          <div className="min-w-[150px]">
+          {/* Status Filter - full-width on mobile */}
+          <div className="w-full md:w-auto md:min-w-[150px]">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={cn(
+                'w-full border border-gray-300 rounded-md',
+                'focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'text-base md:text-sm',
+                // Touch-friendly padding
+                'px-4 py-3 md:px-3 md:py-2'
+              )}
             >
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -192,12 +252,18 @@ export const TimelineView: React.FC = () => {
             </select>
           </div>
 
-          {/* Owner Role Filter */}
-          <div className="min-w-[150px]">
+          {/* Owner Role Filter - full-width on mobile */}
+          <div className="w-full md:w-auto md:min-w-[150px]">
             <select
               value={ownerRoleFilter}
               onChange={(e) => setOwnerRoleFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={cn(
+                'w-full border border-gray-300 rounded-md',
+                'focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'text-base md:text-sm',
+                // Touch-friendly padding
+                'px-4 py-3 md:px-3 md:py-2'
+              )}
             >
               <option value="all">All Roles</option>
               <option value="agent">Agent</option>
@@ -209,40 +275,67 @@ export const TimelineView: React.FC = () => {
             </select>
           </div>
 
-          {/* View Options */}
-          <div className="flex gap-2">
-            <label className="flex items-center gap-2 text-sm">
+          {/* View Options - stacked on mobile, horizontal on desktop */}
+          <div className="flex flex-col gap-3 md:flex-row md:gap-2 w-full md:w-auto">
+            <label className={cn(
+              'flex items-center gap-2',
+              'text-sm md:text-sm',
+              // Touch-friendly padding
+              'py-1'
+            )}>
               <input
                 type="checkbox"
                 checked={showDependencies}
                 onChange={(e) => setShowDependencies(e.target.checked)}
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                className={cn(
+                  'rounded border-gray-300 text-blue-500 focus:ring-blue-500',
+                  // Touch-friendly size
+                  'w-5 h-5 md:w-4 md:h-4'
+                )}
               />
               Dependencies
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className={cn(
+              'flex items-center gap-2',
+              'text-sm md:text-sm',
+              // Touch-friendly padding
+              'py-1'
+            )}>
               <input
                 type="checkbox"
                 checked={showMilestones}
                 onChange={(e) => setShowMilestones(e.target.checked)}
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                className={cn(
+                  'rounded border-gray-300 text-blue-500 focus:ring-blue-500',
+                  // Touch-friendly size
+                  'w-5 h-5 md:w-4 md:h-4'
+                )}
               />
               Milestones
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className={cn(
+              'flex items-center gap-2',
+              'text-sm md:text-sm',
+              // Touch-friendly padding
+              'py-1'
+            )}>
               <input
                 type="checkbox"
                 checked={groupByPhase}
                 onChange={(e) => setGroupByPhase(e.target.checked)}
-                className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                className={cn(
+                  'rounded border-gray-300 text-blue-500 focus:ring-blue-500',
+                  // Touch-friendly size
+                  'w-5 h-5 md:w-4 md:h-4'
+                )}
               />
               Group by Phase
             </label>
           </div>
         </div>
 
-        {/* Task Count */}
-        <div className="mt-3 text-sm text-gray-600">
+        {/* Task Count - responsive text */}
+        <div className="mt-3 text-sm md:text-sm text-gray-600">
           Showing {filteredTasks.length} of {tasksResponse?.data?.length || 0} tasks
         </div>
       </div>

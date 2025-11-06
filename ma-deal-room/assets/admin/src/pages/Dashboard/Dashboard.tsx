@@ -6,9 +6,26 @@ import { Badge } from '@/components/shared/Badge';
 import { PageLoader } from '@/components/shared/Loader';
 import { formatDate, formatCurrency } from '@/utils/formatDate';
 import { Plus, Home, TrendingUp, CheckCircle, Clock } from 'lucide-react';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { cn } from '@/utils/cn';
+
+/**
+ * Dashboard Component (Mobile-First Redesign)
+ *
+ * Responsive dashboard with mobile-first design:
+ * - Mobile (<768px): Vertical layout with card-based transaction list
+ * - Desktop (>=768px): Grid layout with table view
+ *
+ * Features:
+ * - Statistics cards (4 cards)
+ * - Recent transactions list
+ * - Touch-friendly actions
+ * - Responsive grid layout
+ */
 
 const Dashboard = () => {
   const { data: transactionsData, isLoading } = useGetTransactions({ page: 1, per_page: 10 });
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return <PageLoader />;
@@ -28,104 +45,134 @@ const Dashboard = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'closed':
-        return <Badge variant="success">Closed</Badge>;
+        return <Badge variant="success" size="md">Closed</Badge>;
       case 'under_agreement':
-        return <Badge variant="info">Under Agreement</Badge>;
+        return <Badge variant="info" size="md">Under Agreement</Badge>;
       case 'listing_active':
-        return <Badge variant="warning">Active Listing</Badge>;
+        return <Badge variant="warning" size="md">Active Listing</Badge>;
       case 'prospect':
-        return <Badge variant="default">Prospect</Badge>;
+        return <Badge variant="default" size="md">Prospect</Badge>;
       case 'cancelled':
-        return <Badge variant="danger">Cancelled</Badge>;
+        return <Badge variant="danger" size="md">Cancelled</Badge>;
       default:
-        return <Badge variant="default">{status}</Badge>;
+        return <Badge variant="default" size="md">{status}</Badge>;
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 md:space-y-6">
+      {/* Header - responsive layout */}
+      <div className={cn(
+        'flex flex-col space-y-4',
+        'md:flex-row md:items-center md:justify-between md:space-y-0'
+      )}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1">Welcome to MA Deal Room</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">Welcome to MA Deal Room</p>
         </div>
-        <Link to="/transactions/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
+        <Link to="/transactions/new" className="w-full md:w-auto">
+          <Button size="lg" className="w-full md:w-auto">
+            <Plus className="h-5 w-5 mr-2" />
             New Transaction
           </Button>
         </Link>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Statistics Cards - responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className={cn(
+            'pt-5 md:pt-6',
+            'pb-5 md:pb-6'
+          )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{totalTransactions}</p>
+                <p className="text-sm md:text-base font-medium text-gray-600">Total Transactions</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{totalTransactions}</p>
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Home className="h-6 w-6 text-blue-600" />
+              <div className={cn(
+                'h-12 w-12 md:h-14 md:w-14',
+                'bg-blue-100 rounded-lg flex items-center justify-center'
+              )}>
+                <Home className="h-6 w-6 md:h-7 md:w-7 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className={cn(
+            'pt-5 md:pt-6',
+            'pb-5 md:pb-6'
+          )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{activeTransactions}</p>
+                <p className="text-sm md:text-base font-medium text-gray-600">Active</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{activeTransactions}</p>
               </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-green-600" />
+              <div className={cn(
+                'h-12 w-12 md:h-14 md:w-14',
+                'bg-green-100 rounded-lg flex items-center justify-center'
+              )}>
+                <TrendingUp className="h-6 w-6 md:h-7 md:w-7 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className={cn(
+            'pt-5 md:pt-6',
+            'pb-5 md:pb-6'
+          )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Closed</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{closedTransactions}</p>
+                <p className="text-sm md:text-base font-medium text-gray-600">Closed</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{closedTransactions}</p>
               </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-purple-600" />
+              <div className={cn(
+                'h-12 w-12 md:h-14 md:w-14',
+                'bg-purple-100 rounded-lg flex items-center justify-center'
+              )}>
+                <CheckCircle className="h-6 w-6 md:h-7 md:w-7 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className={cn(
+            'pt-5 md:pt-6',
+            'pb-5 md:pb-6'
+          )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tasks Progress</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">
+                <p className="text-sm md:text-base font-medium text-gray-600">Tasks Progress</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">
                   {completedTasks}/{totalTasks}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6 text-orange-600" />
+              <div className={cn(
+                'h-12 w-12 md:h-14 md:w-14',
+                'bg-orange-100 rounded-lg flex items-center justify-center'
+              )}>
+                <Clock className="h-6 w-6 md:h-7 md:w-7 text-orange-600" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions - responsive: cards on mobile, table on desktop */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Recent Transactions</CardTitle>
-            <Link to="/transactions">
-              <Button variant="ghost" size="sm">
+          <div className={cn(
+            'flex flex-col space-y-3',
+            'md:flex-row md:items-center md:justify-between md:space-y-0'
+          )}>
+            <CardTitle className="text-lg md:text-xl">Recent Transactions</CardTitle>
+            <Link to="/transactions" className="w-full md:w-auto">
+              <Button variant="ghost" size={isMobile ? 'md' : 'sm'} className="w-full md:w-auto">
                 View All
               </Button>
             </Link>
@@ -134,15 +181,68 @@ const Dashboard = () => {
         <CardContent>
           {transactions.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">No transactions yet</p>
+              <p className="text-sm md:text-base text-gray-500 mb-4">No transactions yet</p>
               <Link to="/transactions/new">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button size="lg">
+                  <Plus className="h-5 w-5 mr-2" />
                   Create Your First Transaction
                 </Button>
               </Link>
             </div>
+          ) : isMobile ? (
+            // Mobile: Card view
+            <div className="space-y-3">
+              {transactions.map((transaction) => (
+                <Card key={transaction.transaction_id} interactive>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Property address */}
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {transaction.property_address}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {transaction.property_city}, {transaction.property_state}
+                        </div>
+                      </div>
+
+                      {/* Status and Price row */}
+                      <div className="flex items-center justify-between">
+                        {getStatusBadge(transaction.status)}
+                        <span className="text-lg font-semibold text-gray-900">
+                          {transaction.sale_price ? formatCurrency(transaction.sale_price) : '-'}
+                        </span>
+                      </div>
+
+                      {/* Details grid */}
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-gray-500">Closing:</span>
+                          <div className="font-medium text-gray-900">
+                            {transaction.closing_date ? formatDate(transaction.closing_date) : '-'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Tasks:</span>
+                          <div className="font-medium text-gray-900">
+                            {transaction.task_summary?.completed || 0}/{transaction.task_summary?.total || 0}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* View button */}
+                      <Link to={`/transactions/${transaction.transaction_id}`} className="block">
+                        <Button variant="ghost" size="sm" className="w-full">
+                          View Details
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
+            // Desktop: Table view
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>

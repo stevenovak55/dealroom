@@ -49,8 +49,35 @@ Each AI has a dedicated instruction file:
 - **Gemini**: See `GEMINI.md`
 - **Codex**: See `CODEX.md`
 
+## Session Startup Protocol
+
+**⚠️ MANDATORY**: At the start of every new session, follow the **SESSION_STARTUP_PROTOCOL.md**:
+
+1. **Pull latest GitHub updates first** (before reading any files)
+2. Review session history and recent changes
+3. Check current state (version, dependencies, commits)
+4. Verify development environment
+5. Confirm understanding with user
+
+See `SESSION_STARTUP_PROTOCOL.md` for complete step-by-step instructions.
+
+## Plugin Build Protocol
+
+**⚠️ MANDATORY**: Before creating any plugin zip file, follow the **PLUGIN_BUILD_CHECKLIST.md**:
+
+1. Verify Composer dependencies are installed
+2. Verify frontend build exists (React admin dashboard)
+3. Validate PHP syntax (no errors)
+4. Verify database migrations
+5. Check plugin version consistency
+6. Run pre-build tests
+
+See `PLUGIN_BUILD_CHECKLIST.md` for complete checklist and troubleshooting.
+
 ## Important Notes
 
 - Always reference this master file for universal guidelines
+- Always follow SESSION_STARTUP_PROTOCOL.md at the start of each session
+- Always follow PLUGIN_BUILD_CHECKLIST.md before building plugin zips
 - AI-specific files may override or extend these instructions
 - When in doubt, prioritize code quality and user clarity

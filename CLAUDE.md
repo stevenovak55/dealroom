@@ -58,6 +58,28 @@ This file contains Claude-specific instructions that supplement the master guide
 
 ## Workflow
 
+### Session Startup (MANDATORY)
+
+**Before starting any work**, follow `SESSION_STARTUP_PROTOCOL.md`:
+
+1. Pull latest GitHub updates first (git fetch && git pull)
+2. Review VERSION_HISTORY.md and DEVELOPMENT_ROADMAP.md
+3. Check recent commits and session notes
+4. Verify current state (version, dependencies)
+5. Provide Session Start Summary to user
+
+### Plugin Building (MANDATORY)
+
+**Before creating any plugin zip**, follow `PLUGIN_BUILD_CHECKLIST.md`:
+
+1. Verify Composer dependencies installed
+2. Verify frontend build exists
+3. Validate PHP syntax
+4. Check migrations and version
+5. Run pre-build tests
+
+### General Workflow
+
 1. Read `AI_MASTER.md` for general project guidelines
 2. Understand the task fully before starting
 3. Create todo list with TodoWrite for multi-step tasks

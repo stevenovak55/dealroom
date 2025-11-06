@@ -2,6 +2,24 @@ import { useState, FormEvent } from 'react';
 import { Input } from '../shared/Input';
 import { Button } from '../shared/Button';
 import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/utils/cn';
+
+/**
+ * TwoFactorVerifyForm Component (Mobile-First Redesign)
+ *
+ * Responsive 2FA verification form with mobile-first design:
+ * - Touch-friendly code input (44px minimum from Phase 1)
+ * - Responsive text sizing
+ * - Two input modes: TOTP (6 digits) and backup code
+ *
+ * Features:
+ * - Large, centered code input for easy entry
+ * - Auto-focus on code input
+ * - Toggle between TOTP and backup code
+ * - Context-sensitive instructions
+ * - Error notifications
+ * - Touch-optimized buttons
+ */
 
 export interface TwoFactorVerifyFormProps {
   onSuccess?: () => void;
@@ -40,10 +58,13 @@ export const TwoFactorVerifyForm = ({ onSuccess, onCancel }: TwoFactorVerifyForm
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+      {/* Header - responsive text sizing */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Two-factor authentication</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+          Two-factor authentication
+        </h2>
+        <p className="mt-2 text-sm md:text-base text-gray-600">
           {useBackupCode ? (
             <>Enter one of your backup codes to sign in.</>
           ) : (
@@ -52,15 +73,20 @@ export const TwoFactorVerifyForm = ({ onSuccess, onCancel }: TwoFactorVerifyForm
         </p>
       </div>
 
+      {/* Error message - responsive sizing */}
       {error && (
-        <div className="rounded-md bg-danger-50 p-4">
+        <div className={cn(
+          'rounded-md bg-danger-50',
+          'p-3 md:p-4'
+        )}>
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-danger-400"
+                className="h-5 w-5 md:h-6 md:w-6 text-danger-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -70,12 +96,15 @@ export const TwoFactorVerifyForm = ({ onSuccess, onCancel }: TwoFactorVerifyForm
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-danger-800">{error}</h3>
+              <h3 className="text-sm md:text-base font-medium text-danger-800">
+                {error}
+              </h3>
             </div>
           </div>
         </div>
       )}
 
+      {/* Code input - Input component already mobile-first from Phase 1 */}
       <Input
         label={useBackupCode ? 'Backup code' : 'Authentication code'}
         type="text"
@@ -98,27 +127,46 @@ export const TwoFactorVerifyForm = ({ onSuccess, onCancel }: TwoFactorVerifyForm
         disabled={isLoading}
         autoFocus
         maxLength={useBackupCode ? 16 : 6}
-        className="text-center text-2xl tracking-wider"
+        // Large, centered text for easy code entry
+        className="text-center text-2xl md:text-3xl tracking-wider font-mono"
+        inputMode={useBackupCode ? 'text' : 'numeric'}
       />
 
+      {/* Action buttons */}
       <div className="space-y-3">
-        <Button type="submit" className="w-full" isLoading={isLoading}>
+        {/* Submit button - Button component already mobile-first from Phase 1 */}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          isLoading={isLoading}
+        >
           Verify and sign in
         </Button>
 
+        {/* Toggle code type - touch-friendly */}
         <button
           type="button"
           onClick={toggleCodeType}
-          className="w-full text-center text-sm font-medium text-primary-600 hover:text-primary-500"
+          className={cn(
+            'w-full text-center font-medium text-primary-600 hover:text-primary-500',
+            'text-sm md:text-base',
+            // Touch-friendly padding
+            'py-2 px-4',
+            'transition-colors duration-fast',
+            'underline'
+          )}
           disabled={isLoading}
         >
           {useBackupCode ? 'Use authenticator app code' : 'Use backup code instead'}
         </button>
 
+        {/* Cancel button */}
         {onCancel && (
           <Button
             type="button"
             variant="ghost"
+            size="lg"
             className="w-full"
             onClick={onCancel}
             disabled={isLoading}
@@ -128,14 +176,19 @@ export const TwoFactorVerifyForm = ({ onSuccess, onCancel }: TwoFactorVerifyForm
         )}
       </div>
 
-      <div className="rounded-md bg-gray-50 p-4">
+      {/* Context-sensitive help - responsive sizing */}
+      <div className={cn(
+        'rounded-md bg-gray-50',
+        'p-3 md:p-4'
+      )}>
         <div className="flex">
           <div className="flex-shrink-0">
             <svg
-              className="h-5 w-5 text-gray-400"
+              className="h-5 w-5 md:h-6 md:w-6 text-gray-400"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
+              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -145,7 +198,7 @@ export const TwoFactorVerifyForm = ({ onSuccess, onCancel }: TwoFactorVerifyForm
             </svg>
           </div>
           <div className="ml-3 flex-1">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm md:text-base text-gray-700">
               {useBackupCode ? (
                 <>
                   Each backup code can only be used once. After using a backup code, make sure to
