@@ -56,7 +56,8 @@ export const UsersList = () => {
 
   // Invitations query (only fetch when tab is active)
   const { data: invitationsData, isLoading: invitationsLoading } = useGetInvitations(
-    activeTab === 'invitations' ? { status: 'pending', page, per_page: perPage } : {}
+    { status: 'pending', page, per_page: perPage },
+    activeTab === 'invitations' // Only fetch when on invitations tab
   );
   const cancelInvitationMutation = useCancelInvitation();
 
@@ -417,7 +418,7 @@ export const UsersList = () => {
             <div className="flex items-center gap-2">
               <MailOpen className="h-4 w-4" />
               Pending Invitations
-              {invitationsData?.pagination.total && (
+              {invitationsData?.pagination?.total !== undefined && (
                 <Badge variant="warning">{invitationsData.pagination.total}</Badge>
               )}
             </div>

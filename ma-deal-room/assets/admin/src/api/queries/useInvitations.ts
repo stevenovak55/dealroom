@@ -50,7 +50,7 @@ interface GetInvitationsResponse {
 /**
  * Get invitations list
  */
-export const useGetInvitations = (params: GetInvitationsParams = {}) => {
+export const useGetInvitations = (params: GetInvitationsParams = {}, enabled: boolean = true) => {
   return useQuery<GetInvitationsResponse, Error>({
     queryKey: ['invitations', params],
     queryFn: async () => {
@@ -59,6 +59,7 @@ export const useGetInvitations = (params: GetInvitationsParams = {}) => {
       });
       return response.data;
     },
+    enabled, // Only fetch when explicitly enabled
   });
 };
 
