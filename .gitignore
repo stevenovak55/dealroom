@@ -59,7 +59,7 @@ coverage/
 *.map
 dist/
 build/
-releases/
+# releases/ - Commented out so release builds are committed to GitHub for easy download
 
 # Temporary files
 *.tmp
