@@ -685,9 +685,6 @@ class EmailService {
 			case 'party-added':
 				$html .= $this->renderPartyAddedContent($data);
 				break;
-			case 'user-invitation':
-				$html .= $this->renderUserInvitationContent($data);
-				break;
 			default:
 				$html .= '<p>Notification from MA Deal Room</p>';
 		}
@@ -849,37 +846,6 @@ class EmailService {
 	}
 
 	/**
-	 * Render user invitation content
-	 */
-	protected function renderUserInvitationContent(array $data): string {
-		$inviter_name = $data['inviter_name'] ?? 'Someone';
-		$role = $data['role'] ?? 'user';
-		$invitation_url = $data['invitation_url'];
-		$message = $data['message'] ?? null;
-		$expiry_days = $data['expiry_days'] ?? 7;
-
-		$html = '<h2>You\'re Invited to Join MA Deal Room</h2>';
-		$html .= '<p><strong>' . esc_html($inviter_name) . '</strong> has invited you to join MA Deal Room with the role: <strong>' . esc_html(ucwords(str_replace('_', ' ', $role))) . '</strong>.</p>';
-
-		if ($message) {
-			$html .= '<div style="background: #f9f9f9; border-left: 4px solid #0073aa; padding: 15px; margin: 20px 0;">';
-			$html .= '<p style="margin: 0; font-style: italic;">"' . nl2br(esc_html($message)) . '"</p>';
-			$html .= '<p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">— ' . esc_html($inviter_name) . '</p>';
-			$html .= '</div>';
-		}
-
-		$html .= '<div style="background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center;">';
-		$html .= '<p><strong>Your Role:</strong> ' . esc_html(ucwords(str_replace('_', ' ', $role))) . '</p>';
-		$html .= '<p style="margin-top: 20px;"><a href="' . esc_url($invitation_url) . '" style="background: #0073aa; color: white; padding: 12px 30px; text-decoration: none; border-radius: 3px; display: inline-block; font-weight: bold;">Accept Invitation</a></p>';
-		$html .= '<p style="margin-top: 15px; font-size: 12px; color: #666;">This invitation will expire in ' . $expiry_days . ' day' . ($expiry_days > 1 ? 's' : '') . '.</p>';
-		$html .= '</div>';
-
-		$html .= '<p style="color: #666; font-size: 14px;">If you don\'t want to accept this invitation, you can simply ignore this email.</p>';
-
-		return $html;
-	}
-
-	/**
 	 * Get email header HTML
 	 */
 	protected function getEmailHeader(): string {
@@ -1031,19 +997,16 @@ class EmailService {
 	 * @param string $inviter_name Name of person sending invitation
 	 * @param string $role Role being invited to
 	 * @param string $invitation_url Invitation acceptance URL
-	 * @param string|null $message Optional personal message
 	 * @param int $expiry_days Days until invitation expires
 	 * @return bool Whether email was sent successfully
 	 */
-	public function send_invitation_email(string $email, string $inviter_name, string $role, string $invitation_url, ?string $message = null, int $expiry_days = 7): bool {
-		$subject = sprintf('You Have Been Invited to MA Deal Room by %s', $inviter_name);
+	public function send_user_invitation(string $email, string $inviter_name, string $role, string $invitation_url, int $expiry_days = 7): bool {
+		$subject = 'You Have Been Invited - MA Deal Room';
 
-		$body = $this->renderTemplate('user-invitation', [
-			'inviter_name' => $inviter_name,
-			'role' => $role,
-			'invitation_url' => $invitation_url,
-			'message' => $message,
-			'expiry_days' => $expiry_days,
+		$body = $this->renderTemplate('welcome', [
+			'user_name' => 'New User',
+			'user_email' => $email,
+			'login_url' => $invitation_url,
 			'recipient_email' => $email,
 		]);
 

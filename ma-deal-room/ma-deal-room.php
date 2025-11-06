@@ -3,7 +3,7 @@
  * Plugin Name: MA Deal Room
  * Plugin URI: https://madealroom.com
  * Description: Massachusetts real estate transaction management system with automated task tracking, reminders, and vendor coordination.
- * Version: 2.5.13
+ * Version: 2.5.6
  * Author: BMN Boston Real Estate
  * Author URI: https://bmnboston.com
  * License: GPL-2.0+
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin version
-define('MA_DEAL_VERSION', '2.5.13');
+define('MA_DEAL_VERSION', '2.5.6');
 
 // Plugin root file
 define('MA_DEAL_FILE', __FILE__);
