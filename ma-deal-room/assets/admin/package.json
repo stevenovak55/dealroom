@@ -1,6 +1,6 @@
 {
   "name": "ma-deal-room-admin",
-  "version": "1.0.7",
+  "version": "2.5.0",
   "description": "React admin interface for MA Deal Room WordPress plugin",
   "type": "module",
   "scripts": {
