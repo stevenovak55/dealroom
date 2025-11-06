@@ -10,7 +10,6 @@ import { PageLoader } from '@/components/shared/Loader';
 import {
   Users as UsersIcon,
   Search,
-  Filter,
   UserPlus,
   Edit,
   Trash2,
@@ -19,7 +18,6 @@ import {
   Shield,
   Mail,
   Calendar,
-  MoreVertical,
 } from 'lucide-react';
 import { useGetUsers, useDeleteUser, useLockUser, useUnlockUser, type User } from '@/api/queries/useUsers';
 import { getRoleLabel, getUserStatusColor, ROLE_CATEGORIES, type RoleCategory } from '@/constants/roleTypes';
@@ -138,7 +136,7 @@ export const UsersList = () => {
         const primaryRole = user.roles?.find((r) => r.is_primary);
         const roleType = primaryRole?.role_type || 'buyer';
         return (
-          <Badge variant="secondary">
+          <Badge>
             <Shield className="h-3 w-3 mr-1" />
             {getRoleLabel(roleType as any)}
           </Badge>
@@ -277,12 +275,15 @@ export const UsersList = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
-              <Input
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                icon={<Search className="h-4 w-4" />}
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             {/* User Type */}
@@ -330,7 +331,7 @@ export const UsersList = () => {
             <div className="mt-4 flex items-center gap-2 flex-wrap">
               <span className="text-sm text-gray-600">Active filters:</span>
               {searchQuery && (
-                <Badge variant="secondary">
+                <Badge>
                   Search: {searchQuery}
                   <button
                     onClick={() => setSearchQuery('')}
@@ -341,7 +342,7 @@ export const UsersList = () => {
                 </Badge>
               )}
               {statusFilter && (
-                <Badge variant="secondary">
+                <Badge>
                   Status: {statusOptions.find((o) => o.value === statusFilter)?.label}
                   <button
                     onClick={() => setStatusFilter('')}
@@ -352,7 +353,7 @@ export const UsersList = () => {
                 </Badge>
               )}
               {categoryFilter && (
-                <Badge variant="secondary">
+                <Badge>
                   Category: {ROLE_CATEGORIES[categoryFilter].label}
                   <button
                     onClick={() => {
@@ -366,7 +367,7 @@ export const UsersList = () => {
                 </Badge>
               )}
               {roleFilter && (
-                <Badge variant="secondary">
+                <Badge>
                   Role: {getRoleLabel(roleFilter as any)}
                   <button
                     onClick={() => setRoleFilter('')}
