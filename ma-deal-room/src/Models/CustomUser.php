@@ -440,4 +440,14 @@ class CustomUser {
         $this->deleted_at = null;
         $this->status = 'active';
     }
+
+    /**
+     * Create instance from database array
+     *
+     * @param array $data Database row data
+     * @return self
+     */
+    public static function fromArray(array $data): self {
+        return new self($data);
+    }
 }
