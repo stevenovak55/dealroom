@@ -6,7 +6,7 @@ import { Select } from '@/components/shared/Select';
 import { Label } from '@/components/shared/Label';
 import { Textarea } from '@/components/shared/Textarea';
 import { Mail, Shield, MessageSquare } from 'lucide-react';
-import { ROLE_TYPES, ROLE_CATEGORIES, getRoleLabel, type RoleType } from '@/constants/roleTypes';
+import { ROLE_CATEGORIES, getRoleLabel, type RoleType } from '@/constants/roleTypes';
 import { useSendInvitation } from '@/api/queries/useInvitations';
 
 interface InviteUserModalProps {
@@ -55,8 +55,8 @@ export const InviteUserModal = ({ isOpen, onClose, accountId }: InviteUserModalP
   };
 
   // Get role options based on selected category
-  const roleOptions = roleCategory
-    ? ROLE_CATEGORIES[roleCategory].roles.map((role) => ({
+  const roleOptions = roleCategory && roleCategory in ROLE_CATEGORIES
+    ? ROLE_CATEGORIES[roleCategory as keyof typeof ROLE_CATEGORIES].roles.map((role: string) => ({
         value: role,
         label: getRoleLabel(role as RoleType),
       }))
