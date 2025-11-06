@@ -189,6 +189,9 @@ export const useAuthStore = create<AuthState>()(
           console.error('Logout API call failed:', error);
         }
 
+        // Clear tokens from tokenManager
+        tokenManager.clearTokens();
+
         // Clear state
         set({
           user: null,
@@ -201,8 +204,11 @@ export const useAuthStore = create<AuthState>()(
           pending2FAUserType: null,
         });
 
-        // Reload page to clear any WordPress session
-        window.location.href = '/';
+        // Clear persisted storage
+        localStorage.removeItem('ma-deal-auth');
+
+        // Redirect to login page (use hash routing for SPA)
+        window.location.href = '/#/auth/login';
       },
 
       /**

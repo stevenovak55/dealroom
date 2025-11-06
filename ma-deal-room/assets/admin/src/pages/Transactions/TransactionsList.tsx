@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import { useGetTransactions } from '@/api/queries/useTransactions';
 import { Button } from '@/components/shared/Button';
@@ -32,28 +32,52 @@ const statusOptions = [
 
 export const TransactionsList = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Read status from URL parameters on mount
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      setStatusFilter(statusParam);
+    }
+  }, [searchParams]);
+
+  // Handle special "active" status filter
+  const apiStatusFilter = statusFilter === 'active' ? undefined : (statusFilter || undefined);
+
   const { data, isLoading } = useGetTransactions({
-    status: statusFilter || undefined,
+    status: apiStatusFilter,
     per_page: 50,
   });
 
   const transactions = data?.data || [];
 
-  // Filter by search query - memoized for performance
+  // Filter by search query and status - memoized for performance
   const filteredTransactions = useMemo(() => {
-    if (!searchQuery) return transactions;
+    let filtered = transactions;
 
-    const query = searchQuery.toLowerCase();
-    return transactions.filter((t) =>
-      t.property_address?.toLowerCase().includes(query) ||
-      t.property_city?.toLowerCase().includes(query) ||
-      t.property_state?.toLowerCase().includes(query) ||
-      t.property_zip?.toLowerCase().includes(query)
-    );
-  }, [transactions, searchQuery]);
+    // Handle "active" status filter (listing_active OR under_agreement)
+    if (statusFilter === 'active') {
+      filtered = filtered.filter(
+        (t) => t.status === 'listing_active' || t.status === 'under_agreement'
+      );
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((t) =>
+        t.property_address?.toLowerCase().includes(query) ||
+        t.property_city?.toLowerCase().includes(query) ||
+        t.property_state?.toLowerCase().includes(query) ||
+        t.property_zip?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [transactions, searchQuery, statusFilter]);
 
   const getStatusBadge = (status: Transaction['status']) => {
     const variants: Record<Transaction['status'], 'default' | 'info' | 'warning' | 'success' | 'danger'> = {

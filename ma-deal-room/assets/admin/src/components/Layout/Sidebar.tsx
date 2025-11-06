@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { Home, FileText, Layout, Library, Bell, Settings, Menu, FolderOpen, Database, FileSignature, Users } from 'lucide-react';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/utils/cn';
+import { useGetSettings } from '@/api/queries/useSettings';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -18,6 +19,10 @@ const navigation = [
 
 export const Sidebar = () => {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { data: settings } = useGetSettings();
+
+  // Use company name from settings, fallback to MA Deal Room
+  const displayName = settings?.company_name || 'MA Deal Room';
 
   return (
     <div
@@ -29,7 +34,7 @@ export const Sidebar = () => {
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800">
         {!sidebarCollapsed && (
-          <h1 className="text-lg font-bold">MA Deal Room</h1>
+          <h1 className="text-lg font-bold truncate">{displayName}</h1>
         )}
         <button
           onClick={toggleSidebar}
