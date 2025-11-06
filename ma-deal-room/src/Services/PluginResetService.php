@@ -447,7 +447,7 @@ class PluginResetService {
 			'ma_deal_documents',
 			'ma_deal_notifications',
 			'ma_deal_mls_config',
-			'ma_deal_mls_sync_log',
+			// Note: mls_sync_log table removed - not created by any current migration (018-020 missing)
 		];
 
 		foreach ($required_tables as $table) {
