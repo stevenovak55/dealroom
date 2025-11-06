@@ -13,6 +13,7 @@ import { TemplateBuilder } from '@/pages/TemplateBuilder/TemplateBuilder';
 import { TemplateAnalytics } from '@/pages/Templates/TemplateAnalytics';
 import { TaskLibraryEnhanced } from '@/pages/TaskLibrary/TaskLibraryEnhanced';
 import { RemindersList } from '@/pages/Reminders/RemindersList';
+import { VendorRequestsList } from '@/pages/Vendors';
 import { MLSDashboard } from '@/pages/MLS/MLSDashboard';
 import { DocuSignSettings } from '@/pages/Integrations/DocuSign';
 import CRMIntegrationPage from '@/pages/Integrations/CRM';
@@ -56,6 +57,7 @@ export const AppRoutes = () => {
           <Route path=":id/timeline" element={<TimelineView />} />
         </Route>
         <Route path="documents" element={<DocumentManager />} />
+        <Route path="vendors" element={<VendorRequestsList />} />
         <Route path="templates">
           <Route index element={<TemplatesList />} />
           <Route path="new" element={<TemplateBuilder />} />
