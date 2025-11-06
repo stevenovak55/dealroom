@@ -272,6 +272,32 @@ export interface Event {
   payload?: Record<string, any>;
 }
 
+export interface VendorRequest {
+  id: number;
+  task_id: number;
+  transaction_id: number;
+  party_id?: number;
+  vendor_type: 'fire_dept' | 'septic_inspector' | 'hoa_manager' | 'title_company' |
+               'appraiser' | 'inspector' | 'other';
+  vendor_email: string;
+  vendor_phone?: string;
+  token: string;
+  token_expires_at: string;
+  status: 'sent' | 'opened' | 'scheduled' | 'completed' | 'expired' | 'cancelled';
+  scheduled_date?: string;
+  scheduled_time?: string;
+  completion_notes?: string;
+  document_url?: string;
+  last_opened_at?: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  // Populated fields
+  task?: Task;
+  transaction?: Transaction;
+  party?: Party;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

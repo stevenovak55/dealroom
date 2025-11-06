@@ -4,6 +4,7 @@ import { formatDate } from '@/utils/formatDate';
 import { Tooltip } from '@/components/shared/Tooltip';
 import { Button } from '@/components/shared/Button';
 import { useUpdateTransaction } from '@/api/queries/useTransactions';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 import {
   suggestMilestoneDates,
   isOverdue,
@@ -30,6 +31,7 @@ interface Milestone {
 }
 
 export const EditableTransactionTimeline = ({ transaction }: EditableTransactionTimelineProps) => {
+  const isMobile = useIsMobile();
   const updateMutation = useUpdateTransaction(transaction.transaction_id);
   const [editingMilestone, setEditingMilestone] = useState<string | null>(null);
   const [localDates, setLocalDates] = useState({
@@ -222,114 +224,228 @@ export const EditableTransactionTimeline = ({ transaction }: EditableTransaction
         </div>
       )}
 
-      <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200" aria-hidden="true">
-          <div
-            className="h-full bg-green-500 transition-all duration-500"
-            style={{
-              width: `${(milestones.filter((m) => getMilestoneStatus(m.date) === 'completed').length / milestones.length) * 100}%`
-            }}
-          />
-        </div>
+{isMobile ? (
+        // Mobile: Vertical Timeline
+        <div className="relative pl-8">
+          {/* Vertical Timeline line */}
+          <div className="absolute top-0 bottom-0 left-6 w-0.5 bg-gray-200" aria-hidden="true">
+            <div
+              className="w-full bg-green-500 transition-all duration-500"
+              style={{
+                height: `${(milestones.filter((m) => getMilestoneStatus(m.date) === 'completed').length / milestones.length) * 100}%`
+              }}
+            />
+          </div>
 
-        {/* Milestones */}
-        <div className="relative flex justify-between">
-          {milestones.map((milestone, index) => {
-            const status = getMilestoneStatus(milestone.date);
-            const isEditing = editingMilestone === milestone.id;
-            const hasSuggestion = suggestions[milestone.id] && !milestone.date;
+          {/* Milestones stacked vertically */}
+          <div className="space-y-6">
+            {milestones.map((milestone, index) => {
+              const status = getMilestoneStatus(milestone.date);
+              const isEditing = editingMilestone === milestone.id;
+              const hasSuggestion = suggestions[milestone.id] && !milestone.date;
 
-            return (
-              <div key={milestone.id} className="flex flex-col items-center" style={{ flex: 1 }}>
-                {/* Icon */}
-                <div
-                  className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-4 border-white ${getMilestoneColor(status)} transition-all duration-300 cursor-pointer hover:scale-110 group`}
-                  onClick={() => !isEditing && setEditingMilestone(milestone.id)}
-                >
-                  {getMilestoneIcon(status)}
-                  {!isEditing && (
-                    <div className="absolute -top-1 -right-1 h-5 w-5 bg-primary-600 text-white rounded-full p-1 shadow-lg border-2 border-white group-hover:bg-primary-700 group-hover:scale-125 transition-all duration-200">
-                      <Edit2 className="h-full w-full" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Label & Help */}
-                <div className="mt-3 text-center">
-                  <div className="flex items-center gap-1 justify-center">
-                    <p className={`text-sm font-medium ${status === 'pending' ? 'text-gray-500' : 'text-gray-900'}`}>
-                      {milestone.label}
-                    </p>
-                    <Tooltip content={getMilestoneHelp(milestone)}>
-                      <HelpCircle className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600 cursor-help" />
-                    </Tooltip>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{milestone.description}</p>
-
-                  {/* Date display or edit */}
-                  {isEditing ? (
-                    <div className="mt-2 flex flex-col items-center gap-2">
-                      <input
-                        type="date"
-                        value={localDates[milestone.id]}
-                        onChange={(e) => handleDateChange(milestone.id, e.target.value)}
-                        className="text-xs px-2 py-1 border border-gray-300 rounded"
-                        autoFocus
-                      />
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleSaveDate(milestone.id)}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded"
-                          disabled={updateMutation.isPending}
-                        >
-                          <Save className="h-3 w-3" />
-                        </button>
-                        <button
-                          onClick={() => handleCancelEdit(milestone.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
+              return (
+                <div key={milestone.id} className="relative flex items-start gap-4">
+                  {/* Icon */}
+                  <div
+                    className={`relative z-10 flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full border-4 border-white ${getMilestoneColor(status)} transition-all duration-300 cursor-pointer active:scale-95`}
+                    onClick={() => !isEditing && setEditingMilestone(milestone.id)}
+                    style={{ marginLeft: '-16px' }}
+                  >
+                    {getMilestoneIcon(status)}
+                    {!isEditing && (
+                      <div className="absolute -top-1 -right-1 h-5 w-5 bg-primary-600 text-white rounded-full p-1 shadow-lg border-2 border-white active:bg-primary-700">
+                        <Edit2 className="h-full w-full" />
                       </div>
-                    </div>
-                  ) : milestone.date ? (
-                    <div className="mt-1">
-                      <p className={`text-xs font-medium ${
-                        status === 'completed' ? 'text-green-600' :
-                        status === 'overdue' ? 'text-red-600' :
-                        status === 'current' ? 'text-blue-600' :
-                        'text-gray-900'
-                      }`}>
-                        {formatDate(milestone.date)}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {getRelativeTime(milestone.date)}
-                      </p>
-                    </div>
-                  ) : hasSuggestion ? (
-                    <div className="mt-1">
-                      <p className="text-xs text-gray-400 italic">Not set</p>
-                      <p className="text-xs text-blue-600 mt-0.5">
-                        Suggest: {formatDate(suggestions[milestone.id])}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-400 mt-1 italic">Not set</p>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Days until/since */}
-                  {milestone.date && index < milestones.length - 1 && milestones[index + 1].date && (
-                    <p className="text-xs text-gray-400 mt-2">
-                      ↓ {daysBetween(milestone.date, milestones[index + 1].date!)} days
-                    </p>
-                  )}
+                  {/* Content */}
+                  <div className="flex-1 pb-4">
+                    <div className="flex items-center gap-1">
+                      <p className={`text-base font-medium ${status === 'pending' ? 'text-gray-500' : 'text-gray-900'}`}>
+                        {milestone.label}
+                      </p>
+                      <Tooltip content={getMilestoneHelp(milestone)}>
+                        <HelpCircle className="h-4 w-4 text-gray-400 active:text-gray-600" />
+                      </Tooltip>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-0.5">{milestone.description}</p>
+
+                    {/* Date display or edit */}
+                    {isEditing ? (
+                      <div className="mt-3 flex flex-col gap-2">
+                        <input
+                          type="date"
+                          value={localDates[milestone.id]}
+                          onChange={(e) => handleDateChange(milestone.id, e.target.value)}
+                          className="text-sm px-3 py-2 border border-gray-300 rounded-lg w-full"
+                          autoFocus
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSaveDate(milestone.id)}
+                            className="flex-1 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg active:bg-green-700"
+                            disabled={updateMutation.isPending}
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => handleCancelEdit(milestone.id)}
+                            className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg active:bg-gray-200"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : milestone.date ? (
+                      <div className="mt-2">
+                        <p className={`text-sm font-medium ${
+                          status === 'completed' ? 'text-green-600' :
+                          status === 'overdue' ? 'text-red-600' :
+                          status === 'current' ? 'text-blue-600' :
+                          'text-gray-900'
+                        }`}>
+                          {formatDate(milestone.date)}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                          {getRelativeTime(milestone.date)}
+                        </p>
+                      </div>
+                    ) : hasSuggestion ? (
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-400 italic">Not set</p>
+                        <p className="text-sm text-blue-600 mt-0.5">
+                          Suggest: {formatDate(suggestions[milestone.id])}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 mt-2 italic">Not set</p>
+                    )}
+
+                    {/* Days until next milestone */}
+                    {milestone.date && index < milestones.length - 1 && milestones[index + 1].date && (
+                      <p className="text-sm text-gray-400 mt-2">
+                        ↓ {daysBetween(milestone.date, milestones[index + 1].date!)} days to next
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        // Desktop: Horizontal Timeline
+        <div className="relative">
+          {/* Timeline line */}
+          <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200" aria-hidden="true">
+            <div
+              className="h-full bg-green-500 transition-all duration-500"
+              style={{
+                width: `${(milestones.filter((m) => getMilestoneStatus(m.date) === 'completed').length / milestones.length) * 100}%`
+              }}
+            />
+          </div>
+
+          {/* Milestones */}
+          <div className="relative flex justify-between">
+            {milestones.map((milestone, index) => {
+              const status = getMilestoneStatus(milestone.date);
+              const isEditing = editingMilestone === milestone.id;
+              const hasSuggestion = suggestions[milestone.id] && !milestone.date;
+
+              return (
+                <div key={milestone.id} className="flex flex-col items-center" style={{ flex: 1 }}>
+                  {/* Icon */}
+                  <div
+                    className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-4 border-white ${getMilestoneColor(status)} transition-all duration-300 cursor-pointer hover:scale-110 group`}
+                    onClick={() => !isEditing && setEditingMilestone(milestone.id)}
+                  >
+                    {getMilestoneIcon(status)}
+                    {!isEditing && (
+                      <div className="absolute -top-1 -right-1 h-5 w-5 bg-primary-600 text-white rounded-full p-1 shadow-lg border-2 border-white group-hover:bg-primary-700 group-hover:scale-125 transition-all duration-200">
+                        <Edit2 className="h-full w-full" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Label & Help */}
+                  <div className="mt-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <p className={`text-sm font-medium ${status === 'pending' ? 'text-gray-500' : 'text-gray-900'}`}>
+                        {milestone.label}
+                      </p>
+                      <Tooltip content={getMilestoneHelp(milestone)}>
+                        <HelpCircle className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600 cursor-help" />
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{milestone.description}</p>
+
+                    {/* Date display or edit */}
+                    {isEditing ? (
+                      <div className="mt-2 flex flex-col items-center gap-2">
+                        <input
+                          type="date"
+                          value={localDates[milestone.id]}
+                          onChange={(e) => handleDateChange(milestone.id, e.target.value)}
+                          className="text-xs px-2 py-1 border border-gray-300 rounded"
+                          autoFocus
+                        />
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleSaveDate(milestone.id)}
+                            className="p-1 text-green-600 hover:bg-green-50 rounded"
+                            disabled={updateMutation.isPending}
+                          >
+                            <Save className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() => handleCancelEdit(milestone.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : milestone.date ? (
+                      <div className="mt-1">
+                        <p className={`text-xs font-medium ${
+                          status === 'completed' ? 'text-green-600' :
+                          status === 'overdue' ? 'text-red-600' :
+                          status === 'current' ? 'text-blue-600' :
+                          'text-gray-900'
+                        }`}>
+                          {formatDate(milestone.date)}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {getRelativeTime(milestone.date)}
+                        </p>
+                      </div>
+                    ) : hasSuggestion ? (
+                      <div className="mt-1">
+                        <p className="text-xs text-gray-400 italic">Not set</p>
+                        <p className="text-xs text-blue-600 mt-0.5">
+                          Suggest: {formatDate(suggestions[milestone.id])}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400 mt-1 italic">Not set</p>
+                    )}
+
+                    {/* Days until/since */}
+                    {milestone.date && index < milestones.length - 1 && milestones[index + 1].date && (
+                      <p className="text-xs text-gray-400 mt-2">
+                        ↓ {daysBetween(milestone.date, milestones[index + 1].date!)} days
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div className="mt-8 flex items-center justify-center gap-6 text-xs text-gray-600">

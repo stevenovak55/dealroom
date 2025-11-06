@@ -4,6 +4,21 @@ import { AlertCircle, Calendar } from 'lucide-react';
 import { formatDate, formatRelativeTime, isOverdue } from '@/utils/formatDate';
 import type { Transaction, Task } from '@/api/types';
 import { Link } from 'react-router-dom';
+import { cn } from '@/utils/cn';
+
+/**
+ * Dashboard Widgets (Mobile-First Redesign)
+ *
+ * Responsive dashboard widget components with mobile-first design:
+ * - Mobile (<768px): Full-width with touch-friendly spacing
+ * - Desktop (>=768px): Optimized layouts with smaller padding
+ *
+ * Widgets:
+ * - StatsWidget: Statistics card with icon and trend
+ * - ActiveTransactionsWidget: List of active transactions
+ * - OverdueTasksWidget: List of overdue tasks
+ * - UpcomingDeadlinesWidget: List of upcoming deadlines
+ */
 
 interface StatsWidgetProps {
   title: string;
@@ -18,17 +33,26 @@ interface StatsWidgetProps {
 export const StatsWidget = ({ title, value, icon, trend }: StatsWidgetProps) => {
   return (
     <Card>
-      <CardContent className="flex items-center justify-between">
+      <CardContent className={cn(
+        'flex items-center justify-between',
+        // Responsive padding
+        'pt-5 md:pt-6',
+        'pb-5 md:pb-6'
+      )}>
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+          <p className="text-sm md:text-base font-medium text-gray-600">{title}</p>
+          <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{value}</p>
           {trend && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
               {trend.value > 0 ? '+' : ''}{trend.value} {trend.label}
             </p>
           )}
         </div>
-        <div className="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600">
+        {/* Responsive icon size */}
+        <div className={cn(
+          'bg-primary-100 rounded-full flex items-center justify-center text-primary-600',
+          'h-12 w-12 md:h-14 md:w-14'
+        )}>
           {icon}
         </div>
       </CardContent>
@@ -49,12 +73,12 @@ export const ActiveTransactionsWidget = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Active Transactions</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Active Transactions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-3">
+          <div className="animate-pulse space-y-3 md:space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded" />
+              <div key={i} className="h-16 md:h-20 bg-gray-200 rounded" />
             ))}
           </div>
         </CardContent>
@@ -65,33 +89,54 @@ export const ActiveTransactionsWidget = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className={cn(
+          'flex items-center justify-between',
+          'text-lg md:text-xl'
+        )}>
           <span>Active Transactions</span>
-          <Link to="/transactions" className="text-sm text-primary-600 hover:text-primary-700">
+          {/* Touch-friendly "View all" link */}
+          <Link
+            to="/transactions"
+            className={cn(
+              'text-sm md:text-base text-primary-600 hover:text-primary-700',
+              // Increase touch target
+              'py-1 px-2 -mr-2'
+            )}
+          >
             View all
           </Link>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-3 md:space-y-4">
           {transactions.slice(0, 5).map((transaction) => (
             <Link
               key={transaction.transaction_id}
               to={`/transactions/${transaction.transaction_id}`}
-              className="block p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors"
+              className={cn(
+                'block rounded-lg border border-gray-200',
+                'hover:border-primary-300 hover:bg-primary-50',
+                'transition-colors',
+                // Touch-friendly padding
+                'p-4 md:p-3'
+              )}
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">
+                  <p className="text-base md:text-sm font-medium text-gray-900 truncate">
                     {transaction.property_address}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm md:text-xs text-gray-500 mt-1">
                     {transaction.property_city}, {transaction.property_state}
                   </p>
                 </div>
-                <Badge variant="info">{transaction.property_type}</Badge>
+                <Badge variant="info" size="md">{transaction.property_type}</Badge>
               </div>
-              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+              <div className={cn(
+                'mt-3 md:mt-2',
+                'flex flex-wrap items-center gap-3 md:gap-4',
+                'text-xs md:text-xs text-gray-500'
+              )}>
                 <span>Closing: {formatDate(transaction.closing_date)}</span>
                 {transaction.task_summary && (
                   <span>
@@ -117,12 +162,12 @@ export const OverdueTasksWidget = ({ tasks, isLoading }: OverdueTasksWidgetProps
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Overdue Tasks</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Overdue Tasks</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-3">
+          <div className="animate-pulse space-y-3 md:space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded" />
+              <div key={i} className="h-14 md:h-12 bg-gray-200 rounded" />
             ))}
           </div>
         </CardContent>
@@ -135,29 +180,40 @@ export const OverdueTasksWidget = ({ tasks, isLoading }: OverdueTasksWidgetProps
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 text-danger-500" />
+        <CardTitle className={cn(
+          'flex items-center gap-2',
+          'text-lg md:text-xl'
+        )}>
+          <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-danger-500" />
           Overdue Tasks ({overdueTasks.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {overdueTasks.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-4">No overdue tasks</p>
+          <p className="text-sm md:text-base text-gray-500 text-center py-6 md:py-4">
+            No overdue tasks
+          </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3 md:space-y-2">
             {overdueTasks.slice(0, 5).map((task) => (
               <div
                 key={task.id}
-                className="p-3 rounded-lg border border-danger-200 bg-danger-50"
+                className={cn(
+                  'rounded-lg border border-danger-200 bg-danger-50',
+                  // Touch-friendly padding
+                  'p-4 md:p-3'
+                )}
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{task.title}</p>
-                    <p className="text-xs text-danger-600 mt-1">
+                    <p className="text-base md:text-sm font-medium text-gray-900">
+                      {task.title}
+                    </p>
+                    <p className="text-sm md:text-xs text-danger-600 mt-1">
                       Due {formatRelativeTime(task.due_at)}
                     </p>
                   </div>
-                  <Badge variant="danger">Overdue</Badge>
+                  <Badge variant="danger" size="md">Overdue</Badge>
                 </div>
               </div>
             ))}
@@ -178,12 +234,12 @@ export const UpcomingDeadlinesWidget = ({ tasks, isLoading }: UpcomingDeadlinesW
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming Deadlines</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Upcoming Deadlines</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-3">
+          <div className="animate-pulse space-y-3 md:space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded" />
+              <div key={i} className="h-14 md:h-12 bg-gray-200 rounded" />
             ))}
           </div>
         </CardContent>
@@ -194,29 +250,42 @@ export const UpcomingDeadlinesWidget = ({ tasks, isLoading }: UpcomingDeadlinesW
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-warning-500" />
-          Upcoming Deadlines (Next 7 Days)
+        <CardTitle className={cn(
+          'flex items-center gap-2',
+          'text-lg md:text-xl'
+        )}>
+          <Calendar className="h-5 w-5 md:h-6 md:w-6 text-warning-500" />
+          <span className="hidden sm:inline">Upcoming Deadlines (Next 7 Days)</span>
+          <span className="sm:hidden">Upcoming (7 Days)</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         {tasks.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-4">No upcoming deadlines</p>
+          <p className="text-sm md:text-base text-gray-500 text-center py-6 md:py-4">
+            No upcoming deadlines
+          </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3 md:space-y-2">
             {tasks.slice(0, 5).map((task) => (
               <div
                 key={task.id}
-                className="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                className={cn(
+                  'rounded-lg border border-gray-200',
+                  'hover:bg-gray-50 transition-colors',
+                  // Touch-friendly padding
+                  'p-4 md:p-3'
+                )}
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{task.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-base md:text-sm font-medium text-gray-900">
+                      {task.title}
+                    </p>
+                    <p className="text-sm md:text-xs text-gray-500 mt-1">
                       Due {formatDate(task.due_at)}
                     </p>
                   </div>
-                  <Badge variant="warning">Upcoming</Badge>
+                  <Badge variant="warning" size="md">Upcoming</Badge>
                 </div>
               </div>
             ))}

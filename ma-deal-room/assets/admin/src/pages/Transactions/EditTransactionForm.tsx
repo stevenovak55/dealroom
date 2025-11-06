@@ -8,6 +8,21 @@ import { Input } from '@/components/shared/Input';
 import { Select } from '@/components/shared/Select';
 import { PageLoader } from '@/components/shared/Loader';
 import type { UpdateTransactionInput } from '@/api/types';
+import { cn } from '@/utils/cn';
+
+/**
+ * EditTransactionForm Component (Mobile-First Redesign)
+ *
+ * Responsive transaction edit form with mobile-first design:
+ * - Mobile (<768px): Full-width inputs, stacked button layout
+ * - Desktop (>=768px): Multi-column grids, inline buttons
+ *
+ * Features:
+ * - Basic info, financial info, key dates, notes
+ * - Form validation with React Hook Form
+ * - Touch-friendly inputs and buttons
+ * - Responsive grid layouts
+ */
 
 const propertyTypeOptions = [
   { value: 'SFH', label: 'Single Family Home' },
@@ -70,18 +85,25 @@ export const EditTransactionForm = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link to={`/transactions/${transactionId}`}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="max-w-4xl mx-auto space-y-5 md:space-y-6">
+      {/* Header - responsive layout */}
+      <div className={cn(
+        'flex flex-col space-y-3',
+        'md:flex-row md:items-center md:gap-4 md:space-y-0'
+      )}>
+        <Link to={`/transactions/${transactionId}`} className="inline-block w-fit">
+          <Button variant="ghost" size="md">
+            <ArrowLeft className="h-5 w-5 mr-2" />
             Back
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Transaction</h1>
-          <p className="text-sm text-gray-500 mt-1">{transaction.property_address}</p>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+            Edit Transaction
+          </h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">
+            {transaction.property_address}
+          </p>
         </div>
       </div>
 
@@ -89,10 +111,10 @@ export const EditTransactionForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Transaction Details</CardTitle>
+            <CardTitle className="text-lg md:text-xl">Transaction Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-6 md:space-y-6">
               {/* Basic Information */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-4">Basic Information</h3>
@@ -103,7 +125,8 @@ export const EditTransactionForm = () => {
                     {...register('property_address')}
                     error={errors.property_address?.message}
                   />
-                  <div className="grid grid-cols-3 gap-4">
+                  {/* City/State/ZIP - responsive grid: 1 col mobile → 3 cols desktop */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Input
                       label="City"
                       placeholder="Boston"
@@ -181,33 +204,47 @@ export const EditTransactionForm = () => {
                 </div>
               </div>
 
-              {/* Notes */}
+              {/* Notes - responsive textarea */}
               <div>
-                <h3 className="font-medium text-gray-900 mb-4">Notes</h3>
+                <h3 className="text-base md:text-base font-medium text-gray-900 mb-4">Notes</h3>
                 <textarea
                   {...register('notes')}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className={cn(
+                    'w-full border border-gray-300 rounded-md',
+                    'focus:outline-none focus:ring-2 focus:ring-primary-500',
+                    'text-base md:text-sm',
+                    // Touch-friendly padding
+                    'px-4 py-3 md:px-3 md:py-2'
+                  )}
                   placeholder="Add any additional notes about this transaction..."
                 />
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+            {/* Action Buttons - responsive layout */}
+            <div className={cn(
+              'flex flex-col-reverse space-y-3 space-y-reverse',
+              'sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:space-y-0',
+              'mt-8 pt-6 border-t border-gray-200'
+            )}>
               <Button
                 type="button"
                 variant="secondary"
+                size="lg"
                 onClick={() => navigate(`/transactions/${transactionId}`)}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 variant="primary"
+                size="lg"
                 isLoading={updateMutation.isPending}
+                className="w-full sm:w-auto"
               >
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5 mr-2" />
                 Save Changes
               </Button>
             </div>

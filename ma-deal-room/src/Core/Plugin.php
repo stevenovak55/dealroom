@@ -53,6 +53,7 @@ use MADealRoom\REST\Controllers\TemplateController;
 use MADealRoom\REST\Controllers\TaskDefinitionController;
 use MADealRoom\REST\Controllers\ReminderController;
 use MADealRoom\REST\Controllers\VendorPortalController;
+use MADealRoom\REST\Controllers\VendorRequestController;
 use MADealRoom\REST\Controllers\DocumentController;
 use MADealRoom\REST\Controllers\NotificationController;
 use MADealRoom\REST\Controllers\SettingsController;
@@ -462,6 +463,14 @@ class Plugin {
 			);
 		});
 
+		$this->container->register('vendor_request_controller', function($container) {
+			return new VendorRequestController(
+				$container->get('vendor_request_repository'),
+				$container->get('vendor_service'),
+				$container->get('event_repository')
+			);
+		});
+
 		$this->container->register('document_controller', function($container) {
 			return new DocumentController(
 				$container->get('document_repository'),
@@ -629,6 +638,7 @@ class Plugin {
 		$this->container->get('task_definition_controller')->register_routes();
 		$this->container->get('reminder_controller')->register_routes();
 		$this->container->get('vendor_portal_controller')->register_routes();
+		$this->container->get('vendor_request_controller')->register_routes();
 		$this->container->get('document_controller')->register_routes();
 		$this->container->get('notification_controller')->register_routes();
 		$this->container->get('settings_controller')->register_routes();
