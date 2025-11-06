@@ -122,6 +122,7 @@ class UserRoles {
                 self::CAP_PREFIX . 'manage_users' => __('Manage all users', 'ma-deal-room'),
                 self::CAP_PREFIX . 'manage_clients' => __('Manage client users (buyers/sellers)', 'ma-deal-room'),
                 self::CAP_PREFIX . 'invite_users' => __('Send user invitations', 'ma-deal-room'),
+                self::CAP_PREFIX . 'view_invitations' => __('View user invitations', 'ma-deal-room'),
                 self::CAP_PREFIX . 'assign_roles' => __('Assign user roles', 'ma-deal-room'),
                 self::CAP_PREFIX . 'view_user_activity' => __('View user activity logs', 'ma-deal-room'),
             ],
