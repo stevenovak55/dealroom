@@ -59,6 +59,7 @@ coverage/
 *.map
 dist/
 build/
+releases/
 
 # Temporary files
 *.tmp
