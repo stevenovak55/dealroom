@@ -38,33 +38,6 @@ class UserRoles {
 
         // Register deactivation hook to cleanup roles
         register_deactivation_hook(MA_DEAL_ROOM_PLUGIN_FILE, [$this, 'cleanup_roles_on_deactivation']);
-
-        // Check and update capabilities on admin init (for plugin updates)
-        add_action('admin_init', [$this, 'check_and_update_capabilities']);
-    }
-
-    /**
-     * Check and update capabilities if needed (runs on admin_init)
-     *
-     * This ensures capabilities are up-to-date after plugin updates
-     * without requiring reactivation
-     */
-    public function check_and_update_capabilities(): void {
-        // Get stored version
-        $stored_version = get_option('ma_deal_room_roles_version', '0.0.0');
-        $current_version = defined('MA_DEAL_VERSION') ? MA_DEAL_VERSION : '2.5.0';
-
-        // Only run if version changed or never run
-        if (version_compare($stored_version, $current_version, '<')) {
-            // Update capabilities for existing roles
-            $this->assign_capabilities_to_existing_roles();
-
-            // Update stored version
-            update_option('ma_deal_room_roles_version', $current_version);
-
-            // Clear any cached user capabilities
-            wp_cache_flush();
-        }
     }
 
     /**
