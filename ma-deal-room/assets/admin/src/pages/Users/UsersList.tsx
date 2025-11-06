@@ -396,8 +396,8 @@ export const UsersList = () => {
             <div className="flex items-center gap-2">
               <UsersIcon className="h-4 w-4" />
               Users
-              {data?.pagination.total && (
-                <Badge variant="info">{data.pagination.total}</Badge>
+              {data?.pagination?.total !== undefined && (
+                <Badge variant="info">{data.pagination?.total}</Badge>
               )}
             </div>
           </button>
@@ -419,7 +419,7 @@ export const UsersList = () => {
               <MailOpen className="h-4 w-4" />
               Pending Invitations
               {invitationsData?.pagination?.total !== undefined && (
-                <Badge variant="warning">{invitationsData.pagination.total}</Badge>
+                <Badge variant="warning">{invitationsData.pagination?.total}</Badge>
               )}
             </div>
           </button>
