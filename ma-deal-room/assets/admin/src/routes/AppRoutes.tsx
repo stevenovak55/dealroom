@@ -14,7 +14,6 @@ import { TemplateAnalytics } from '@/pages/Templates/TemplateAnalytics';
 import { TaskLibraryEnhanced } from '@/pages/TaskLibrary/TaskLibraryEnhanced';
 import { RemindersList } from '@/pages/Reminders/RemindersList';
 import { VendorRequestsList } from '@/pages/Vendors';
-import { UsersList, UserDetail } from '@/pages/Users';
 import { MLSDashboard } from '@/pages/MLS/MLSDashboard';
 import { DocuSignSettings } from '@/pages/Integrations/DocuSign';
 import CRMIntegrationPage from '@/pages/Integrations/CRM';
@@ -59,10 +58,6 @@ export const AppRoutes = () => {
         </Route>
         <Route path="documents" element={<DocumentManager />} />
         <Route path="vendors" element={<VendorRequestsList />} />
-        <Route path="users">
-          <Route index element={<UsersList />} />
-          <Route path=":id" element={<UserDetail />} />
-        </Route>
         <Route path="templates">
           <Route index element={<TemplatesList />} />
           <Route path="new" element={<TemplateBuilder />} />

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, FileText, Layout, Library, Bell, Settings, Menu, FolderOpen, Database, FileSignature, Users, Briefcase, UserCog } from 'lucide-react';
+import { Home, FileText, Layout, Library, Bell, Settings, Menu, FolderOpen, Database, FileSignature, Users, Briefcase } from 'lucide-react';
 import { useUIStore } from '@/store/useUIStore';
 import { cn } from '@/utils/cn';
 
@@ -8,7 +8,6 @@ const navigation = [
   { name: 'Transactions', href: '/transactions', icon: FileText },
   { name: 'Vendors', href: '/vendors', icon: Briefcase },
   { name: 'Documents', href: '/documents', icon: FolderOpen },
-  { name: 'Users', href: '/users', icon: UserCog },
   { name: 'MLS Integration', href: '/mls', icon: Database },
   { name: 'CRM Integration', href: '/integrations/crm', icon: Users },
   { name: 'DocuSign', href: '/integrations/docusign', icon: FileSignature },

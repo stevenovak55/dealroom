@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { X, User, LogOut, Home, FileText, FolderOpen, Database, Users, FileSignature, Layout, Library, Bell, Settings, UserCog } from 'lucide-react';
+import { X, User, LogOut, Home, FileText, FolderOpen, Database, Users, FileSignature, Layout, Library, Bell, Settings } from 'lucide-react';
 import { useEffect } from 'react';
 import { cn } from '@/utils/cn';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,7 +38,6 @@ const navigationItems: NavItem[] = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Transactions', href: '/transactions', icon: FileText },
   { name: 'Documents', href: '/documents', icon: FolderOpen },
-  { name: 'Users', href: '/users', icon: UserCog },
   { name: 'MLS Integration', href: '/mls', icon: Database },
   { name: 'CRM Integration', href: '/integrations/crm', icon: Users },
   { name: 'DocuSign', href: '/integrations/docusign', icon: FileSignature },

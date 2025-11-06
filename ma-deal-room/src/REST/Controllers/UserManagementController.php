@@ -225,14 +225,14 @@ class UserManagementController extends BaseController {
 
         if ($user_type === 'custom') {
             // Get custom users
-            $users = $this->custom_user_repository->query([], [
+            $users = $this->user_repo->query([], [
                 'limit' => $per_page,
                 'offset' => $offset,
                 'order_by' => 'created_at',
                 'order' => 'DESC',
             ]);
 
-            $total = $this->custom_user_repository->count();
+            $total = $this->user_repo->count();
 
             $users_data = array_map(function($user) {
                 return $user->to_array();
@@ -283,7 +283,7 @@ class UserManagementController extends BaseController {
         $user_type = $request->get_param('user_type') ?? 'custom';
 
         if ($user_type === 'custom') {
-            $user = $this->custom_user_repository->find($user_id);
+            $user = $this->user_repo->find($user_id);
 
             if (!$user) {
                 return $this->error(__('User not found', 'ma-deal-room'), 404);
@@ -320,7 +320,7 @@ class UserManagementController extends BaseController {
         $user_type = $request->get_param('user_type') ?? 'custom';
 
         if ($user_type === 'custom') {
-            $user = $this->custom_user_repository->find($user_id);
+            $user = $this->user_repo->find($user_id);
 
             if (!$user) {
                 return $this->error(__('User not found', 'ma-deal-room'), 404);
@@ -361,14 +361,14 @@ class UserManagementController extends BaseController {
             }
 
             // Update user
-            $updated = $this->custom_user_repository->update($user_id, $data);
+            $updated = $this->user_repo->update($user_id, $data);
 
             if (!$updated) {
                 return $this->error(__('Failed to update user', 'ma-deal-room'), 500);
             }
 
             // Get updated user
-            $user = $this->custom_user_repository->find($user_id);
+            $user = $this->user_repo->find($user_id);
 
             return $this->success($user->to_array(), __('User updated successfully', 'ma-deal-room'));
         } else {
@@ -389,14 +389,14 @@ class UserManagementController extends BaseController {
         $user_type = $request->get_param('user_type') ?? 'custom';
 
         if ($user_type === 'custom') {
-            $user = $this->custom_user_repository->find($user_id);
+            $user = $this->user_repo->find($user_id);
 
             if (!$user) {
                 return $this->error(__('User not found', 'ma-deal-room'), 404);
             }
 
             // Soft delete
-            $deleted = $this->custom_user_repository->delete($user_id);
+            $deleted = $this->user_repo->delete($user_id);
 
             if (!$deleted) {
                 return $this->error(__('Failed to delete user', 'ma-deal-room'), 500);
@@ -421,7 +421,7 @@ class UserManagementController extends BaseController {
         $user_type = $request->get_param('user_type') ?? 'custom';
 
         if ($user_type === 'custom') {
-            $user = $this->custom_user_repository->find($user_id);
+            $user = $this->user_repo->find($user_id);
 
             if (!$user) {
                 return $this->error(__('User not found', 'ma-deal-room'), 404);
@@ -452,7 +452,7 @@ class UserManagementController extends BaseController {
         $user_type = $request->get_param('user_type') ?? 'custom';
 
         if ($user_type === 'custom') {
-            $user = $this->custom_user_repository->find($user_id);
+            $user = $this->user_repo->find($user_id);
 
             if (!$user) {
                 return $this->error(__('User not found', 'ma-deal-room'), 404);
@@ -590,7 +590,7 @@ class UserManagementController extends BaseController {
         }
 
         if ($user_type === 'custom') {
-            $users = $this->custom_user_repository->search($search, $limit);
+            $users = $this->user_repo->search($search, $limit);
 
             $users_data = array_map(function($user) {
                 return $user->to_array();

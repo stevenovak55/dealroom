@@ -3,7 +3,7 @@
  * Plugin Name: MA Deal Room
  * Plugin URI: https://madealroom.com
  * Description: Massachusetts real estate transaction management system with automated task tracking, reminders, and vendor coordination.
- * Version: 2.5.6
+ * Version: 2.5.0
  * Author: BMN Boston Real Estate
  * Author URI: https://bmnboston.com
  * License: GPL-2.0+
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin version
-define('MA_DEAL_VERSION', '2.5.6');
+define('MA_DEAL_VERSION', '2.5.0');
 
 // Plugin root file
 define('MA_DEAL_FILE', __FILE__);
@@ -383,9 +383,6 @@ function ma_deal_room_upgrade($from_version, $to_version) {
 		}
 	}
 
-	// Update capabilities for all versions (ensures new capabilities are added)
-	ma_deal_room_update_capabilities();
-
 	// Version-specific upgrades
 	if (version_compare($from_version, '1.0.1', '<')) {
 		// Upgrading to 1.0.1 - ensure MLS repository is available
@@ -410,29 +407,6 @@ function ma_deal_room_upgrade($from_version, $to_version) {
 
 	// Flush rewrite rules
 	flush_rewrite_rules();
-}
-
-/**
- * Update user capabilities
- * Ensures all roles have the latest capabilities
- */
-function ma_deal_room_update_capabilities() {
-	if (!class_exists('MADealRoom\Core\UserRoles')) {
-		return;
-	}
-
-	// Create instance and assign capabilities
-	$user_roles = new MADealRoom\Core\UserRoles();
-
-	// Get the protected method via reflection to call it
-	$reflection = new \ReflectionClass($user_roles);
-	$method = $reflection->getMethod('assign_capabilities_to_existing_roles');
-	$method->setAccessible(true);
-	$method->invoke($user_roles);
-
-	if (defined('WP_DEBUG') && WP_DEBUG) {
-		error_log('MA Deal Room: Updated user capabilities');
-	}
 }
 
 add_action('init', function() {

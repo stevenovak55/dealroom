@@ -50,9 +50,9 @@ class UserProfileController extends BaseController {
 	 */
 	public function get_profile( WP_REST_Request $request ) {
 		try {
-			$current_user = $this->get_current_user();
+			$user_id = get_current_user_id();
 
-			if ( ! $current_user ) {
+			if ( ! $user_id ) {
 				return new WP_Error(
 					'not_authenticated',
 					'User not authenticated',
@@ -60,52 +60,34 @@ class UserProfileController extends BaseController {
 				);
 			}
 
-			// Handle WordPress user
-			if ( $current_user['type'] === 'wordpress' ) {
-				$user = $current_user['user'];
+			$user = get_userdata( $user_id );
 
-				// Get user meta for preferences
-				$preferences = get_user_meta( $user->ID, 'ma_deal_preferences', true );
-				if ( ! $preferences ) {
-					$preferences = $this->get_default_preferences();
-				}
-
-				$profile = [
-					'id' => $user->ID,
-					'username' => $user->user_login,
-					'email' => $user->user_email,
-					'display_name' => $user->display_name,
-					'first_name' => $user->first_name,
-					'last_name' => $user->last_name,
-					'avatar_url' => get_avatar_url( $user->ID, [ 'size' => 96 ] ),
-					'role' => ! empty( $user->roles ) ? $user->roles[0] : 'subscriber',
-					'registered_date' => $user->user_registered,
-					'preferences' => $preferences,
-				];
+			if ( ! $user ) {
+				return new WP_Error(
+					'user_not_found',
+					'User not found',
+					[ 'status' => 404 ]
+				);
 			}
-			// Handle custom user
-			else {
-				$user = $current_user['user'];
 
-				// Get preferences from metadata field
-				$preferences = $user->metadata['preferences'] ?? $this->get_default_preferences();
-
-				// Get primary role
-				$primary_role = $user->get_primary_role() ?? 'buyer';
-
-				$profile = [
-					'id' => $user->id,
-					'username' => $user->email, // Custom users use email as username
-					'email' => $user->email,
-					'display_name' => $user->get_display_name(),
-					'first_name' => $user->first_name ?? '',
-					'last_name' => $user->last_name ?? '',
-					'avatar_url' => get_avatar_url( $user->email, [ 'size' => 96 ] ),
-					'role' => $primary_role,
-					'registered_date' => $user->created_at,
-					'preferences' => $preferences,
-				];
+			// Get user meta for preferences
+			$preferences = get_user_meta( $user_id, 'ma_deal_preferences', true );
+			if ( ! $preferences ) {
+				$preferences = $this->get_default_preferences();
 			}
+
+			$profile = [
+				'id' => $user->ID,
+				'username' => $user->user_login,
+				'email' => $user->user_email,
+				'display_name' => $user->display_name,
+				'first_name' => $user->first_name,
+				'last_name' => $user->last_name,
+				'avatar_url' => get_avatar_url( $user->ID, [ 'size' => 96 ] ),
+				'role' => ! empty( $user->roles ) ? $user->roles[0] : 'subscriber',
+				'registered_date' => $user->user_registered,
+				'preferences' => $preferences,
+			];
 
 			return $this->success( $profile );
 
@@ -126,9 +108,9 @@ class UserProfileController extends BaseController {
 	 */
 	public function update_profile( WP_REST_Request $request ) {
 		try {
-			$current_user = $this->get_current_user();
+			$user_id = get_current_user_id();
 
-			if ( ! $current_user ) {
+			if ( ! $user_id ) {
 				return new WP_Error(
 					'not_authenticated',
 					'User not authenticated',
@@ -138,82 +120,40 @@ class UserProfileController extends BaseController {
 
 			$data = $request->get_json_params();
 
-			// Handle WordPress user
-			if ( $current_user['type'] === 'wordpress' ) {
-				$user_id = $current_user['id'];
+			// Update user data
+			$user_data = [];
 
-				// Update user data
-				$user_data = [];
+			if ( isset( $data['display_name'] ) ) {
+				$user_data['ID'] = $user_id;
+				$user_data['display_name'] = sanitize_text_field( $data['display_name'] );
+			}
 
-				if ( isset( $data['display_name'] ) ) {
-					$user_data['ID'] = $user_id;
-					$user_data['display_name'] = sanitize_text_field( $data['display_name'] );
-				}
+			if ( isset( $data['first_name'] ) ) {
+				$user_data['first_name'] = sanitize_text_field( $data['first_name'] );
+			}
 
-				if ( isset( $data['first_name'] ) ) {
-					$user_data['first_name'] = sanitize_text_field( $data['first_name'] );
-				}
+			if ( isset( $data['last_name'] ) ) {
+				$user_data['last_name'] = sanitize_text_field( $data['last_name'] );
+			}
 
-				if ( isset( $data['last_name'] ) ) {
-					$user_data['last_name'] = sanitize_text_field( $data['last_name'] );
-				}
+			// Update user if we have data to update
+			if ( ! empty( $user_data ) ) {
+				$user_data['ID'] = $user_id;
+				$result = wp_update_user( $user_data );
 
-				// Update user if we have data to update
-				if ( ! empty( $user_data ) ) {
-					$user_data['ID'] = $user_id;
-					$result = wp_update_user( $user_data );
-
-					if ( is_wp_error( $result ) ) {
-						return $this->error(
-							'Failed to update user: ' . $result->get_error_message(),
-							500,
-							'user_update_failed'
-						);
-					}
-				}
-
-				// Update preferences
-				if ( isset( $data['preferences'] ) ) {
-					$validated_preferences = $this->validate_preferences( $data['preferences'] );
-					update_user_meta( $user_id, 'ma_deal_preferences', $validated_preferences );
+				if ( is_wp_error( $result ) ) {
+					return $this->error(
+						'Failed to update user: ' . $result->get_error_message(),
+						500,
+						'user_update_failed'
+					);
 				}
 			}
-			// Handle custom user
-			else {
-				$user = $current_user['user'];
-				$user_id = $user->id;
 
-				// Prepare update data for custom user
-				$update_data = [];
-
-				if ( isset( $data['first_name'] ) ) {
-					$update_data['first_name'] = sanitize_text_field( $data['first_name'] );
-				}
-
-				if ( isset( $data['last_name'] ) ) {
-					$update_data['last_name'] = sanitize_text_field( $data['last_name'] );
-				}
-
-				// Update preferences in metadata
-				if ( isset( $data['preferences'] ) ) {
-					$validated_preferences = $this->validate_preferences( $data['preferences'] );
-					$current_metadata = $user->metadata ?? [];
-					$current_metadata['preferences'] = $validated_preferences;
-					$update_data['metadata'] = json_encode( $current_metadata );
-				}
-
-				// Update custom user if we have data
-				if ( ! empty( $update_data ) ) {
-					$result = $this->user_repo->update( $user_id, $update_data );
-
-					if ( ! $result ) {
-						return $this->error(
-							'Failed to update user profile',
-							500,
-							'user_update_failed'
-						);
-					}
-				}
+			// Update preferences
+			if ( isset( $data['preferences'] ) ) {
+				$validated_preferences = $this->validate_preferences( $data['preferences'] );
+				update_user_meta( $user_id, 'ma_deal_preferences', $validated_preferences );
 			}
 
 			// Get updated profile

@@ -108,29 +108,14 @@ class FileStorageService {
 	 * @return bool
 	 */
 	private function can_create_directory(string $path): bool {
-		// Check if path is allowed by open_basedir restriction
-		if (ini_get('open_basedir')) {
-			$allowed_paths = explode(PATH_SEPARATOR, ini_get('open_basedir'));
-			$is_allowed = false;
-			foreach ($allowed_paths as $allowed_path) {
-				if (strpos($path, rtrim($allowed_path, '/')) === 0) {
-					$is_allowed = true;
-					break;
-				}
-			}
-			if (!$is_allowed) {
-				return false;
-			}
-		}
-
 		// If directory exists, check if writable
-		if (@file_exists($path)) {
-			return @is_writable($path);
+		if (file_exists($path)) {
+			return is_writable($path);
 		}
 
 		// Try to create directory
 		$parent = dirname($path);
-		if (!@is_writable($parent)) {
+		if (!is_writable($parent)) {
 			return false;
 		}
 

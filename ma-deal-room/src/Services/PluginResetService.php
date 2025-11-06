@@ -434,38 +434,33 @@ class PluginResetService {
 		$checks = [];
 		$all_passed = true;
 
-		// Get table prefix
-		$prefix = $this->wpdb->prefix;
-
 		// Check 1: All tables exist
 		$required_tables = [
-			'ma_deal_accounts',
-			'ma_deal_transactions',
-			'ma_deal_tasks',
-			'ma_deal_task_definitions',
-			'ma_deal_templates',
-			'ma_deal_documents',
-			'ma_deal_notifications',
-			'ma_deal_mls_config',
-			// Note: mls_sync_log table removed - not created by any current migration (018-020 missing)
+			'wp_ma_deal_accounts',
+			'wp_ma_deal_transactions',
+			'wp_ma_deal_tasks',
+			'wp_ma_deal_task_definitions',
+			'wp_ma_deal_templates',
+			'wp_ma_deal_documents',
+			'wp_ma_deal_notifications',
+			'wp_ma_deal_mls_config',
+			'wp_ma_deal_mls_sync_log',
 		];
 
 		foreach ($required_tables as $table) {
-			$full_table_name = $prefix . $table;
-			$exists = $this->wpdb->get_var("SHOW TABLES LIKE '{$full_table_name}'");
+			$exists = $this->wpdb->get_var("SHOW TABLES LIKE '{$table}'");
 			$checks["table_{$table}"] = [
-				'name' => "Table exists: {$full_table_name}",
+				'name' => "Table exists: {$table}",
 				'passed' => (bool) $exists,
 			];
 
 			if (!$exists) {
 				$all_passed = false;
-				$this->log("Verification check failed: Table {$full_table_name} does not exist", 'error');
 			}
 		}
 
 		// Check 2: Task definitions count
-		$task_count = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$prefix}ma_deal_task_definitions");
+		$task_count = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM wp_ma_deal_task_definitions");
 		$checks['task_definitions_count'] = [
 			'name' => 'Task definitions count (should be 276)',
 			'passed' => $task_count === 276,
@@ -475,11 +470,10 @@ class PluginResetService {
 
 		if ($task_count !== 276) {
 			$all_passed = false;
-			$this->log("Verification check failed: Task definitions count is {$task_count}, expected 276", 'error');
 		}
 
 		// Check 3: Templates count
-		$template_count = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$prefix}ma_deal_templates");
+		$template_count = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM wp_ma_deal_templates");
 		$checks['templates_count'] = [
 			'name' => 'Templates count (should be 7)',
 			'passed' => $template_count === 7,
@@ -489,11 +483,10 @@ class PluginResetService {
 
 		if ($template_count !== 7) {
 			$all_passed = false;
-			$this->log("Verification check failed: Templates count is {$template_count}, expected 7", 'error');
 		}
 
 		// Check 4: Default account exists
-		$account_exists = (bool) $this->wpdb->get_var("SELECT COUNT(*) FROM {$prefix}ma_deal_accounts WHERE id = 1");
+		$account_exists = (bool) $this->wpdb->get_var("SELECT COUNT(*) FROM wp_ma_deal_accounts WHERE id = 1");
 		$checks['default_account'] = [
 			'name' => 'Default account exists (ID: 1)',
 			'passed' => $account_exists,
@@ -501,7 +494,6 @@ class PluginResetService {
 
 		if (!$account_exists) {
 			$all_passed = false;
-			$this->log("Verification check failed: Default account (ID: 1) does not exist", 'error');
 		}
 
 		// Check 5: WordPress options set
@@ -515,7 +507,6 @@ class PluginResetService {
 
 		if ($version !== MA_DEAL_VERSION) {
 			$all_passed = false;
-			$this->log("Verification check failed: Version option is '{$version}', expected '" . MA_DEAL_VERSION . "'", 'error');
 		}
 
 		return [
