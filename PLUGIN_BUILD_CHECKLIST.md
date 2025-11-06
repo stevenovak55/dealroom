@@ -1,8 +1,27 @@
 # Plugin Build Checklist
 
-This document defines the **mandatory checklist** that must be completed **BEFORE** creating a WordPress plugin zip file for testing or deployment.
+This document defines the **mandatory checklist** that must be completed **AFTER making any plugin changes** and **BEFORE pushing to GitHub**.
 
-**Purpose**: Prevent common dependency errors, build failures, and deployment issues.
+**Purpose**: Prevent common dependency errors, build failures, and deployment issues. Ensure user has access to installable plugin zip.
+
+---
+
+## ⚠️ CRITICAL: When to Use This Checklist
+
+**MANDATORY** after making changes to:
+- ✅ **Frontend code** (React components, TypeScript, CSS)
+- ✅ **Backend code** (PHP controllers, models, services)
+- ✅ **Database migrations**
+- ✅ **Dependencies** (composer.json, package.json)
+- ✅ **Plugin configuration** (ma-deal-room.php)
+
+**The Process:**
+1. Make your code changes
+2. **Run this entire checklist**
+3. **Build the plugin zip**
+4. **Commit zip to GitHub**
+
+**WHY**: The user does NOT have access to the local directory. They can ONLY download from GitHub. If you don't create and commit the zip, they cannot test your changes.
 
 ---
 
@@ -549,6 +568,51 @@ Use this quick checklist before every build:
 
 ---
 
+## ⚠️ MANDATORY: Commit Zip to GitHub
+
+**CRITICAL FINAL STEP**: After creating and verifying the zip, you **MUST** commit it to GitHub.
+
+### Why This Matters
+
+The user **DOES NOT** have access to your local working directory. They can **ONLY** download files from GitHub. If you don't commit the zip, they have no way to test your changes.
+
+### Steps to Commit
+
+```bash
+# 1. Add the zip file to git
+git add ma-deal-room-v*.zip
+
+# 2. Check what's being committed
+git status
+
+# 3. Commit with descriptive message
+git commit -m "build: create plugin v[VERSION] with [brief description of changes]
+
+- Built React frontend (npm run build)
+- Installed Composer dependencies
+- Created installable WordPress plugin zip
+
+[List key features or fixes included]
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# 4. Push to GitHub
+git push origin [your-branch-name]
+```
+
+### Verification
+
+After pushing, verify the zip is on GitHub:
+1. Go to the GitHub repository
+2. Check that `ma-deal-room-v[VERSION].zip` exists in the file listing
+3. Try downloading it to confirm it uploaded successfully
+
+**Do NOT consider your work complete until the zip is on GitHub.**
+
+---
+
 ## Integration with Other Protocols
 
 This checklist works together with:
@@ -562,16 +626,19 @@ This checklist works together with:
 
 ## Notes for AI Assistants
 
-When a user asks to create a plugin zip for testing:
+**CRITICAL**: After making ANY changes to the plugin code, you MUST:
 
-1. **First**: Run this entire checklist
+1. **Run this entire checklist**
 2. **Fix** any issues found (don't skip them)
 3. **Verify** all checks pass
-4. **Then**: Run the build script
+4. **Build the plugin zip**
 5. **Verify** the zip file integrity
-6. **Confirm** with user before testing
+6. **Commit the zip to GitHub**
+7. **Push to remote repository**
 
-**Do not skip these steps** - They prevent the common "dependency not found" errors.
+**NEVER tell the user to run these steps themselves** - they don't have access to the local directory. YOU must complete all steps and push the zip to GitHub.
+
+**Do not skip these steps** - They prevent the common "dependency not found" errors and ensure the user can actually test your changes.
 
 ---
 
