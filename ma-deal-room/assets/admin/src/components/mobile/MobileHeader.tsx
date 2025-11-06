@@ -1,8 +1,9 @@
 import { Menu, Bell, ArrowLeft, MoreVertical } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/utils/cn';
-import { useGetUnreadCount } from '@/api/queries/useNotifications';
+import { useGetUnreadCount, useGetNotifications, useMarkAsRead } from '@/api/queries/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
 
 /**
  * Mobile Header Component
@@ -87,9 +88,29 @@ export const MobileHeader = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [showNotificationsPanel, setShowNotificationsPanel] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
-  // Get unread notifications count
+  // Get notifications
   const { data: unreadCount = 0 } = useGetUnreadCount();
+  const { data: notificationsData } = useGetNotifications({ limit: 10 });
+  const markAsRead = useMarkAsRead();
+
+  const notifications = notificationsData?.data || [];
+
+  // Close notifications panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotificationsPanel(false);
+      }
+    };
+
+    if (showNotificationsPanel) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showNotificationsPanel]);
 
   // Determine page title
   const pageTitle = title || getPageTitle(location.pathname);
@@ -168,26 +189,94 @@ export const MobileHeader = ({
         {/* Right: Action buttons */}
         <div className="flex items-center gap-1">
           {/* Notifications */}
-          <button
-            type="button"
-            onClick={() => navigate('/notifications')}
-            className={cn(
-              'min-w-touch min-h-touch',
-              'relative flex items-center justify-center',
-              'p-2 rounded-lg',
-              'text-gray-700 hover:bg-gray-100 active:bg-gray-200',
-              'transition-colors duration-fast'
+          <div ref={notificationsRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowNotificationsPanel(!showNotificationsPanel)}
+              className={cn(
+                'min-w-touch min-h-touch',
+                'relative flex items-center justify-center',
+                'p-2 rounded-lg',
+                'text-gray-700 hover:bg-gray-100 active:bg-gray-200',
+                'transition-colors duration-fast'
+              )}
+              aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span
+                  className="absolute top-1 right-1 h-2 w-2 bg-danger-500 rounded-full"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+
+            {/* Notifications Panel */}
+            {showNotificationsPanel && (
+              <div
+                className={cn(
+                  'absolute right-0 top-full mt-2',
+                  'w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl',
+                  'border border-gray-200',
+                  'max-h-96 overflow-y-auto',
+                  'animate-in fade-in slide-in-from-top-2 duration-fast'
+                )}
+                role="menu"
+              >
+                <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span className="text-xs text-gray-500">{unreadCount} unread</span>
+                  )}
+                </div>
+
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500 text-sm">
+                    No notifications
+                  </div>
+                ) : (
+                  <div>
+                    {notifications.map((notification) => (
+                      <button
+                        key={notification.id}
+                        onClick={() => {
+                          if (!notification.is_read) {
+                            markAsRead.mutate(notification.id);
+                          }
+                          if (notification.link) {
+                            navigate(notification.link);
+                          }
+                          setShowNotificationsPanel(false);
+                        }}
+                        className={cn(
+                          'w-full text-left p-3 border-b border-gray-100 last:border-0',
+                          'hover:bg-gray-50 active:bg-gray-100 transition-colors',
+                          !notification.is_read && 'bg-blue-50'
+                        )}
+                      >
+                        <div className="flex items-start gap-2">
+                          {!notification.is_read && (
+                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 mt-1.5" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                              {notification.title}
+                            </p>
+                            <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
-            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span
-                className="absolute top-1 right-1 h-2 w-2 bg-danger-500 rounded-full"
-                aria-hidden="true"
-              />
-            )}
-          </button>
+          </div>
 
           {/* Actions menu */}
           {showActions && (

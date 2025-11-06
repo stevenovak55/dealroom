@@ -21,6 +21,7 @@ import { EditableTransactionTimeline } from '@/components/Timeline/EditableTrans
 import { EditablePropertyDetails } from '@/components/Transactions/EditablePropertyDetails';
 import type { Party, Task, Document } from '@/api/types';
 import { cn } from '@/utils/cn';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 /**
  * TransactionDetail Component (Mobile-First Redesign)
@@ -42,6 +43,7 @@ type TabType = 'details' | 'tasks' | 'parties' | 'documents' | 'activity';
 export const TransactionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const transactionId = parseInt(id || '0');
   const [activeTab, setActiveTab] = useState<TabType>('details');
 
@@ -277,32 +279,41 @@ export const TransactionDetail = () => {
         </div>
       </Card>
 
-      {/* Tabs - horizontal scrolling on mobile */}
-      <div className="border-b border-gray-200 -mx-4 px-4 md:mx-0 md:px-0">
-        <nav className={cn(
-          'flex gap-6 md:gap-8',
-          // Enable horizontal scrolling on mobile
-          'overflow-x-auto scrollbar-hide'
-        )}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={cn(
-                'border-b-2 font-medium whitespace-nowrap',
-                // Touch-friendly padding
-                'py-3 md:py-4 px-1',
-                'text-sm md:text-base',
-                activeTab === tab.id
-                  ? 'border-primary-600 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* Tabs - dropdown on mobile, tabs on desktop */}
+      {isMobile ? (
+        <div className="px-1">
+          <select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value as TabType)}
+            className="w-full px-3 py-3 text-base font-medium border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            {tabs.map((tab) => (
+              <option key={tab.id} value={tab.id}>
+                {tab.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div className="border-b border-gray-200">
+          <nav className="flex gap-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={cn(
+                  'border-b-2 font-medium whitespace-nowrap py-4 px-1 text-base',
+                  activeTab === tab.id
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {/* Tab content */}
       {activeTab === 'details' && (
