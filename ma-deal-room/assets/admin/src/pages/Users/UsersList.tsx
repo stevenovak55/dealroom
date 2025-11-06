@@ -567,12 +567,12 @@ export const UsersList = () => {
               <DataTable data={data.users} columns={columns} />
 
               {/* Pagination */}
-              {data.pagination.total_pages > 1 && (
+              {data?.pagination?.total_pages && data.pagination.total_pages > 1 && (
                 <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
                   <div className="text-sm text-gray-600">
                     Showing {((page - 1) * perPage) + 1} to{' '}
-                    {Math.min(page * perPage, data.pagination.total)} of{' '}
-                    {data.pagination.total} users
+                    {Math.min(page * perPage, data.pagination?.total || 0)} of{' '}
+                    {data.pagination?.total || 0} users
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -584,12 +584,12 @@ export const UsersList = () => {
                       Previous
                     </Button>
                     <span className="text-sm text-gray-600">
-                      Page {page} of {data.pagination.total_pages}
+                      Page {page} of {data.pagination?.total_pages || 1}
                     </span>
                     <Button
                       variant="secondary"
                       size="sm"
-                      disabled={page === data.pagination.total_pages}
+                      disabled={page === (data.pagination?.total_pages || 1)}
                       onClick={() => setPage(page + 1)}
                     >
                       Next
@@ -625,12 +625,12 @@ export const UsersList = () => {
                 <DataTable data={invitationsData.invitations} columns={invitationColumns} />
 
                 {/* Pagination */}
-                {invitationsData.pagination.total_pages > 1 && (
+                {invitationsData?.pagination?.total_pages && invitationsData.pagination.total_pages > 1 && (
                   <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
                     <div className="text-sm text-gray-600">
                       Showing {((page - 1) * perPage) + 1} to{' '}
-                      {Math.min(page * perPage, invitationsData.pagination.total)} of{' '}
-                      {invitationsData.pagination.total} invitations
+                      {Math.min(page * perPage, invitationsData.pagination?.total || 0)} of{' '}
+                      {invitationsData.pagination?.total || 0} invitations
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -642,12 +642,12 @@ export const UsersList = () => {
                         Previous
                       </Button>
                       <span className="text-sm text-gray-600">
-                        Page {page} of {invitationsData.pagination.total_pages}
+                        Page {page} of {invitationsData.pagination?.total_pages || 1}
                       </span>
                       <Button
                         variant="secondary"
                         size="sm"
-                        disabled={page === invitationsData.pagination.total_pages}
+                        disabled={page === (invitationsData.pagination?.total_pages || 1)}
                         onClick={() => setPage(page + 1)}
                       >
                         Next
