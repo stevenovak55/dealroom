@@ -5,7 +5,7 @@ import { Button } from '@/components/shared/Button';
 import { Input } from '@/components/shared/Input';
 import { Select } from '@/components/shared/Select';
 import { Badge } from '@/components/shared/Badge';
-import { Table } from '@/components/shared/Table';
+import { DataTable } from '@/components/shared/DataTable';
 import { PageLoader } from '@/components/shared/Loader';
 import {
   Users as UsersIcon,
@@ -404,7 +404,7 @@ export const UsersList = () => {
         <CardContent>
           {data?.users && data.users.length > 0 ? (
             <>
-              <Table data={data.users} columns={columns} />
+              <DataTable data={data.users} columns={columns} />
 
               {/* Pagination */}
               {data.pagination.total_pages > 1 && (
