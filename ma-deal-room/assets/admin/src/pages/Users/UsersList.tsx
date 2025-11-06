@@ -7,6 +7,7 @@ import { Select } from '@/components/shared/Select';
 import { Badge } from '@/components/shared/Badge';
 import { DataTable } from '@/components/shared/DataTable';
 import { PageLoader } from '@/components/shared/Loader';
+import { InviteUserModal } from '@/components/Users/InviteUserModal';
 import {
   Users as UsersIcon,
   Search,
@@ -31,6 +32,7 @@ export const UsersList = () => {
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<RoleCategory | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const { data, isLoading, error } = useGetUsers({
     page,
@@ -263,7 +265,7 @@ export const UsersList = () => {
             Manage users, roles, and permissions
           </p>
         </div>
-        <Button variant="primary">
+        <Button variant="primary" onClick={() => setIsInviteModalOpen(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
           Invite User
         </Button>
@@ -449,6 +451,13 @@ export const UsersList = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Invite User Modal */}
+      <InviteUserModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        accountId={1} // TODO: Get from auth context or settings
+      />
     </div>
   );
 };
